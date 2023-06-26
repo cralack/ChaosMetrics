@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"ChaosMetrics/server/global"
-	_ "ChaosMetrics/server/init"
 
 	"gorm.io/gorm"
 )

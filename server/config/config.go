@@ -14,5 +14,6 @@ type DirTree struct {
 }
 
 func New() *Server {
+
 	return &Server{}
 }
