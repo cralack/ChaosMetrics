@@ -21,7 +21,3 @@ type DatabaseConfig struct {
 	ConnMaxOpen     int    `mapstructure:"conn_max_open" yaml:"conn_max_open"`         // 连接池最大打开连接数
 	ConnMaxLifetime string `mapstructure:"conn_max_lifetime" yaml:"conn_max_lifetime"` // 连接池连接的最大生命周期
 }
-
-func NewDBConfig() *DatabaseConfig {
-	return &DatabaseConfig{}
-}

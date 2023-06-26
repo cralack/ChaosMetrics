@@ -58,7 +58,7 @@ func Zap(env uint) (*zap.Logger, error) {
 				consoleCore,
 			),
 			zap.AddCaller(),
-			zap.AddStacktrace(logConf.Level),
+			//zap.AddStacktrace(logConf.Level),
 		)
 	}
 

@@ -1,25 +1,24 @@
 package db
 
 import (
-	"log"
 	"net"
 	"strconv"
 	"time"
 
-	"ChaosMetrics/server/config"
 	"ChaosMetrics/server/global"
 
 	"github.com/go-sql-driver/mysql"
 )
 
 func GetDBConfig() error {
-	var dbConf *config.DatabaseConfig
-	var err error
-	//parse to struct
-	err = global.GVA_VP.UnmarshalKey("database", &dbConf)
-	if err != nil {
-		log.Fatal("viper unmarshal db config failed")
-	}
+	// var dbConf *config.DatabaseConfig
+	dbConf := global.GVA_CONF.Dbconf
+	// var err error
+	// //parse to struct
+	// err = global.GVA_VP.UnmarshalKey("database", &dbConf)
+	// if err != nil {
+	// 	log.Fatal("viper unmarshal db config failed")
+	// }
 	//parse conf && format dsn
 	port := strconv.Itoa(dbConf.Port)
 	timeout, err := time.ParseDuration(dbConf.Timeout)

@@ -23,3 +23,9 @@ logger:
   maxage: 30  # 保留旧日志文件的最大天数
   localtime: true
   compress: true
+
+riot:
+  api_key: RGAPI-e9e20855-8258-4d9a-8c0f-f88045d5a2fd
+  rate_limiter:
+    each_sec: 20
+    each_2min: 100

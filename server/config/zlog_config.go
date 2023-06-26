@@ -7,7 +7,3 @@ type LoggerConfig struct {
 	LocalTime  bool `mapstructure:"localtime" yaml:"localtime"`   // 是否使用本地时间
 	Compress   bool `mapstructure:"compress" yaml:"compress"`     // 是否压缩旧日志文件
 }
-
-func NewLoggerConfig() *LoggerConfig {
-	return &LoggerConfig{}
-}

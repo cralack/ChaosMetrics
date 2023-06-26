@@ -2,8 +2,9 @@ package config
 
 type Server struct {
 	DirTree DirTree
-	Dbconf  *DatabaseConfig
-	LogConf *LoggerConfig
+	Dbconf  *DatabaseConfig `mapstructure:"database"`
+	LogConf *LoggerConfig   `mapstructure:"logger"`
+	Riot    *RiotConf       `mapstructure:"riot"`
 }
 type DirTree struct {
 	WordDir string
@@ -13,7 +14,7 @@ type DirTree struct {
 
 func New() *Server {
 	return &Server{
-		Dbconf:  NewDBConfig(),
-		LogConf: NewLoggerConfig(),
+		Dbconf:  &DatabaseConfig{},
+		LogConf: &LoggerConfig{},
 	}
 }
