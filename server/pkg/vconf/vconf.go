@@ -55,6 +55,13 @@ func Viper() (*viper.Viper, error) {
 	if err = v.Unmarshal(global.GVA_CONF); err != nil {
 		panic(err)
 	}
-
+	switch global.GVA_CONF.Env {
+	case "test":
+		global.GVA_ENV = global.TEST_ENV
+	case "dev":
+		global.GVA_ENV = global.DEV_ENV
+	case "product":
+		global.GVA_ENV = global.PRODUCT_ENV
+	}
 	return v, nil
 }

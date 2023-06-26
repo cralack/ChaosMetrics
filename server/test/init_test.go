@@ -1,6 +1,9 @@
-package init
+package test
 
 import (
+	"strconv"
+	"testing"
+
 	"ChaosMetrics/server/config"
 	"ChaosMetrics/server/global"
 	"ChaosMetrics/server/pkg/db"
@@ -10,7 +13,7 @@ import (
 
 var err error
 
-func init() {
+func goInit() {
 	//set runtime envs
 	global.GVA_CONF = config.New()
 
@@ -33,4 +36,15 @@ func init() {
 	}
 
 	global.GVA_LOG.Info("env pkg init succeed")
+}
+
+// basic pkg init test
+func Test_config(t *testing.T) {
+	goInit()
+	conf := global.GVA_CONF
+	global.GVA_LOG.Info(conf.Env)
+	global.GVA_LOG.Info(conf.DirTree.WordDir)
+	global.GVA_LOG.Info(conf.Dbconf.Driver)
+	global.GVA_LOG.Info(strconv.Itoa(conf.LogConf.MaxSize))
+	global.GVA_LOG.Info(conf.Riot.Apikey)
 }

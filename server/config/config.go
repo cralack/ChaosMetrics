@@ -1,6 +1,7 @@
 package config
 
 type Server struct {
+	Env     string `mapstructure:"env"`
 	DirTree DirTree
 	Dbconf  *DatabaseConfig `mapstructure:"database"`
 	LogConf *LoggerConfig   `mapstructure:"logger"`
@@ -13,8 +14,5 @@ type DirTree struct {
 }
 
 func New() *Server {
-	return &Server{
-		Dbconf:  &DatabaseConfig{},
-		LogConf: &LoggerConfig{},
-	}
+	return &Server{}
 }

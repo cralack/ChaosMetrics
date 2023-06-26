@@ -28,14 +28,6 @@ type LoggerConfig struct {
 }
 
 func getFileWriter() zapcore.WriteSyncer {
-	// var logConf *config.LoggerConfig
-	// var err error
-	// //parse to struct
-	// err = global.GVA_VP.UnmarshalKey("logger", &logConf)
-	// if err != nil {
-	// 	global.GVA_LOG.Fatal("viper unmarshal db config failed")
-	// }
-	// global.GVA_CONF.LogConf = logConf
 	logConf := global.GVA_CONF.LogConf
 	logDir := global.GVA_CONF.DirTree.LogDIr
 	today := time.Now().Format("20060102") // 格式化为年月日，如20230626

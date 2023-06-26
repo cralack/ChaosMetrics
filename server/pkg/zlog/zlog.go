@@ -14,9 +14,11 @@ func Zap(env uint) (*zap.Logger, error) {
 		return global.GVA_LOG, nil
 	}
 	//init val
-	var logConf zap.Config
-	var log *zap.Logger
-	var err error
+	var (
+		logConf zap.Config
+		log     *zap.Logger
+		err     error
+	)
 	//diff logger level
 	switch env {
 	case global.PRODUCT_ENV:
