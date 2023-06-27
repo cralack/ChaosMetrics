@@ -3,10 +3,11 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/pkg/fetcher"
 	"io/ioutil"
 	"testing"
+
+	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/cralack/ChaosMetrics/server/pkg/fetcher"
 )
 
 var f fetcher.Fetcher
@@ -19,9 +20,9 @@ func init() {
 
 func Test_parse_summoner(t *testing.T) {
 	//fetching remote JSON data (3~5 seconds per request)
-	// url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
-	// buff, err := f.Get(url)
-	buff, err := ioutil.ReadFile(path + "summoner.txt")
+	url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
+	buff, err := f.Get(url)
+	// buff, err := ioutil.ReadFile(path + "summoner.txt")
 	if err != nil {
 		t.Fatal(err)
 	}

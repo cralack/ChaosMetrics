@@ -2,10 +2,13 @@ package fetcher
 
 import (
 	"context"
-	"github.com/cralack/ChaosMetrics/server/global"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"time"
+
+	"github.com/cralack/ChaosMetrics/server/config"
+	"github.com/cralack/ChaosMetrics/server/global"
 
 	"go.uber.org/zap"
 )
@@ -15,16 +18,29 @@ type Fetcher interface {
 }
 
 type BrowserFetcher struct {
-	Timeout time.Duration
+	Conf    *config.FetcherConfig
 	Logger  *zap.Logger
+	Timeout time.Duration
 }
 
 var _ Fetcher = &BrowserFetcher{}
 
 func NewBrowserFetcher() *BrowserFetcher {
+	conf := global.GVA_CONF.Fetcher
+	if conf.HeaderConfig.XRiotToken == "" {
+		workDir := global.GVA_CONF.DirTree.WorkDir
+		path := filepath.Join(workDir, "pkg", "fetcher")
+		buff, err := ioutil.ReadFile(path + "/api_key")
+		if err != nil {
+			global.GVA_LOG.Error("get api key failed",
+				zap.Error(err))
+		}
+		conf.HeaderConfig.XRiotToken = string(buff)
+	}
 	return &BrowserFetcher{
 		Timeout: global.GVA_CONF.Fetcher.Timeout,
 		Logger:  global.GVA_LOG,
+		Conf:    conf,
 	}
 }
 
