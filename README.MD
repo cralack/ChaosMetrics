@@ -38,6 +38,6 @@ In the future, we plan to expand this project to include more in-depth analysis,
 Please note that this project is purely for educational and personal purposes. We do not endorse any specific strategies, recommendations, or claims derived from the analysis. The project relies on publicly available data and adheres to any applicable terms of use and data privacy regulations.
 
 ## License
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). Feel free to modify, distribute, and use the code as per the terms of the license.
+This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Feel free to modify, distribute, and use the code as per the terms of the license.
 
 **Note:** The project name, description, and content in this README.md file are hypothetical and for illustrative purposes.
