@@ -5,12 +5,14 @@ type Server struct {
 	DirTree DirTree
 	Dbconf  *DatabaseConfig `mapstructure:"database"`
 	LogConf *LoggerConfig   `mapstructure:"logger"`
-	Riot    *RiotConf       `mapstructure:"riot"`
+	Fetcher *FetcherConfig  `mapstructure:"fetcher"`
 }
 type DirTree struct {
-	WordDir string
-	ConfDir string
-	LogDIr  string
+	WorkDir string
+	LogDir  string
+	TestDir string
+
+	// ConfDir string
 }
 
 func New() *Server {

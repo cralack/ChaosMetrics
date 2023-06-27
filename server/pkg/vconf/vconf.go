@@ -24,11 +24,14 @@ func Viper() (*viper.Viper, error) {
 	if err != nil {
 		panic(err)
 	}
+	conf := global.GVA_CONF
 	workDir := curDir[:strings.Index(curDir, "server")+len("server")]
 	logDir := filepath.Join(workDir, "log")
-	if global.GVA_CONF.DirTree.WordDir == "" {
-		global.GVA_CONF.DirTree.WordDir = workDir
-		global.GVA_CONF.DirTree.LogDIr = logDir
+	testDir := filepath.Join(workDir, "test")
+	if conf.DirTree.WorkDir == "" {
+		conf.DirTree.WorkDir = workDir
+		conf.DirTree.LogDir = logDir
+		conf.DirTree.TestDir = testDir
 	}
 	v.AddConfigPath(workDir)
 
@@ -47,15 +50,15 @@ func Viper() (*viper.Viper, error) {
 	v.OnConfigChange(func(e fsnotify.Event) {
 		//handler func
 		fmt.Println("config file changed:", e.Name)
-		if err = v.Unmarshal(global.GVA_CONF); err != nil {
+		if err = v.Unmarshal(conf); err != nil {
 			panic(err)
 		}
 	})
 
-	if err = v.Unmarshal(global.GVA_CONF); err != nil {
+	if err = v.Unmarshal(conf); err != nil {
 		panic(err)
 	}
-	switch global.GVA_CONF.Env {
+	switch conf.Env {
 	case "test":
 		global.GVA_ENV = global.TEST_ENV
 	case "dev":

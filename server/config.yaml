@@ -26,8 +26,14 @@ logger:
   localtime: true          # 是否使用本地时间记录日志
   compress: true           # 是否压缩旧的日志文件
 
-riot:
-  api_key: RGAPI-e9e20855-8258-4d9a-8c0f-f88045d5a2fd     # Riot API 的密钥
+fetcher:
+  timeout: 15 # 连接超时时间
+  header:
+    user_agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36  # 用户代理
+    accept_language: zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7  # 接受的语言
+    accept_charset: application/x-www-form-urlencoded; charset=UTF-8  # 接受的字符集
+    origin: https://developer.riotgames.com  # 请求来源
+    x_riot_token: RGAPI-a6f4551e-1279-4921-9981-9807cc68df87  # Riot API 的密钥
   rate_limiter:
-    each_sec: 20          # 每秒允许的 API 请求次数限制
-    each_2min: 100        # 每两分钟允许的 API 请求次数限制
+    each_sec: 20  # 每秒允许的 API 请求次数限制
+    each_2min: 100  # 每两分钟允许的 API 请求次数限制

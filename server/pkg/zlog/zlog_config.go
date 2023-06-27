@@ -29,7 +29,7 @@ type LoggerConfig struct {
 
 func getFileWriter() zapcore.WriteSyncer {
 	logConf := global.GVA_CONF.LogConf
-	logDir := global.GVA_CONF.DirTree.LogDIr
+	logDir := global.GVA_CONF.DirTree.LogDir
 	today := time.Now().Format("20060102") // 格式化为年月日，如20230626
 	filename := fmt.Sprintf("%s/log_%s.log", logDir, today)
 	writer := zapcore.AddSync(
