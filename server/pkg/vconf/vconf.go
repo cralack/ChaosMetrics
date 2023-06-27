@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/global"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"

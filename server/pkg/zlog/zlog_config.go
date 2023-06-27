@@ -1,8 +1,8 @@
 package zlog
 
 import (
-	"ChaosMetrics/server/global"
 	"fmt"
+	"github.com/cralack/ChaosMetrics/server/global"
 	"time"
 
 	"go.uber.org/zap/zapcore"

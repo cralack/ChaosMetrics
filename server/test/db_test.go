@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/global"
 
 	"gorm.io/gorm"
 )

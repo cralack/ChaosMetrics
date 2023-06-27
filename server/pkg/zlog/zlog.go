@@ -1,7 +1,7 @@
 package zlog
 
 import (
-	"ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/global"
 	"os"
 	"time"
 

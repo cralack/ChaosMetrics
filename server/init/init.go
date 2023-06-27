@@ -1,11 +1,11 @@
 package init
 
 import (
-	"ChaosMetrics/server/config"
-	"ChaosMetrics/server/global"
-	"ChaosMetrics/server/pkg/db"
-	"ChaosMetrics/server/pkg/vconf"
-	"ChaosMetrics/server/pkg/zlog"
+	"github.com/cralack/ChaosMetrics/server/config"
+	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/pkg/db"
+	"github.com/cralack/ChaosMetrics/server/pkg/vconf"
+	"github.com/cralack/ChaosMetrics/server/pkg/zlog"
 )
 
 var err error

@@ -1,7 +1,7 @@
 package global
 
 import (
-	"ChaosMetrics/server/config"
+	"github.com/cralack/ChaosMetrics/server/config"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

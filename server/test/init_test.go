@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"testing"
 
-	"ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/global"
 )
 
 // basic pkg init test

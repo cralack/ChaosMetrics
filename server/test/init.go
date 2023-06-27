@@ -1,5 +1,5 @@
 package test
 
 import (
-	_ "ChaosMetrics/server/init"
+	_ "github.com/cralack/ChaosMetrics/server/init"
 )

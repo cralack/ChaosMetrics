@@ -1,8 +1,8 @@
 package fetcher
 
 import (
-	"ChaosMetrics/server/global"
 	"context"
+	"github.com/cralack/ChaosMetrics/server/global"
 	"io/ioutil"
 	"net/http"
 	"time"

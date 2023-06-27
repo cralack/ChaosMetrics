@@ -1,10 +1,10 @@
 package test
 
 import (
-	"ChaosMetrics/server/model/riotmodel"
-	"ChaosMetrics/server/pkg/fetcher"
 	"encoding/json"
 	"fmt"
+	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/cralack/ChaosMetrics/server/pkg/fetcher"
 	"io/ioutil"
 	"testing"
 )

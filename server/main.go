@@ -1,8 +1,8 @@
 package main
 
 import (
-	"ChaosMetrics/server/global"
-	_ "ChaosMetrics/server/init"
+	"github.com/cralack/ChaosMetrics/server/global"
+	_ "github.com/cralack/ChaosMetrics/server/init"
 	"os"
 )
 

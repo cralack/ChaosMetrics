@@ -1,4 +1,4 @@
-module ChaosMetrics
+module github.com/cralack/ChaosMetrics/server
 
 go 1.19
 
