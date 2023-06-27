@@ -1,5 +1,8 @@
 # League of Legends ARAM Mode Personal Data Analysis Project
 
+
+English | [简体中文](./README.md)
+
 ## Overview
 This project focuses on the analysis of personal data in League of Legends' ARAM (All Random All Mid) mode. ARAM is a popular game mode in League of Legends where players are assigned random champions and battle on a single lane called the "Howling Abyss."
 
