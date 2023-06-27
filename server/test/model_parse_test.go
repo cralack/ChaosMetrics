@@ -17,9 +17,35 @@ func init() {
 	path = "./local_json/"
 }
 
+func Test_parse_summoner(t *testing.T) {
+	//fetching remote JSON data (3~5 seconds per request)
+	// url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
+	// buff, err := f.Get(url)
+	buff, err := ioutil.ReadFile(path + "summoner.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var res riotmodel.SummonerDTO
+	err = json.Unmarshal(buff, &res)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("ID:", res.ID)
+	fmt.Println("Account ID:", res.AccountID)
+	fmt.Println("PUUID:", res.PUUID)
+	fmt.Println("Name:", res.Name)
+	fmt.Println("Profile Icon ID:", res.ProfileIconID)
+	fmt.Println("Revision Date:", res.RevisionDate)
+	fmt.Println("Summoner Level:", res.SummonerLevel)
+}
+
 func Test_parse_championr_rotation(t *testing.T) {
-	url := "https://tw2.api.riotgames.com/lol/platform/v3/champion-rotations"
-	buff, err := f.Get(url)
+	//fetching remote JSON data (3~5 seconds per request)
+	// url := "https://tw2.api.riotgames.com/lol/platform/v3/champion-rotations"
+	// buff, err := f.Get(url)
+
+	//load local json data
+	buff, err := ioutil.ReadFile(path + "championr_rotation.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,24 +59,11 @@ func Test_parse_championr_rotation(t *testing.T) {
 	t.Log(freeForNew)
 }
 
-func Test_parse_summoner(t *testing.T) {
-	url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
-	buff, err := f.Get(url)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var res riotmodel.SummonerDTO
-	err = json.Unmarshal(buff, &res)
-	if err != nil {
-		t.Fatal(err)
-	}
-	puuid := res.PUUID
-	t.Log(puuid)
-}
-
 func Test_parse_championr_mastery(t *testing.T) {
-	url := "https://tw2.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/F4fFtqehQLBj8U5sKBZF--k-7akbtb1IX790lRd4whPI4pXDAuVyfswHetg2lz_kMe2NJ0gUo5EIig/top"
-	buff, err := f.Get(url)
+	//fetching remote JSON data (3~5 seconds per request)
+	// url := "https://tw2.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/F4fFtqehQLBj8U5sKBZF--k-7akbtb1IX790lRd4whPI4pXDAuVyfswHetg2lz_kMe2NJ0gUo5EIig/top"
+	// buff, err := f.Get(url)
+	buff, err := ioutil.ReadFile(path + "championr_mastery.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,12 +88,9 @@ func Test_parse_championr_mastery(t *testing.T) {
 }
 
 func Test_parse_match(t *testing.T) {
-	//get remote json data (3~5s /each req)
+	//fetching remote JSON data (3~5 seconds per request)
 	// url := "https://sea.api.riotgames.com/lol/match/v5/matches/TW2_81882122"
 	// buff, err := f.Get(url)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
 
 	//load local json data
 	buff, err := ioutil.ReadFile(path + "match.txt")
