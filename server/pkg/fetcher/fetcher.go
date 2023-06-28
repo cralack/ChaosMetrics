@@ -29,8 +29,9 @@ func NewBrowserFetcher() *BrowserFetcher {
 	conf := global.GVA_CONF.Fetcher
 	if conf.HeaderConfig.XRiotToken == "" {
 		workDir := global.GVA_CONF.DirTree.WorkDir
-		path := filepath.Join(workDir, "pkg", "fetcher")
-		buff, err := ioutil.ReadFile(path + "/api_key")
+		filename := "api_key"
+		path := filepath.Join(workDir, "pkg", "fetcher", filename)
+		buff, err := ioutil.ReadFile(path)
 		if err != nil {
 			global.GVA_LOG.Error("get api key failed",
 				zap.Error(err))
