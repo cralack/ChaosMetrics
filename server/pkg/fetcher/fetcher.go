@@ -45,7 +45,7 @@ func NewBrowserFetcher() *BrowserFetcher {
 	}
 }
 
-// get raw json from riot dev port
+// Get raw json from riot dev port
 func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	client := &http.Client{
 		Timeout: f.Timeout * time.Second,
