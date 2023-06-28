@@ -69,7 +69,7 @@ func Test_parse_championr_mastery(t *testing.T) {
 		t.Fatal(err)
 	}
 	var res []riotmodel.ChampionMasteryDto
-	err = json.Unmarshal([]byte(buff), &res)
+	err = json.Unmarshal(buff, &res)
 	if err != nil {
 		t.Fatal(err)
 	}
