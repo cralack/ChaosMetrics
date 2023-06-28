@@ -135,5 +135,6 @@ func Test_parse_match(t *testing.T) {
 		player.Kills, player.Deaths, player.Assists)
 	fmt.Println("Total Damage Dealt to Champions by First Blood Player:",
 		player.TotalDamageDealtToChampions)
-
+	fmt.Println("First Blood Player's match ID:",
+		player.MatchID)
 }

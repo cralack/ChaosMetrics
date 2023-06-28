@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cralack/ChaosMetrics/server/config"
 	"github.com/cralack/ChaosMetrics/server/global"
 
 	"github.com/fsnotify/fsnotify"
@@ -28,10 +29,12 @@ func Viper() (*viper.Viper, error) {
 	workDir := curDir[:strings.Index(curDir, "server")+len("server")]
 	logDir := filepath.Join(workDir, "log")
 	testDir := filepath.Join(workDir, "test")
-	if conf.DirTree.WorkDir == "" {
-		conf.DirTree.WorkDir = workDir
-		conf.DirTree.LogDir = logDir
-		conf.DirTree.TestDir = testDir
+	if conf.DirTree == nil {
+		conf.DirTree = &config.DirTree{
+			WorkDir: workDir,
+			LogDir:  logDir,
+			TestDir: testDir,
+		}
 	}
 	v.AddConfigPath(workDir)
 

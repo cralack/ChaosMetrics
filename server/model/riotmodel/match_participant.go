@@ -1,6 +1,8 @@
 package riotmodel
 
 type ParticipantDto struct {
+	MatchID string // 关联InfoDTO的外键
+
 	Assists                        int      `json:"assists"`                        // 助攻数
 	BaronKills                     int      `json:"baronKills"`                     // 击杀大龙数
 	BountyLevel                    int      `json:"bountyLevel"`                    // 赏金等级
@@ -109,14 +111,14 @@ type ParticipantDto struct {
 }
 
 type PerksDto struct {
-	StatPerks PerkStatsDto   `json:"statPerks"` // 符文属性
-	Styles    []PerkStyleDto `json:"styles"`    // 符文样式列表
+	StatPerks *PerkStatsDto   `json:"statPerks"` // 符文属性
+	Styles    []*PerkStyleDto `json:"styles"`    // 符文样式列表
 }
 
 type PerkStyleDto struct {
-	Description string                  `json:"description"` // 描述
-	Selections  []PerkStyleSelectionDto `json:"selections"`  // 符文样式选择
-	Style       int                     `json:"style"`       // 符文样式
+	Description string                   `json:"description"` // 描述
+	Selections  []*PerkStyleSelectionDto `json:"selections"`  // 符文样式选择
+	Style       int                      `json:"style"`       // 符文样式
 }
 
 type PerkStatsDto struct {

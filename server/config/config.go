@@ -2,7 +2,7 @@ package config
 
 type Server struct {
 	Env     string `mapstructure:"env"`
-	DirTree DirTree
+	DirTree *DirTree
 	Dbconf  *DatabaseConfig `mapstructure:"database"`
 	LogConf *LoggerConfig   `mapstructure:"logger"`
 	Fetcher *FetcherConfig  `mapstructure:"fetcher"`
