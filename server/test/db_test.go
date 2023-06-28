@@ -20,7 +20,9 @@ type User struct {
 
 func Test_db(t *testing.T) {
 	db := global.GVA_DB
-	db.AutoMigrate(&User{})
+	if err := db.AutoMigrate(&User{}); err != nil {
+		log.Fatal(err)
+	}
 	time.Sleep(time.Second * 1)
 	//清空表中的所有数据
 	if err := db.Exec("truncate table users").Error; err != nil {
