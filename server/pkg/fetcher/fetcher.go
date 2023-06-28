@@ -2,8 +2,9 @@ package fetcher
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -31,7 +32,7 @@ func NewBrowserFetcher() *BrowserFetcher {
 		workDir := global.GVA_CONF.DirTree.WorkDir
 		filename := "api_key"
 		path := filepath.Join(workDir, "pkg", "fetcher", filename)
-		buff, err := ioutil.ReadFile(path)
+		buff, err := os.ReadFile(path)
 		if err != nil {
 			global.GVA_LOG.Error("get api key failed",
 				zap.Error(err))
@@ -50,14 +51,14 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	client := &http.Client{
 		Timeout: f.Timeout * time.Second,
 	}
-	//set req url
+	// set req url
 	req, err := http.NewRequestWithContext(
 		context.Background(), http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	//set header
+	// set header
 	header := global.GVA_CONF.Fetcher.HeaderConfig
 	req.Header.Set("User-Agent", header.UserAgent)
 	req.Header.Set("Accept-Language", header.AcceptLanguage)
@@ -65,18 +66,24 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	req.Header.Set("Origin", header.Origin)
 	req.Header.Set("X-Riot-Token", header.XRiotToken)
 
-	//run req
+	// run req
 	resp, err := client.Do(req)
 	if err != nil {
 		f.Logger.Error("fetch failed", zap.Error(err))
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if cerr := resp.Body.Close(); err != nil {
+			f.Logger.Error("failed to close response body",
+				zap.Error(cerr))
+		}
+	}()
 
-	//get buffer
-	body, err := ioutil.ReadAll(resp.Body)
+	// get buffer
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		f.Logger.Error("read resp body failed", zap.Error(err))
+		f.Logger.Error("read resp body failed",
+			zap.Error(err))
 		return nil, err
 	}
 

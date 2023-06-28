@@ -11,22 +11,22 @@ import (
 var err error
 
 func init() {
-	//set runtime envs
+	// set runtime envs
 	global.GVA_CONF = config.New()
 
-	//setup config service
+	// setup config service
 	global.GVA_VP, err = vconf.Viper()
 	if err != nil {
 		panic(err)
 	}
 
-	//setup logger service
+	// setup logger service
 	global.GVA_LOG, err = zlog.Zap(global.GVA_ENV)
 	if err != nil {
 		panic(err)
 	}
 
-	//setup orm service
+	// setup orm service
 	global.GVA_DB, err = db.GetDB()
 	if err != nil {
 		panic(err)

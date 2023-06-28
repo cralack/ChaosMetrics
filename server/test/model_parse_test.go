@@ -3,7 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -19,7 +19,7 @@ func init() {
 }
 
 func Test_parse_summoner(t *testing.T) {
-	//fetching remote JSON data (3~5 seconds per request)
+	// fetching remote JSON data (3~5 seconds per request)
 	url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
 	buff, err := f.Get(url)
 	// buff, err := ioutil.ReadFile(path + "summoner.txt")
@@ -41,12 +41,12 @@ func Test_parse_summoner(t *testing.T) {
 }
 
 func Test_parse_championr_rotation(t *testing.T) {
-	//fetching remote JSON data (3~5 seconds per request)
+	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://tw2.api.riotgames.com/lol/platform/v3/champion-rotations"
 	// buff, err := f.Get(url)
 
-	//load local json data
-	buff, err := ioutil.ReadFile(path + "championr_rotation.txt")
+	// load local json data
+	buff, err := os.ReadFile(path + "championr_rotation.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,10 +61,10 @@ func Test_parse_championr_rotation(t *testing.T) {
 }
 
 func Test_parse_championr_mastery(t *testing.T) {
-	//fetching remote JSON data (3~5 seconds per request)
+	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://tw2.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/F4fFtqehQLBj8U5sKBZF--k-7akbtb1IX790lRd4whPI4pXDAuVyfswHetg2lz_kMe2NJ0gUo5EIig/top"
 	// buff, err := f.Get(url)
-	buff, err := ioutil.ReadFile(path + "championr_mastery.txt")
+	buff, err := os.ReadFile(path + "championr_mastery.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,22 +89,22 @@ func Test_parse_championr_mastery(t *testing.T) {
 }
 
 func Test_parse_match(t *testing.T) {
-	//fetching remote JSON data (3~5 seconds per request)
+	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://sea.api.riotgames.com/lol/match/v5/matches/TW2_81882122"
 	// buff, err := f.Get(url)
 
-	//load local json data
-	buff, err := ioutil.ReadFile(path + "match.txt")
+	// load local json data
+	buff, err := os.ReadFile(path + "match.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	//parse
+	// parse
 	var res riotmodel.MatchDto
 	err = json.Unmarshal(buff, &res)
 	if err != nil {
 		t.Fatal(err)
 	}
-	//check data
+	// check data
 	fmt.Println("Metadata Data Version:",
 		res.Metadata.DataVersion)
 	fmt.Println("Game Creation Time:",

@@ -1,9 +1,10 @@
 package zlog
 
 import (
-	"github.com/cralack/ChaosMetrics/server/global"
 	"os"
 	"time"
+
+	"github.com/cralack/ChaosMetrics/server/global"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -13,13 +14,13 @@ func Zap(env uint) (*zap.Logger, error) {
 	if global.GVA_LOG != nil {
 		return global.GVA_LOG, nil
 	}
-	//init val
+	// init val
 	var (
 		logConf zap.Config
 		log     *zap.Logger
 		err     error
 	)
-	//diff logger level
+	// diff logger level
 	switch env {
 	case global.PRODUCT_ENV:
 		logConf = zap.NewProductionConfig()
@@ -27,25 +28,25 @@ func Zap(env uint) (*zap.Logger, error) {
 		logConf = zap.NewDevelopmentConfig()
 	}
 
-	//setup logConf
+	// setup logConf
 	// logConf.EncoderConfig.TimeKey = "timestamp"
 	logConf.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(time.RFC3339)
 
-	//init log console core
+	// init log console core
 	consoleCore := zapcore.NewCore(
 		zapcore.NewConsoleEncoder(logConf.EncoderConfig),
 		zapcore.Lock(os.Stdout),
 		logConf.Level,
 	)
 
-	//init log file core
+	// init log file core
 	fileCore := zapcore.NewCore(
 		zapcore.NewJSONEncoder(logConf.EncoderConfig),
 		getFileWriter(),
 		logConf.Level,
 	)
 
-	//init logger
+	// init logger
 	switch env {
 	case global.PRODUCT_ENV:
 		log = zap.New(
@@ -60,14 +61,19 @@ func Zap(env uint) (*zap.Logger, error) {
 				consoleCore,
 			),
 			zap.AddCaller(),
-			//zap.AddStacktrace(logConf.Level),
+			// zap.AddStacktrace(logConf.Level),
 		)
 	}
 
 	zap.ReplaceGlobals(log)
 
 	// flushes buffer, if any
-	defer log.Sync()
+	defer func() {
+		if err := log.Sync(); err != nil {
+			log.Fatal("sync failed", zap.Error(err))
+		}
+
+	}()
 
 	if err != nil {
 		panic(err)

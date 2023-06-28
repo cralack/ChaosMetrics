@@ -1,9 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	_ "github.com/cralack/ChaosMetrics/server/init"
-	"os"
 )
 
 func main() {

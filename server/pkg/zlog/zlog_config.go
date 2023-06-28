@@ -2,21 +2,12 @@ package zlog
 
 import (
 	"fmt"
-	"github.com/cralack/ChaosMetrics/server/global"
 	"time"
+
+	"github.com/cralack/ChaosMetrics/server/global"
 
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-)
-
-const (
-	DebugLevel  = zapcore.DebugLevel
-	InfoLevel   = zapcore.InfoLevel
-	WarnLevel   = zapcore.WarnLevel
-	ErrorLevel  = zapcore.ErrorLevel
-	DPanicLevel = zapcore.DPanicLevel
-	PanicLevel  = zapcore.PanicLevel
-	FatalLevel  = zapcore.FatalLevel
 )
 
 type LoggerConfig struct {

@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/cralack/ChaosMetrics/server/global"
+	"go.uber.org/zap"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,17 +12,21 @@ func GetDB() (*gorm.DB, error) {
 	if global.GVA_DB != nil {
 		return global.GVA_DB, nil
 	}
-	//check dsn
+	// check dsn
 	if global.GVA_CONF.Dbconf.DSN == "" {
-		GetDBConfig()
+		err := GetDBConfig()
+		if err != nil {
+			global.GVA_LOG.Error("get db config failed",
+				zap.Error(err))
+		}
 	}
-	//init val
+	// init val
 	var (
 		db       *gorm.DB
 		gormConf *gorm.Config
 		err      error
 	)
-	//diff logger for gom
+	// diff logger for gom
 	if global.GVA_ENV == global.PRODUCT_ENV {
 		gormConf = &gorm.Config{
 			Logger: &ZapLogger{
@@ -31,7 +36,7 @@ func GetDB() (*gorm.DB, error) {
 	} else {
 		gormConf = &gorm.Config{}
 	}
-	//get db con
+	// get db con
 	db, err = gorm.Open(
 		mysql.Open(global.GVA_CONF.Dbconf.DSN),
 		gormConf,
