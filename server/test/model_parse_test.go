@@ -7,16 +7,7 @@ import (
 	"testing"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/pkg/fetcher"
 )
-
-var f fetcher.Fetcher
-var path string
-
-func init() {
-	f = fetcher.NewBrowserFetcher()
-	path = "./local_json/"
-}
 
 func Test_parse_summoner(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
@@ -136,5 +127,5 @@ func Test_parse_match(t *testing.T) {
 	fmt.Println("Total Damage Dealt to Champions by First Blood Player:",
 		player.TotalDamageDealtToChampions)
 	fmt.Println("First Blood Player's match ID:",
-		player.MatchID)
+		player.MetaMatchID)
 }

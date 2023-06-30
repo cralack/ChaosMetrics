@@ -1,0 +1,140 @@
+{
+  "metadata": {
+    "dataVersion": "2",
+    "matchId": "TW2_81882122"
+  },
+  "info": {
+    "gameMode": "ARAM",
+    "gameVersion": "13.11.513.8260",
+    "participants": [
+      {
+        "matchId": "TW2_81882122",
+        "championName": "Lux",
+        "assists": 10,
+        "deaths": 2,
+        "kills": 8,
+        "perks": {
+            "statPerks": {
+              "defense": 5003,
+              "flex": 5002,
+              "offense": 5007
+            },
+            "styles": [
+              {
+                "description": "primaryStyle",
+                "selections": [
+                  {
+                    "perk": 8229,
+                    "var1": 1117,
+                    "var2": 0,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8226,
+                    "var1": 250,
+                    "var2": 655,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8210,
+                    "var1": 14,
+                    "var2": 0,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8237,
+                    "var1": 603,
+                    "var2": 0,
+                    "var3": 0
+                  }
+                ],
+                "style": 8200
+              },
+              {
+                "description": "subStyle",
+                "selections": [
+                  {
+                    "perk": 8401,
+                    "var1": 203,
+                    "var2": 0,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8453,
+                    "var1": 882,
+                    "var2": 2797,
+                    "var3": 0
+                  }
+                ],
+                "style": 8400
+              }
+            ]
+          }
+      },
+      {
+        "matchId": "TW2_81882122",
+        "championName": "Ezreal",
+        "assists": 5,
+        "deaths": 3,
+        "kills": 6,
+        "perks": {
+            "statPerks": {
+              "defense": 5003,
+              "flex": 5002,
+              "offense": 5007
+            },
+            "styles": [
+              {
+                "description": "primaryStyle",
+                "selections": [
+                  {
+                    "perk": 8229,
+                    "var1": 1117,
+                    "var2": 0,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8226,
+                    "var1": 250,
+                    "var2": 655,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8210,
+                    "var1": 14,
+                    "var2": 0,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8237,
+                    "var1": 603,
+                    "var2": 0,
+                    "var3": 0
+                  }
+                ],
+                "style": 8200
+              },
+              {
+                "description": "subStyle",
+                "selections": [
+                  {
+                    "perk": 8401,
+                    "var1": 203,
+                    "var2": 0,
+                    "var3": 0
+                  },
+                  {
+                    "perk": 8453,
+                    "var1": 882,
+                    "var2": 2797,
+                    "var3": 0
+                  }
+                ],
+                "style": 8400
+              }
+            ]
+          }
+      }
+    ]
+  }
+}

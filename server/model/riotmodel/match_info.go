@@ -5,26 +5,31 @@ import (
 	"time"
 )
 
-type InfoDto struct {
-	MatchID string
-
-	GameCreation       time.Time         `json:"gameCreation"`                           // 游戏创建时间戳
-	GameDuration       int               `json:"gameDuration"`                           // 游戏持续时间
-	GameEndTimestamp   time.Time         `json:"gameEndTimestamp"`                       // 游戏结束时间戳
-	GameID             int               `json:"gameId"`                                 // 游戏ID
-	GameMode           string            `json:"gameMode"`                               // 游戏模式
-	GameName           string            `json:"gameName"`                               // 游戏名称
-	GameStartTimestamp time.Time         `json:"gameStartTimestamp"`                     // 游戏开始时间戳
-	GameType           string            `json:"gameType"`                               // 游戏类型
-	GameVersion        string            `json:"gameVersion"`                            // 游戏版本
-	MapID              int               `json:"mapId"`                                  // 地图ID
-	Participants       []*ParticipantDto `gorm:"foreignKey:MatchID" json:"participants"` // 参与者列表
-	PlatformID         string            `json:"platformId"`                             // 比赛所在平台
-	QueueID            int               `json:"queueId"`                                // 队列ID
-	Teams              []*TeamDto        `gorm:"-" json:"teams"`                         // 队伍列表
-	TournamentCode     string            `json:"tournamentCode"`                         // 生成比赛的锦标赛代码
+type MetadataDto struct {
+	DataVersion  string   `json:"dataVersion" gorm:"column:data_version" ` // 比赛数据版本
+	MetaMatchID  string   `json:"matchId" gorm:"column:meta_match_id"`     // 比赛ID
+	Participants []string `json:"participants" gorm:"-"`                   // 参与者 PUUID 列表
 }
 
+type InfoDto struct {
+	GameCreation       time.Time         `json:"gameCreation" gorm:"column:game_creation"`              // 游戏创建时间戳
+	GameDuration       int               `json:"gameDuration" gorm:"column:game_duration"`              // 游戏持续时间
+	GameEndTimestamp   time.Time         `json:"gameEndTimestamp" gorm:"column:game_end_timestamp"`     // 游戏结束时间戳
+	GameID             int               `json:"gameId" gorm:"column:game_id"`                          // 游戏ID
+	GameMode           string            `json:"gameMode" gorm:"column:game_mode"`                      // 游戏模式
+	GameName           string            `json:"gameName" gorm:"column:game_name"`                      // 游戏名称
+	GameStartTimestamp time.Time         `json:"gameStartTimestamp" gorm:"column:game_start_timestamp"` // 游戏开始时间戳
+	GameType           string            `json:"gameType" gorm:"column:game_type"`                      // 游戏类型
+	GameVersion        string            `json:"gameVersion" gorm:"column:game_version"`                // 游戏版本
+	MapID              int               `json:"mapId" gorm:"column:map_id"`                            // 地图ID
+	Participants       []*ParticipantDto `json:"participants" gorm:"foreignKey:match_id"`               // 参与者列表
+	PlatformID         string            `json:"platformId" gorm:"column:platform_id"`                  // 比赛所在平台
+	QueueID            int               `json:"queueId" gorm:"column:queue_id"`                        // 队列ID
+	Teams              []*TeamDto        `json:"teams" gorm:"-"`                                        // 队伍列表
+	TournamentCode     string            `json:"tournamentCode" gorm:"column:tournament_code"`          // 生成比赛的锦标赛代码
+}
+
+// TeamDto todo:add gorm tag
 type TeamDto struct {
 	Bans       []*BanDto      `json:"bans"`       // 禁用的英雄列表
 	Objectives *ObjectivesDto `json:"objectives"` // 目标
@@ -91,6 +96,10 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 			if err != nil {
 				return err
 			}
+			for _, par := range p.Participants {
+				par.PerksORM = &PerksORM{}
+				par.PerksMeta.parsePerksMeta(par.PerksORM)
+			}
 		case "platformId":
 			p.PlatformID = v.(string)
 		case "queueId":
@@ -110,7 +119,6 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 			// Handle other fields as needed
 		}
 	}
-	// p.MatchID = p.PlatformID + "_" + strconv.Itoa(p.GameID)
-
+	
 	return nil
 }
