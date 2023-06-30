@@ -223,6 +223,7 @@ func Test_riotmodel_store(t *testing.T) {
 	if err := db.AutoMigrate(
 		&riotmodel.MatchDto{},
 		&riotmodel.ParticipantDto{},
+		&riotmodel.TeamDto{},
 	); err != nil {
 		t.Fatal(err)
 	}

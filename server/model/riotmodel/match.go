@@ -27,9 +27,11 @@ func (p *MatchDto) UnmarshalJSON(data []byte) error {
 	p.Info = tmp.Info
 	p.Metadata = tmp.Metadata
 	matchID := p.Metadata.MetaMatchID
-	parts := p.Info.Participants
-	for _, part := range parts {
+	for _, part := range p.Info.Participants {
 		part.MetaMatchID = matchID
+	}
+	for _, team := range p.Info.Teams {
+		team.MetaMatchID = matchID
 	}
 	return nil
 }

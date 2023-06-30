@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// ChampionMasteryDto 不一定会用
 type ChampionMasteryDto struct {
 	ChampionPointsUntilNextLevel int64     `json:"championPointsUntilNextLevel"` // 距离下一等级所需的点数。如果玩家达到了该英雄的最高等级，则为零。
 	ChestGranted                 bool      `json:"chestGranted"`                 // 在当前赛季是否已经获得了该英雄的宝箱。
