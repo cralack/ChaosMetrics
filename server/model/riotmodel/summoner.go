@@ -3,16 +3,24 @@ package riotmodel
 import (
 	"encoding/json"
 	"time"
+	
+	"gorm.io/gorm"
 )
 
 type SummonerDTO struct {
-	AccountID     string    `json:"accountId"`     // 加密的账号ID，最长为56个字符
-	ProfileIconID int       `json:"profileIconId"` // 与召唤师相关联的召唤师图标ID
-	RevisionDate  time.Time `json:"revisionDate"`  // 召唤师最后修改的日期，以毫秒为单位的时间戳
-	Name          string    `json:"name"`          // 召唤师名称
-	ID            string    `json:"id"`            // 加密的召唤师ID，最长为63个字符
-	PUUID         string    `json:"puuid"`         // 加密的PUUID，长度为78个字符
-	SummonerLevel int       `json:"summonerLevel"` // 召唤师等级
+	gorm.Model
+	
+	// 比赛列表，多对多关系
+	Matches []*MatchDto `gorm:"many2many:match_summoners"`
+	
+	AccountID     string    `gorm:"column:account_id;type:varchar(100)" json:"accountId"`      // 加密的账号ID，最长为56个字符
+	ProfileIconID int       `gorm:"column:profile_icon_id;type:smallint" json:"profileIconId"` // 与召唤师相关联的召唤师图标ID
+	RevisionDate  time.Time `gorm:"column:revision_date" json:"revisionDate"`                  // 召唤师最后修改的日期，以毫秒为单位的时间戳
+	Name          string    `gorm:"column:name;type:varchar(100)" json:"name"`                 // 召唤师名称
+	ID            string    `gorm:"column:summoner_id;type:varchar(100)" json:"id"`            // 加密的召唤师ID，最长为63个字符
+	PUUID         string    `gorm:"column:puuid;type:varchar(100)" json:"puuid"`               // 加密的PUUID，长度为78个字符
+	SummonerLevel int       `gorm:"column:summoner_level;type:smallint" json:"summonerLevel"`  // 召唤师等级
+	TournamentID  string    `gorm:"column:tournament_id;type:varchar(100)"`                    // 锦标赛ID
 }
 
 // check implement

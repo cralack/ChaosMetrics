@@ -5,39 +5,47 @@ import (
 	"fmt"
 	"os"
 	"testing"
-
+	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
 func Test_parse_summoner(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
-	url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
-	buff, err := f.Get(url)
-	// buff, err := ioutil.ReadFile(path + "summoner.txt")
+	// url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
+	// buff, err := f.Get(url)
+	buff, err := os.ReadFile(path + "summoner.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	var res riotmodel.SummonerDTO
-	err = json.Unmarshal(buff, &res)
+	
+	// 解析 JSON 数据
+	var summoners []*riotmodel.SummonerDTO
+	err = json.Unmarshal(buff, &summoners)
 	if err != nil {
-		t.Fatal(err)
+		fmt.Println("解析失败：", err)
+		return
 	}
-	fmt.Println("ID:", res.ID)
-	fmt.Println("Account ID:", res.AccountID)
-	fmt.Println("PUUID:", res.PUUID)
-	fmt.Println("Name:", res.Name)
-	fmt.Println("Profile Icon ID:", res.ProfileIconID)
-	fmt.Println("Revision Date:", res.RevisionDate)
-	fmt.Println("Summoner Level:", res.SummonerLevel)
+	
+	// 打印解析结果
+	for _, summoner := range summoners {
+		fmt.Println("ID:", summoner.ID)
+		fmt.Println("AccountID:", summoner.AccountID)
+		fmt.Println("PUUID:", summoner.PUUID)
+		fmt.Println("Name:", summoner.Name)
+		fmt.Println("ProfileIconID:", summoner.ProfileIconID)
+		fmt.Println("RevisionDate:", summoner.RevisionDate)
+		fmt.Println("SummonerLevel:", summoner.SummonerLevel)
+		fmt.Println()
+	}
 }
 
 func Test_parse_championr_rotation(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
-	// url := "https://tw2.api.riotgames.com/lol/platform/v3/champion-rotations"
-	// buff, err := f.Get(url)
-
+	url := "https://tw2.api.riotgames.com/lol/platform/v3/champion-rotations"
+	buff, err := f.Get(url)
+	
 	// load local json data
-	buff, err := os.ReadFile(path + "championr_rotation.txt")
+	// buff, err := os.ReadFile(path + "championr_rotation.txt")
 	if err != nil {
 		t.Fatal(err)
 	}

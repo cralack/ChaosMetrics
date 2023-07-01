@@ -8,6 +8,7 @@ import (
 
 type MatchDto struct {
 	gorm.Model
+	Summoners []*SummonerDTO `gorm:"many2many:match_summoners"`
 	
 	Metadata *MetadataDto `json:"metadata" gorm:"embedded"` // 比赛元数据
 	Info     *InfoDto     `json:"info" gorm:"embedded"`     // 比赛信息

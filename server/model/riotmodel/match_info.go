@@ -8,9 +8,9 @@ import (
 )
 
 type MetadataDto struct {
-	DataVersion  string   `json:"dataVersion" gorm:"column:data_version;type:varchar(100)"` // 比赛数据版本
-	MetaMatchID  string   `json:"matchId" gorm:"column:meta_match_id;type:varchar(100)"`    // 比赛ID
-	Participants []string `json:"participants" gorm:"-"`                                    // 参与者 PUUID 列表
+	DataVersion  string   `json:"dataVersion" gorm:"column:data_version;type:varchar(100)"`    // 比赛数据版本
+	MetaMatchID  string   `json:"matchId" gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
+	Participants []string `json:"participants" gorm:"-"`                                       // 参与者 PUUID 列表
 }
 
 type InfoDto struct {
@@ -31,7 +31,6 @@ type InfoDto struct {
 	TournamentCode     string            `json:"tournamentCode" gorm:"column:tournament_code;type:varchar(100)"` // 生成比赛的锦标赛代码
 }
 
-// TeamDto todo:add gorm tag
 type TeamDto struct {
 	gorm.Model
 	MatchID     string `gorm:"column:match_id;type:varchar(100)"`            // 匹配matchDTO_id
