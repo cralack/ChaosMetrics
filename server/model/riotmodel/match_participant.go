@@ -6,7 +6,7 @@ import (
 
 type ParticipantDto struct {
 	gorm.Model
-	MatchID     string `gorm:"column:match_id;type:varchar(100)"`            // 匹配matchDTO_id
+	MatchID     uint   `gorm:"column:match_id"`                              // 匹配matchDTO_id
 	MetaMatchID string `gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
 	
 	Assists                        int       `json:"assists" gorm:"column:assists;type:varchar(100)"`                                    // 助攻数

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"testing"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -13,7 +14,7 @@ func Test_parse_summoner(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
 	// buff, err := f.Get(url)
-	buff, err := os.ReadFile(path + "summoner.txt")
+	buff, err := os.ReadFile(path + "summoners.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,4 +137,32 @@ func Test_parse_match(t *testing.T) {
 		player.TotalDamageDealtToChampions)
 	fmt.Println("First Blood Player's match ID:",
 		player.MetaMatchID)
+}
+
+func Test_parse_league(t *testing.T) {
+	// CHALLENGER
+	// url := "https://tw2.api.riotgames.com/lol/league/v4/challengerleagues/by-queue/RANKED_SOLO_5x5"
+	// GRANDMASTER
+	// url := "https://tw2.api.riotgames.com/lol/league/v4/grandmasterleagues/by-queue/RANKED_SOLO_5x5"
+	// MASTER
+	// url := "https://tw2.api.riotgames.com/lol/league/v4/masterleagues/by-queue/RANKED_SOLO_5x5"
+	url := "https://tw2.api.riotgames.com/lol/league/v4/masterleagues/by-queue/RANKED_FLEX_SR"
+	buff, err := f.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// parse
+	var res riotmodel.LeagueListDTO
+	err = json.Unmarshal(buff, &res)
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries := res.Entries
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].LeaguePoints > entries[j].LeaguePoints
+	})
+	n := 10
+	for i := 0; i < n; i++ {
+		fmt.Printf("summoner %s's LP is %d\n", entries[i].SummonerName, entries[i].LeaguePoints)
+	}
 }

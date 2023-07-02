@@ -20,13 +20,40 @@ type DTO interface {
 
 // TIER LEVEL
 const (
-	CHALLENGER = iota
-	GRANDMASTER
-	MASTER
+	CHALLENGER  = iota // top 200 players
+	GRANDMASTER        // top 201-701 players
+	MASTER             // top 702-2922 players
 	DIAMOND
 	PLATINUM
 	GOLD
 	SILVER
 	BRONZE
 	IRON
+)
+
+// LOCATION CODE
+const (
+	BR1  = iota // 巴西
+	EUN1        // 欧洲东北
+	EUW1        // 欧洲西部
+	JP1         // 日本
+	KR1         // 韩国
+	LA1         // 拉丁美洲北部
+	LA2         // 拉丁美洲南部
+	NA1         // 北美洲
+	OC1         // 大洋洲
+	PH2         // 菲律宾
+	RU          // 俄罗斯
+	SG2         // 新加坡
+	TH2         // 泰国
+	TR1         // 土耳其
+	TW2         // 台湾
+	VN2         // 越南
+)
+
+// QUE CODE
+const (
+	RANKED_SOLO_5x5 = 1
+	RANKED_FLEX_SR  = 2
+	RANKED_FLEX_TT  = 4
 )

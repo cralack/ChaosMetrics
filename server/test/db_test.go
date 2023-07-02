@@ -75,23 +75,12 @@ func Test_db_crud_func(t *testing.T) {
 	db.Where("id=?", 2).Unscoped().Delete(&User{})
 }
 
-func Test_match_summoners(t *testing.T) {
+func Test_match_store(t *testing.T) {
 	/*
 		set up values
 	*/
 	// load local json data
-	buff, err := os.ReadFile(path + "summoners.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	// parse
-	var summoners []*riotmodel.SummonerDTO
-	err = json.Unmarshal(buff, &summoners)
-	if err != nil {
-		t.Fatal(err)
-	}
-	// load local json data
-	buff, err = os.ReadFile(path + "match.txt")
+	buff, err := os.ReadFile(path + "match.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,11 +94,6 @@ func Test_match_summoners(t *testing.T) {
 	/*
 		test
 	*/
-	for _, sum := range summoners {
-		sum.Matches = append(sum.Matches, match)
-		match.Summoners = append(match.Summoners, sum)
-	}
-	
 	db := global.GVA_DB
 	db.Exec("DROP TABLE IF EXISTS match_dtos, match_summoners, participant_dtos, summoner_dtos, team_dtos")
 	// AutoMigrate
@@ -117,7 +101,6 @@ func Test_match_summoners(t *testing.T) {
 		&riotmodel.MatchDto{},
 		&riotmodel.ParticipantDto{},
 		&riotmodel.TeamDto{},
-		&riotmodel.SummonerDTO{},
 	); err != nil {
 		t.Fatal(err)
 	}
@@ -149,6 +132,36 @@ func Test_match_summoners(t *testing.T) {
 	/*
 		Currently it looks like the model doesn't need to change or delete data
 	*/
+}
+
+func Test_summoner_store(t *testing.T) {
+	// load json
+	buff, err := os.ReadFile(path + "summoners.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	// parse to model
+	var summoners []*riotmodel.SummonerDTO
+	err = json.Unmarshal(buff, &summoners)
+	if err != nil {
+		fmt.Println("解析失败：", err)
+		return
+	}
+	// store
+	db := global.GVA_DB
+	db.Exec("DROP TABLE IF EXISTS summoner_dtos")
+	// AutoMigrate
+	if err := db.AutoMigrate(
+		&riotmodel.SummonerDTO{},
+	); err != nil {
+		t.Fatal(err)
+	}
+	db.Save(summoners)
+}
+
+func Test_entry_store(t *testing.T) {
+
 }
 
 // // Minimatch 表示一个用于展示比赛关系的模型。

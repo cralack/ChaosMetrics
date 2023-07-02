@@ -33,7 +33,7 @@ type InfoDto struct {
 
 type TeamDto struct {
 	gorm.Model
-	MatchID     string `gorm:"column:match_id;type:varchar(100)"`            // 匹配matchDTO_id
+	MatchID     uint   `gorm:"column:match_id"`                              // 匹配matchDTO_id
 	MetaMatchID string `gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
 	
 	Bans       []*BanDto      `json:"bans" gorm:"-"`                       // 禁用的英雄列表
