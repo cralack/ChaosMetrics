@@ -3,7 +3,7 @@ package db
 import (
 	"github.com/cralack/ChaosMetrics/server/global"
 	"go.uber.org/zap"
-
+	
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -34,7 +34,9 @@ func GetDB() (*gorm.DB, error) {
 			},
 		}
 	} else {
-		gormConf = &gorm.Config{}
+		gormConf = &gorm.Config{
+			// Logger: logger.Default.LogMode(logger.Silent), // 禁用日志输出
+		}
 	}
 	// get db con
 	db, err = gorm.Open(

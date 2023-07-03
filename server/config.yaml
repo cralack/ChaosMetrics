@@ -29,7 +29,7 @@ logger:
 fetcher:
   timeout: 15 # 连接超时时间
   header:
-    user_agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36  # 用户代理
+    user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36  # 用户代理
     accept_language: zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7  # 接受的语言
     accept_charset: application/x-www-form-urlencoded; charset=UTF-8  # 接受的字符集
     origin: https://developer.riotgames.com  # 请求来源

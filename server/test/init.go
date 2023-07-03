@@ -21,7 +21,7 @@ func init() {
 		&riotmodel.ParticipantDto{},
 		&riotmodel.TeamDto{},
 		&riotmodel.SummonerDTO{},
-		&riotmodel.LeagueItemDTO{},
+		&riotmodel.LeagueEntryDTO{},
 	); err != nil {
 		global.GVA_LOG.Error("init db model failed", zap.Error(err))
 	}

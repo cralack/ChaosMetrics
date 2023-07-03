@@ -3,9 +3,9 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"testing"
-	"time"
 	
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -21,13 +21,10 @@ type User struct {
 }
 
 func Test_db_crud_func(t *testing.T) {
+	// init db
 	db := global.GVA_DB
+	db.Exec("DROP TABLE IF EXISTS users")
 	if err := db.AutoMigrate(&User{}); err != nil {
-		t.Fatal(err)
-	}
-	time.Sleep(time.Second * 1)
-	// 清空表中的所有数据
-	if err := db.Exec("truncate table users").Error; err != nil {
 		t.Fatal(err)
 	}
 	
@@ -76,9 +73,6 @@ func Test_db_crud_func(t *testing.T) {
 }
 
 func Test_match_store(t *testing.T) {
-	/*
-		set up values
-	*/
 	// load local json data
 	buff, err := os.ReadFile(path + "match.txt")
 	if err != nil {
@@ -90,22 +84,9 @@ func Test_match_store(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
-	/*
-		test
-	*/
-	db := global.GVA_DB
-	db.Exec("DROP TABLE IF EXISTS match_dtos, match_summoners, participant_dtos, summoner_dtos, team_dtos")
-	// AutoMigrate
-	if err := db.AutoMigrate(
-		&riotmodel.MatchDto{},
-		&riotmodel.ParticipantDto{},
-		&riotmodel.TeamDto{},
-	); err != nil {
-		t.Fatal(err)
-	}
-	
+
 	// save data
+	db := global.GVA_DB
 	if err := db.Save(match).Error; err != nil {
 		t.Log(err)
 	}
@@ -150,18 +131,7 @@ func Test_summoner_store(t *testing.T) {
 	}
 	// store
 	db := global.GVA_DB
-	db.Exec("DROP TABLE IF EXISTS summoner_dtos")
-	// AutoMigrate
-	if err := db.AutoMigrate(
-		&riotmodel.SummonerDTO{},
-	); err != nil {
-		t.Fatal(err)
-	}
 	db.Save(summoners)
-}
-
-func Test_entry_store(t *testing.T) {
-
 }
 
 // // Minimatch 表示一个用于展示比赛关系的模型。
@@ -361,3 +331,160 @@ func Test_entry_store(t *testing.T) {
 // 	}
 // }
 
+// need setuo gorm's logger silent before test
+// server/pkg/db/db.go:38
+// db.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
+func Benchmark_db_store_1(b *testing.B) {
+	// load json
+	buff, err := os.ReadFile(path + "master_league.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	// parse to model
+	var league *riotmodel.LeagueListDTO
+	err = json.Unmarshal(buff, &league)
+	if err != nil {
+		fmt.Println("解析失败：", err)
+		return
+	}
+	// init test val
+	type storeTEST struct {
+		entires []*riotmodel.LeagueEntryDTO
+		n       int
+	}
+	leagueSize := len(league.Entries)
+	tests := make([]*storeTEST, 5)
+	cnt := 1
+	for i := range tests {
+		size := cnt
+		cnt *= 10
+		tests[i] = &storeTEST{
+			n:       size,
+			entires: make([]*riotmodel.LeagueEntryDTO, size),
+		}
+		tt := tests[i]
+		for idx := range tt.entires {
+			tt.entires[idx] = league.Entries[i%leagueSize]
+		}
+	}
+	// test
+	db := global.GVA_DB
+	for _, tt := range tests {
+		b.Run(fmt.Sprintf("%d entries", tt.n), func(b *testing.B) {
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				db.Save(tt.entires)
+			}
+			b.StopTimer()
+		})
+	}
+	
+	/*
+										local result
+		goos: windows
+		goarch: amd64
+		pkg: github.com/cralack/ChaosMetrics/server/test
+		cpu: AMD Ryzen 5 2600X Six-Core Processor
+		Benchmark_db_store
+		Benchmark_db_store/1_entries
+		Benchmark_db_store/1_entries-12                      128          11071534 ns/op
+	
+		Benchmark_db_store/10_entries
+		Benchmark_db_store/10_entries-12                     120          10154584 ns/op
+	
+		Benchmark_db_store/0.1k_entries
+		Benchmark_db_store/0.1k_entries-12                    88          19098601 ns/op
+	
+		Benchmark_db_store/1k_entries
+		Benchmark_db_store/1k_entries-12                      20          76719330 ns/op
+	
+		Benchmark_db_store/10k_entries
+		Benchmark_db_store/10k_entries-12                     10         107688520 ns/op
+	*/
+}
+
+// db.Save([size]*riotmodel.LeagueEntryDTO) size=1k~10k store benchmark
+func Benchmark_db_store_2(b *testing.B) {
+	// load json
+	buff, err := os.ReadFile(path + "master_league.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	// parse to model
+	var league *riotmodel.LeagueListDTO
+	err = json.Unmarshal(buff, &league)
+	if err != nil {
+		fmt.Println("解析失败：", err)
+		return
+	}
+	// init test val
+	type storeTEST struct {
+		entires []*riotmodel.LeagueEntryDTO
+		n       int
+	}
+	leagueSize := len(league.Entries)
+	tests := make([]*storeTEST, 10)
+	for i := range tests {
+		size := (1 + i) * 100
+		tests[i] = &storeTEST{
+			n:       size,
+			entires: make([]*riotmodel.LeagueEntryDTO, size),
+		}
+		tt := tests[i]
+		for idx := range tt.entires {
+			tt.entires[idx] = league.Entries[i%leagueSize]
+		}
+	}
+	// test
+	db := global.GVA_DB
+	for _, tt := range tests {
+		b.Run(fmt.Sprintf("%d entries", tt.n), func(b *testing.B) {
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				db.Save(tt.entires)
+			}
+			b.StopTimer()
+		})
+	}
+	
+	/*
+											local result
+		goos: windows
+		goarch: amd64
+		pkg: github.com/cralack/ChaosMetrics/server/test
+		cpu: AMD Ryzen 5 2600X Six-Core Processor
+		Benchmark_db_store_2
+		Benchmark_db_store_2/100_entries
+		Benchmark_db_store_2/100_entries-12                   97          15569600 ns/op
+	
+		Benchmark_db_store_2/200_entries
+		Benchmark_db_store_2/200_entries-12                   57          22760793 ns/op
+	
+		Benchmark_db_store_2/300_entries
+		Benchmark_db_store_2/300_entries-12                   54          25559107 ns/op
+	
+		Benchmark_db_store_2/400_entries
+		Benchmark_db_store_2/400_entries-12                   54          37813459 ns/op
+	
+		Benchmark_db_store_2/500_entries
+		Benchmark_db_store_2/500_entries-12                   40          40469692 ns/op
+	
+		Benchmark_db_store_2/600_entries
+		Benchmark_db_store_2/600_entries-12                   24          59813025 ns/op
+	
+		Benchmark_db_store_2/700_entries
+		Benchmark_db_store_2/700_entries-12                   26          55035704 ns/op
+	
+		Benchmark_db_store_2/800_entries
+		Benchmark_db_store_2/800_entries-12                   21          54065381 ns/op
+	
+		Benchmark_db_store_2/900_entries
+		Benchmark_db_store_2/900_entries-12                   25          62689404 ns/op
+	
+		Benchmark_db_store_2/1000_entries
+		Benchmark_db_store_2/1000_entries-12                  19          65841416 ns/op
+	
+	*/
+}

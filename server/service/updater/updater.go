@@ -3,6 +3,7 @@ package updater
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 	
@@ -122,21 +123,21 @@ func (u *RiotUpdater) getMatchByMatchID(loc uint, matchID string) (res *riotmode
 
 // Get the BEST(challenger/grandmaster/master) league for given queue
 // api: /lol/league/v4/{BEST}leagues/by-queue/{queue}
-func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.LeagueItemDTO, err error) {
+func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.LeagueEntryDTO, err error) {
 	var stem string
+	var tierStr string
 	prefix := utils.ConvertPlatformURL(loc)
 	queStr := getQueueString(que)
 	switch tier {
 	case riotmodel.CHALLENGER:
-		stem = fmt.Sprintf("/lol/league/v4/%sleagues/by-queue/%s",
-			"challenger", queStr)
+		tierStr = "CHALLENGER"
 	case riotmodel.GRANDMASTER:
-		stem = fmt.Sprintf("/lol/league/v4/%sleagues/by-queue/%s",
-			"grandmaster", queStr)
+		tierStr = "GRANDMASTER"
 	case riotmodel.MASTER:
-		stem = fmt.Sprintf("/lol/league/v4/%sleagues/by-queue/%s",
-			"master", queStr)
+		tierStr = "MASTER"
 	}
+	stem = fmt.Sprintf("/lol/league/v4/%sleagues/by-queue/%s",
+		strings.ToLower(tierStr), queStr)
 	// fill buffer
 	u.Lock.Lock()
 	defer u.Lock.Unlock()
@@ -154,6 +155,9 @@ func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.
 		return nil, err
 	}
 	res = results.Entries
+	for _, enrty := range res {
+		enrty.Tier = tierStr
+	}
 	// todo puller
 	u.DB.Save(res)
 	return res, nil
@@ -162,7 +166,7 @@ func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.
 // Get all the league entries
 // api: /lol/league/v4/entries/{queue}/{tier}/{division}
 // page(optional): 	Defaults to 1. Starts with page 1.
-func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que, idx uint) (res []*riotmodel.LeagueItemDTO, err error) {
+func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que, idx uint) (res []*riotmodel.LeagueEntryDTO, err error) {
 	prefix := utils.ConvertPlatformURL(loc)
 	queStr := getQueueString(que)
 	tierDiv := getMortalString(tier, division)
@@ -181,12 +185,14 @@ func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que, idx uint) (re
 			zap.Error(err))
 		return nil, err
 	}
-	
 	// parse
 	if err = json.Unmarshal(buff, &res); err != nil {
 		u.Logger.Error(fmt.Sprintf("unmarshal json to %s failed",
 			"LeagueItemDTO"), zap.Error(err))
 		return nil, err
+	}
+	for _, enrty := range res {
+		enrty.Tier = tierDiv[0]
 	}
 	// todo puller
 	u.DB.Save(res)
@@ -272,8 +278,8 @@ func (u *RiotUpdater) Syncer(key string, data interface{}) {
 			u.Logger.Error("buffer'key and buff doens match")
 		}
 		u.DB.Save(matches)
-	case "leagueEntrie":
-		entries, ok := data.([]*riotmodel.LeagueItemDTO)
+	case "leagueEntry":
+		entries, ok := data.([]*riotmodel.LeagueEntryDTO)
 		if !ok {
 			u.Logger.Error("buffer'key and buff doens match")
 		}

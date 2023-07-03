@@ -70,7 +70,7 @@ func Zap(env uint) (*zap.Logger, error) {
 	// flushes buffer, if any
 	defer func() {
 		if err := log.Sync(); err != nil {
-			log.Fatal("sync failed", zap.Error(err))
+			log.Error("sync failed", zap.Error(err))
 		}
 
 	}()
