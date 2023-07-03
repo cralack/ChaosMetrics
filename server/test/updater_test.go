@@ -40,35 +40,27 @@ func Test_update_all(t *testing.T) {
 	var loc, que, tier, div, page uint
 	loc = riotmodel.TW2
 	que = riotmodel.RANKED_SOLO_5x5
-	for tier = riotmodel.CHALLENGER; tier <= riotmodel.MASTER; tier++ {
-		res, err := updtr.UpdateBetserLeague(loc, tier, que)
-		if err != nil {
-			t.Fatal(err)
-		} else {
-			t.Log("update succeed ", res[0].Tier, len(res))
-		}
-	}
 	// batch query
-	for tier = riotmodel.DIAMOND; tier <= riotmodel.IRON; tier++ {
-		for div = 1; div <= 4; div++ {
-			for page = 1; page <= 1; page++ {
-				res, err := updtr.UpdateMortalLeague(loc, tier, div, que, page)
-				if err != nil {
-					t.Fatal(err)
-				} else {
-					t.Log("update succeed ", res[0].Tier, len(res))
-				}
-			}
-		}
-	}
-	// single query
-	// tier = riotmodel.DIAMOND
-	// div = 1
-	// page = 1
-	// res, err := updtr.UpdateMortalLeague(loc, tier, div, que, page)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// } else {
-	// 	t.Log("update succeed ", len(res))
+	// for tier = riotmodel.DIAMOND; tier <= riotmodel.IRON; tier++ {
+	// 	for div = 1; div <= 4; div++ {
+	// 		for page = 1; page <= 1; page++ {
+	// 			res, err := updtr.UpdateMortalLeague(loc, tier, div, que, page)
+	// 			if err != nil {
+	// 				t.Fatal(err)
+	// 			} else {
+	// 				t.Log("update succeed ", res[0].Tier, len(res))
+	// 			}
+	// 		}
+	// 	}
 	// }
+	// single query
+	tier = riotmodel.DIAMOND
+	div = 1
+	page = 1
+	res, err := updtr.UpdateMortalLeague(loc, tier, div, que, page)
+	if err != nil {
+		t.Fatal(err)
+	} else {
+		t.Log("update succeed ", len(res))
+	}
 }

@@ -3,6 +3,7 @@ package updater
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -170,12 +171,9 @@ func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que, idx uint) (re
 	prefix := utils.ConvertPlatformURL(loc)
 	queStr := getQueueString(que)
 	tierDiv := getMortalString(tier, division)
-	//todo:page should be int
-	// page := strconv.Itoa(int(idx))
-	// stem := fmt.Sprintf("/lol/league/v4/entries/%s/%s/%s?page=%d",
-	// 	queStr, tierDiv[0], tierDiv[1], page)
-	stem := fmt.Sprintf("/lol/league/v4/entries/%s/%s/%s",
-		queStr, tierDiv[0], tierDiv[1])
+	page := strconv.Itoa(int(idx))
+	stem := fmt.Sprintf("/lol/league/v4/entries/%s/%s/%s?page=%s",
+		queStr, tierDiv[0], tierDiv[1], page)
 	// fill buffer
 	u.Lock.Lock()
 	defer u.Lock.Unlock()

@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -57,7 +58,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	
 	// set header
 	header := global.GVA_CONF.Fetcher.HeaderConfig
 	req.Header.Set("User-Agent", header.UserAgent)
@@ -65,11 +66,15 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	req.Header.Set("Accept-Charset", header.AcceptCharset)
 	req.Header.Set("Origin", header.Origin)
 	req.Header.Set("X-Riot-Token", header.XRiotToken)
-
+	
 	// run req
 	resp, err := client.Do(req)
 	if err != nil {
 		f.Logger.Error("fetch failed", zap.Error(err))
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		f.Logger.Error(fmt.Sprintf("fetch failed:%s", resp.Status))
 		return nil, err
 	}
 	defer func() {
@@ -78,7 +83,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 				zap.Error(cerr))
 		}
 	}()
-
+	
 	// get buffer
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
