@@ -8,21 +8,24 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
+	
 	"github.com/cralack/ChaosMetrics/server/config"
 	"github.com/cralack/ChaosMetrics/server/global"
-
+	"github.com/cralack/ChaosMetrics/server/service/rater"
+	
 	"go.uber.org/zap"
 )
 
 type Fetcher interface {
+	rater.RateLimter
 	Get(url string) ([]byte, error)
 }
 
 type BrowserFetcher struct {
-	Conf    *config.FetcherConfig
-	Logger  *zap.Logger
-	Timeout time.Duration
+	Conf         *config.FetcherConfig
+	Logger       *zap.Logger
+	RaterLimiter rater.RateLimter
+	Timeout      time.Duration
 }
 
 var _ Fetcher = &BrowserFetcher{}
@@ -40,10 +43,15 @@ func NewBrowserFetcher() *BrowserFetcher {
 		}
 		conf.HeaderConfig.XRiotToken = string(buff)
 	}
+	limiter, err := rater.NewSlidingWindowLimiter(100, time.Minute*2, time.Second*5)
+	if err != nil {
+		global.GVA_LOG.Error("rate limiter init failed", zap.Error(err))
+	}
 	return &BrowserFetcher{
-		Timeout: global.GVA_CONF.Fetcher.Timeout,
-		Logger:  global.GVA_LOG,
-		Conf:    conf,
+		Timeout:      global.GVA_CONF.Fetcher.Timeout,
+		Logger:       global.GVA_LOG,
+		RaterLimiter: limiter,
+		Conf:         conf,
 	}
 }
 
@@ -91,6 +99,9 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 			zap.Error(err))
 		return nil, err
 	}
-
+	
 	return body, nil
+}
+func (f *BrowserFetcher) TryAcquire() bool {
+	return f.RaterLimiter.TryAcquire()
 }

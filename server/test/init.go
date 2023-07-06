@@ -4,7 +4,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/global"
 	_ "github.com/cralack/ChaosMetrics/server/init"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/pkg/fetcher"
+	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"go.uber.org/zap"
 )
 

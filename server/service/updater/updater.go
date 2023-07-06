@@ -10,7 +10,8 @@ import (
 	
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/pkg/fetcher"
+	"github.com/cralack/ChaosMetrics/server/service/fetcher"
+	"github.com/cralack/ChaosMetrics/server/service/scheduler"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -27,6 +28,7 @@ type RiotUpdater struct {
 	
 	MatchVis map[string]struct{}
 	Fetcher  fetcher.Fetcher
+	Schduler *scheduler.RiotDTOSchedule
 	// Conf     UpdateConfig
 }
 
@@ -116,7 +118,7 @@ func (u *RiotUpdater) getMatchByMatchID(loc uint, matchID string) (res *riotmode
 			"MatchDTO"), zap.Error(err))
 		return nil, err
 	}
-	// store
+	// todo puller
 	u.DB.Save(res)
 	return res, nil
 	
@@ -167,34 +169,49 @@ func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.
 // Get all the league entries
 // api: /lol/league/v4/entries/{queue}/{tier}/{division}
 // page(optional): 	Defaults to 1. Starts with page 1.
-func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que, idx uint) (res []*riotmodel.LeagueEntryDTO, err error) {
+func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que uint) (res []*riotmodel.LeagueEntryDTO, err error) {
 	prefix := utils.ConvertPlatformURL(loc)
 	queStr := getQueueString(que)
-	tierDiv := getMortalString(tier, division)
-	page := strconv.Itoa(int(idx))
-	stem := fmt.Sprintf("/lol/league/v4/entries/%s/%s/%s?page=%s",
-		queStr, tierDiv[0], tierDiv[1], page)
-	// fill buffer
+	rank := getMortalString(tier, division)
+	page := 0
+	cnt := 0
 	u.Lock.Lock()
 	defer u.Lock.Unlock()
-	buff, err := u.Fetcher.Get(prefix + stem)
-	if err != nil {
-		u.Logger.Error(fmt.Sprintf("fetch %s failed", stem),
-			zap.Error(err))
-		return nil, err
+	for {
+		page++
+		stem := fmt.Sprintf("/lol/league/v4/entries/%s/%s/%s?page=%s",
+			queStr, rank[0], rank[1], strconv.Itoa(page))
+		// fill buffer
+		buff, err := u.Fetcher.Get(prefix + stem)
+		if err != nil {
+			u.Logger.Error(fmt.Sprintf("fetch %s failed", stem),
+				zap.Error(err))
+			return nil, err
+		}
+		// parse
+		if err = json.Unmarshal(buff, &res); err != nil {
+			u.Logger.Error(fmt.Sprintf("unmarshal json to %s failed",
+				"LeagueItemDTO"), zap.Error(err))
+			return nil, err
+		}
+		key := fmt.Sprintf("%s_%s", rank[0], rank[1])
+		if len(res) == 0 {
+			u.Logger.Info(fmt.Sprintf("all %s data fetch done at page %0d", key, page))
+			return nil, nil
+		}
+		for _, enrty := range res {
+			enrty.Tier = rank[0]
+		}
+		cnt += len(res)
+		// todo puller
+		
+		u.Schduler.RequestCh <- &scheduler.Task{
+			// Key:    key,
+			// Brief:  key + ":" + strconv.Itoa(page),
+			// Buffer: res,
+		}
 	}
-	// parse
-	if err = json.Unmarshal(buff, &res); err != nil {
-		u.Logger.Error(fmt.Sprintf("unmarshal json to %s failed",
-			"LeagueItemDTO"), zap.Error(err))
-		return nil, err
-	}
-	for _, enrty := range res {
-		enrty.Tier = tierDiv[0]
-	}
-	// todo puller
-	u.DB.Save(res)
-	return res, nil
+	return nil, nil
 }
 
 func getQueueString(que uint) string {
@@ -243,33 +260,31 @@ func getMortalString(tier, div uint) (ans []string) {
 	return
 }
 
-type Task struct {
-	key    string
-	brief  string
-	buffer interface{}
-}
-
-func (u *RiotUpdater) Puller(req chan Task) {
-	for {
-		select {
-		case task := <-req:
-			u.Logger.Info(fmt.Sprintf("pulling task type:%s,brief:%s\n",
-				task.key, task.brief))
-			u.Syncer(task.key, task.buffer)
-			u.Logger.Info(fmt.Sprintf("task type:%s,brief:%s store succeed\n",
-				task.key, task.brief))
-		}
-	}
-}
+// func (u *RiotUpdater) Push(src Task, dec chan Task) {
+// 	dec <- src
+// }
+//
+// func (u *RiotUpdater) Pull(src chan Task) {
+// 	for {
+// 		select {
+// 		case task := <-src:
+// 			u.logger.Info(fmt.Sprintf("pulling task type:%s,brief:%s\n",
+// 				task.key, task.brief))
+// 			u.Syncer(task.key, task.buffer)
+// 			u.logger.Info(fmt.Sprintf("task type:%s,brief:%s store succeed\n",
+// 				task.key, task.brief))
+// 		}
+// 	}
+// }
 
 func (u *RiotUpdater) Syncer(key string, data interface{}) {
 	switch key {
 	// case "summoner":
 	// 	summoners, ok := data.([]*riotmodel.SummonerDTO)
 	// 	if !ok {
-	// 		u.Logger.Error("buffer'key and buff doens match")
+	// 		u.logger.Error("buffer'key and buff doens match")
 	// 	}
-	// 	u.DB.Save(summoners)
+	// 	u.db.Save(summoners)
 	case "match":
 		matches, ok := data.([]*riotmodel.MatchDto)
 		if !ok {

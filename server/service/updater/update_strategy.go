@@ -1,4 +1,7 @@
 package updater
 
-type Strategy struct {
+type RiotStrategy struct {
+	Loc       uint
+	Que       uint
+	MatchSize uint
 }

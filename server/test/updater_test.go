@@ -37,7 +37,7 @@ func Test_update_best(t *testing.T) {
 
 func Test_update_all(t *testing.T) {
 	updtr := updater.NewRiotUpdater()
-	var loc, que, tier, div, page uint
+	var loc, que, tier, div uint
 	loc = riotmodel.TW2
 	que = riotmodel.RANKED_SOLO_5x5
 	// batch query
@@ -56,11 +56,8 @@ func Test_update_all(t *testing.T) {
 	// single query
 	tier = riotmodel.DIAMOND
 	div = 1
-	page = 1
-	res, err := updtr.UpdateMortalLeague(loc, tier, div, que, page)
+	_, err := updtr.UpdateMortalLeague(loc, tier, div, que)
 	if err != nil {
 		t.Fatal(err)
-	} else {
-		t.Log("update succeed ", len(res))
 	}
 }
