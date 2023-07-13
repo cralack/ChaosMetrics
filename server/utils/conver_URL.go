@@ -4,26 +4,50 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-func ConvertPlatformURL(loc uint) string {
-	platformHosts := map[uint]string{
-		riotmodel.BR1:  "br1.api.riotgames.com",
-		riotmodel.EUN1: "eun1.api.riotgames.com",
-		riotmodel.EUW1: "euw1.api.riotgames.com",
-		riotmodel.JP1:  "jp1.api.riotgames.com",
-		riotmodel.KR1:  "kr.api.riotgames.com",
-		riotmodel.LA1:  "la1.api.riotgames.com",
-		riotmodel.LA2:  "la2.api.riotgames.com",
-		riotmodel.NA1:  "na1.api.riotgames.com",
-		riotmodel.OC1:  "oc1.api.riotgames.com",
-		riotmodel.PH2:  "ph2.api.riotgames.com",
-		riotmodel.RU:   "ru.api.riotgames.com",
-		riotmodel.SG2:  "sg2.api.riotgames.com",
-		riotmodel.TH2:  "th2.api.riotgames.com",
-		riotmodel.TR1:  "tr1.api.riotgames.com",
-		riotmodel.TW2:  "tw2.api.riotgames.com",
-		riotmodel.VN2:  "vn2.api.riotgames.com",
+func ConvertHostURL(loc uint) (loCode, hostURL string) {
+	platformCodeMap := map[uint]string{
+		riotmodel.BR1:  "br1",
+		riotmodel.EUN1: "eun1",
+		riotmodel.EUW1: "euw1",
+		riotmodel.JP1:  "jp1",
+		riotmodel.KR1:  "kr",
+		riotmodel.LA1:  "la1",
+		riotmodel.LA2:  "la2",
+		riotmodel.NA1:  "na1",
+		riotmodel.OC1:  "oc1",
+		riotmodel.PH2:  "ph2",
+		riotmodel.RU:   "ru",
+		riotmodel.SG2:  "sg2",
+		riotmodel.TH2:  "th2",
+		riotmodel.TR1:  "tr1",
+		riotmodel.TW2:  "tw2",
+		riotmodel.VN2:  "vn2",
 	}
-	return "https://" + platformHosts[loc]
+	loCode = platformCodeMap[loc]
+	host := ".api.riotgames.com"
+	return loCode, "https://" + loCode + host
+}
+func ConverHostLoCode(loCode string) uint {
+	platformCodeMap := map[string]uint{
+		"br1":  riotmodel.BR1,
+		"eun1": riotmodel.EUN1,
+		"euw1": riotmodel.EUW1,
+		"jp1":  riotmodel.JP1,
+		"kr":   riotmodel.KR1,
+		"la1":  riotmodel.LA1,
+		"la2":  riotmodel.LA2,
+		"na1":  riotmodel.NA1,
+		"oc1":  riotmodel.OC1,
+		"ph2":  riotmodel.PH2,
+		"ru":   riotmodel.RU,
+		"sg2":  riotmodel.SG2,
+		"th2":  riotmodel.TH2,
+		"tr1":  riotmodel.TR1,
+		"tw2":  riotmodel.TW2,
+		"vn2":  riotmodel.VN2,
+	}
+	
+	return platformCodeMap[loCode]
 }
 
 func ConvertPlatformToHost(loc uint) string {

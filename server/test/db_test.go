@@ -21,7 +21,7 @@ type User struct {
 }
 
 func Test_db_crud_func(t *testing.T) {
-	// init db
+	// init gormdb
 	db := global.GVA_DB
 	db.Exec("DROP TABLE IF EXISTS users")
 	if err := db.AutoMigrate(&User{}); err != nil {
@@ -258,16 +258,16 @@ func Test_summoner_store(t *testing.T) {
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	db := global.GVA_DB
+// 	gormdb := global.GVA_DB
 // 	// AutoMigrate
-// 	if err := db.AutoMigrate(
+// 	if err := gormdb.AutoMigrate(
 // 		&MiniMatchDto{},
 // 		&MiniParticipantDto{},
 // 	); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// save data
-// 	if err := db.Save(&res).Error; err != nil {
+// 	if err := gormdb.Save(&res).Error; err != nil {
 // 		t.Log(err)
 // 	}
 // }
@@ -284,9 +284,9 @@ func Test_summoner_store(t *testing.T) {
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	db := global.GVA_DB
+// 	gormdb := global.GVA_DB
 // 	// AutoMigrate
-// 	if err := db.AutoMigrate(
+// 	if err := gormdb.AutoMigrate(
 // 		&riotmodel.MatchDto{},
 // 		&riotmodel.ParticipantDto{},
 // 		&riotmodel.TeamDto{},
@@ -294,7 +294,7 @@ func Test_summoner_store(t *testing.T) {
 // 		t.Fatal(err)
 // 	}
 // 	// save data
-// 	if err := db.Save(&res).Error; err != nil {
+// 	if err := gormdb.Save(&res).Error; err != nil {
 // 		t.Log(err)
 // 	}
 // }
@@ -319,24 +319,24 @@ func Test_summoner_store(t *testing.T) {
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
-// 	db := global.GVA_DB
-// 	if err := db.AutoMigrate(
+// 	gormdb := global.GVA_DB
+// 	if err := gormdb.AutoMigrate(
 // 		&riotmodel.SummonerDTO{},
 // 	); err != nil {
 // 		t.Fatal(err)
 // 	}
 // 	// save data
-// 	if err := db.Save(&res).Error; err != nil {
+// 	if err := gormdb.Save(&res).Error; err != nil {
 // 		t.Log(err)
 // 	}
 // }
 
 // need setuo gorm's logger silent before test
-// server/pkg/db/db.go:38
-// db.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
+// server/pkg/gormdb/gormdb.go:38
+// gormdb.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
 func Benchmark_db_store_1(b *testing.B) {
 	// load json
-	buff, err := os.ReadFile(path + "master_league.txt")
+	buff, err := os.ReadFile(path + "challenger_league.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -404,10 +404,10 @@ func Benchmark_db_store_1(b *testing.B) {
 	*/
 }
 
-// db.Save([size]*riotmodel.LeagueEntryDTO) size=1k~10k store benchmark
+// gormdb.Save([size]*riotmodel.LeagueEntryDTO) size=1k~10k store benchmark
 func Benchmark_db_store_2(b *testing.B) {
 	// load json
-	buff, err := os.ReadFile(path + "master_league.txt")
+	buff, err := os.ReadFile(path + "challenger_league.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -31,7 +31,15 @@ const (
 	IRON
 )
 
-// LOCATION CODE
+const (
+	LOC_ALL = iota
+	LOC_AMERICAS
+	LOC_ASIA
+	LOC_EUROPE
+	LOC_SEA
+)
+
+// 16 LOCATION CODE
 const (
 	BR1  = iota // 巴西
 	EUN1        // 欧洲东北
@@ -53,7 +61,7 @@ const (
 
 // QUE CODE
 const (
-	RANKED_SOLO_5x5 = 1
-	RANKED_FLEX_SR  = 2
-	RANKED_FLEX_TT  = 4
+	RANKED_SOLO_5x5 = iota
+	RANKED_FLEX_SR
+	RANKED_FLEX_TT
 )

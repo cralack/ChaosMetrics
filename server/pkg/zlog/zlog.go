@@ -64,20 +64,20 @@ func Zap(env uint) (*zap.Logger, error) {
 			// zap.AddStacktrace(logConf.Level),
 		)
 	}
-
+	
 	zap.ReplaceGlobals(log)
-
+	
 	// flushes buffer, if any
 	defer func() {
-		if err := log.Sync(); err != nil {
+		err = log.Sync()
+		if err != nil {
 			log.Error("sync failed", zap.Error(err))
 		}
-
 	}()
-
+	
 	if err != nil {
 		panic(err)
 	}
-
+	
 	return log, nil
 }

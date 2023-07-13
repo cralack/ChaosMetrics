@@ -1,6 +1,9 @@
 package riotmodel
 
 import (
+	"encoding"
+	"encoding/json"
+	
 	"gorm.io/gorm"
 )
 
@@ -14,7 +17,7 @@ type LeagueListDTO struct {
 
 type LeagueEntryDTO struct {
 	gorm.Model
-	
+	Loc          string         `json:"loc" gorm:"column:loc;type:varchar(100)"`                      // 地区
 	FreshBlood   bool           `json:"freshBlood" gorm:"column:fresh_blood"`                         // 是否是新晋选手
 	Wins         int            `json:"wins" gorm:"column:wins;type:smallint"`                        // 胜场次数（召唤师峡谷）
 	SummonerName string         `json:"summonerName" gorm:"column:summoner_name;type:varchar(100)"`   // 召唤师名称
@@ -22,7 +25,7 @@ type LeagueEntryDTO struct {
 	Inactive     bool           `json:"inactive" gorm:"column:inactive"`                              // 是否处于非活跃状态
 	Veteran      bool           `json:"veteran" gorm:"column:veteran"`                                // 是否是资深选手
 	HotStreak    bool           `json:"hotStreak" gorm:"column:hot_streak"`                           // 是否处于连胜状态
-	Tier         string         `gorm:"column:tier;type:varchar(100)"`                                // 段位
+	Tier         string         `json:"tier_" gorm:"column:tier;type:varchar(100)"`                   // 段位
 	Rank         string         `json:"rank" gorm:"column:rank;type:varchar(100)"`                    // 段位
 	LeaguePoints int            `json:"leaguePoints" gorm:"column:league_points;type:smallint"`       // 段位积分
 	Losses       int            `json:"losses" gorm:"column:losses;type:smallint"`                    // 负场次数（召唤师峡谷）
@@ -34,4 +37,24 @@ type MiniSeriesDTO struct {
 	Progress string `json:"progress" gorm:"column:progress"` // 小系列赛的进度
 	Target   int    `json:"target" gorm:"column:target"`     // 小系列赛的目标胜场次
 	Wins     int    `json:"wins" gorm:"column:wins"`         // 小系列赛中的胜场次
+}
+
+var _ encoding.BinaryMarshaler = &LeagueEntryDTO{}
+
+func (e *LeagueEntryDTO) MarshalBinary() ([]byte, error) {
+	return json.Marshal(e)
+}
+
+var _ encoding.BinaryUnmarshaler = &LeagueEntryDTO{}
+
+func (e *LeagueEntryDTO) UnmarshalBinary(bt []byte) error {
+	return json.Unmarshal(bt, e)
+}
+
+func Entries2RdbObj(entries []*LeagueEntryDTO) (res map[string]*LeagueEntryDTO) {
+	res = make(map[string]*LeagueEntryDTO, len(entries))
+	for _, entry := range entries {
+		res[entry.SummonerID] = entry
+	}
+	return res
 }

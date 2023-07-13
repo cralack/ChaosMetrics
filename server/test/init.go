@@ -23,8 +23,8 @@ func init() {
 		&riotmodel.SummonerDTO{},
 		&riotmodel.LeagueEntryDTO{},
 	); err != nil {
-		global.GVA_LOG.Error("init db model failed", zap.Error(err))
+		global.GVA_LOG.Error("init gormdb model failed", zap.Error(err))
 	} else {
-		global.GVA_LOG.Info("init db model succeed")
+		global.GVA_LOG.Info("init gormdb model succeed")
 	}
 }

@@ -66,8 +66,8 @@ func (u *RiotUpdater) UpdateSummonerMatch(loc uint, puuid string, cnt int) (res 
 // api: /lol/match/v5/matches/by-puuid/{puuid}/ids
 func (u *RiotUpdater) getMatchIDsByPUUID(loc uint, puuid string, count int) (res []string, err error) {
 	// set up args val
-	prefix := utils.ConvertPlatformToHost(loc)
-	stem := fmt.Sprintf("/lol/match/v5/matches/by-puuid/%s/ids?", puuid)
+	host := utils.ConvertPlatformToHost(loc)
+	path := fmt.Sprintf("/lol/match/v5/matches/by-puuid/%s/ids?", puuid)
 	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	suffix := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
@@ -76,9 +76,9 @@ func (u *RiotUpdater) getMatchIDsByPUUID(loc uint, puuid string, count int) (res
 	u.Lock.Lock()
 	defer u.Lock.Unlock()
 	
-	buff, err := u.Fetcher.Get(prefix + stem + suffix)
+	buff, err := u.Fetcher.Get(host + path + suffix)
 	if err != nil {
-		u.Logger.Error(fmt.Sprintf("fetch %s failed", stem),
+		u.Logger.Error(fmt.Sprintf("fetch %s failed", path),
 			zap.Error(err))
 		return nil, err
 	}
@@ -100,15 +100,15 @@ func (u *RiotUpdater) getMatchByMatchID(loc uint, matchID string) (res *riotmode
 		return nil, nil
 	}
 	// set up args val
-	prefix := utils.ConvertPlatformToHost(loc)
-	stem := fmt.Sprintf("/lol/match/v5/matches/%s", matchID)
+	host := utils.ConvertPlatformToHost(loc)
+	path := fmt.Sprintf("/lol/match/v5/matches/%s", matchID)
 	// fetch buffer
 	u.Lock.Lock()
 	defer u.Lock.Unlock()
 	
-	buff, err := u.Fetcher.Get(prefix + stem)
+	buff, err := u.Fetcher.Get(host + path)
 	if err != nil {
-		u.Logger.Error(fmt.Sprintf("fetch %s failed", stem),
+		u.Logger.Error(fmt.Sprintf("fetch %s failed", path),
 			zap.Error(err))
 		return nil, err
 	}
@@ -118,7 +118,6 @@ func (u *RiotUpdater) getMatchByMatchID(loc uint, matchID string) (res *riotmode
 			"MatchDTO"), zap.Error(err))
 		return nil, err
 	}
-	// todo puller
 	u.DB.Save(res)
 	return res, nil
 	
@@ -129,7 +128,7 @@ func (u *RiotUpdater) getMatchByMatchID(loc uint, matchID string) (res *riotmode
 func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.LeagueEntryDTO, err error) {
 	var stem string
 	var tierStr string
-	prefix := utils.ConvertPlatformURL(loc)
+	_, host := utils.ConvertHostURL(loc)
 	queStr := getQueueString(que)
 	switch tier {
 	case riotmodel.CHALLENGER:
@@ -144,7 +143,7 @@ func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.
 	// fill buffer
 	u.Lock.Lock()
 	defer u.Lock.Unlock()
-	buff, err := u.Fetcher.Get(prefix + stem)
+	buff, err := u.Fetcher.Get(host + stem)
 	if err != nil {
 		u.Logger.Error(fmt.Sprintf("fetch %s failed", stem),
 			zap.Error(err))
@@ -161,7 +160,6 @@ func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.
 	for _, enrty := range res {
 		enrty.Tier = tierStr
 	}
-	// todo puller
 	u.DB.Save(res)
 	return res, nil
 }
@@ -170,7 +168,7 @@ func (u *RiotUpdater) UpdateBetserLeague(loc, tier, que uint) (res []*riotmodel.
 // api: /lol/league/v4/entries/{queue}/{tier}/{division}
 // page(optional): 	Defaults to 1. Starts with page 1.
 func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que uint) (res []*riotmodel.LeagueEntryDTO, err error) {
-	prefix := utils.ConvertPlatformURL(loc)
+	_, host := utils.ConvertHostURL(loc)
 	queStr := getQueueString(que)
 	rank := getMortalString(tier, division)
 	page := 0
@@ -179,12 +177,12 @@ func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que uint) (res []*
 	defer u.Lock.Unlock()
 	for {
 		page++
-		stem := fmt.Sprintf("/lol/league/v4/entries/%s/%s/%s?page=%s",
+		path := fmt.Sprintf("/lol/league/v4/entries/%s/%s/%s?page=%s",
 			queStr, rank[0], rank[1], strconv.Itoa(page))
 		// fill buffer
-		buff, err := u.Fetcher.Get(prefix + stem)
+		buff, err := u.Fetcher.Get(host + path)
 		if err != nil {
-			u.Logger.Error(fmt.Sprintf("fetch %s failed", stem),
+			u.Logger.Error(fmt.Sprintf("fetch %s failed", path),
 				zap.Error(err))
 			return nil, err
 		}
@@ -203,7 +201,6 @@ func (u *RiotUpdater) UpdateMortalLeague(loc, tier, division, que uint) (res []*
 			enrty.Tier = rank[0]
 		}
 		cnt += len(res)
-		// todo puller
 		
 		u.Schduler.RequestCh <- &scheduler.Task{
 			// Key:    key,
@@ -260,31 +257,10 @@ func getMortalString(tier, div uint) (ans []string) {
 	return
 }
 
-// func (u *RiotUpdater) Push(src Task, dec chan Task) {
-// 	dec <- src
-// }
-//
-// func (u *RiotUpdater) Pull(src chan Task) {
-// 	for {
-// 		select {
-// 		case task := <-src:
-// 			u.logger.Info(fmt.Sprintf("pulling task type:%s,brief:%s\n",
-// 				task.key, task.brief))
-// 			u.Syncer(task.key, task.buffer)
-// 			u.logger.Info(fmt.Sprintf("task type:%s,brief:%s store succeed\n",
-// 				task.key, task.brief))
-// 		}
-// 	}
-// }
-
 func (u *RiotUpdater) Syncer(key string, data interface{}) {
 	switch key {
 	// case "summoner":
-	// 	summoners, ok := data.([]*riotmodel.SummonerDTO)
-	// 	if !ok {
-	// 		u.logger.Error("buffer'key and buff doens match")
-	// 	}
-	// 	u.db.Save(summoners)
+	
 	case "match":
 		matches, ok := data.([]*riotmodel.MatchDto)
 		if !ok {

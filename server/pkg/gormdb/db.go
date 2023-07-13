@@ -1,4 +1,4 @@
-package db
+package gormdb
 
 import (
 	"github.com/cralack/ChaosMetrics/server/global"
@@ -16,7 +16,7 @@ func GetDB() (*gorm.DB, error) {
 	if global.GVA_CONF.Dbconf.DSN == "" {
 		err := GetDBConfig()
 		if err != nil {
-			global.GVA_LOG.Error("get db config failed",
+			global.GVA_LOG.Error("get gormdb config failed",
 				zap.Error(err))
 		}
 	}
@@ -38,7 +38,7 @@ func GetDB() (*gorm.DB, error) {
 			// logger: logger.Default.LogMode(logger.Silent), // 禁用日志输出
 		}
 	}
-	// get db con
+	// get gormdb con
 	db, err = gorm.Open(
 		mysql.Open(global.GVA_CONF.Dbconf.DSN),
 		gormConf,

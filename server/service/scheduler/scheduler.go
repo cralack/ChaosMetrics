@@ -7,11 +7,11 @@ type Scheduler interface {
 }
 
 type Task struct {
-	Key   string
-	Brief string
-	URL   string
-	// Part   uint        // ?
-	// Buffer interface{} // []*DTO
+	Key  string
+	Loc  string
+	Tier string
+	Rank string
+	URL  string
 }
 
 type RiotDTOSchedule struct {

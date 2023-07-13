@@ -32,6 +32,7 @@ var _ Fetcher = &BrowserFetcher{}
 
 func NewBrowserFetcher() *BrowserFetcher {
 	conf := global.GVA_CONF.Fetcher
+	// init riot token
 	if conf.HeaderConfig.XRiotToken == "" {
 		workDir := global.GVA_CONF.DirTree.WorkDir
 		filename := "api_key"
@@ -43,7 +44,12 @@ func NewBrowserFetcher() *BrowserFetcher {
 		}
 		conf.HeaderConfig.XRiotToken = string(buff)
 	}
-	limiter, err := rater.NewSlidingWindowLimiter(100, time.Minute*2, time.Second*5)
+	// init rate limiter
+	limiter, err := rater.NewSlidingWindowLimiter(
+		conf.RateLimiterConfig.Each2Min-5,
+		time.Minute*2,
+		time.Second/time.Duration(conf.RateLimiterConfig.EachSec),
+	)
 	if err != nil {
 		global.GVA_LOG.Error("rate limiter init failed", zap.Error(err))
 	}
