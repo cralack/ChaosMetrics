@@ -14,14 +14,16 @@ var path string
 func init() {
 	f = fetcher.NewBrowserFetcher()
 	path = "./local_json/"
-	global.GVA_DB.Exec("DROP TABLE IF EXISTS match_dtos, match_summoners, participant_dtos, summoner_dtos, team_dtos, league_entry_dtos")
+	// wipe gdb && rdb
+	// global.GVA_DB.Exec("DROP TABLE IF EXISTS match_dtos, match_summoners, participant_dtos, summoner_dtos, team_dtos, league_entry_dtos")
+	// global.GVA_RDB.FlushDB(context.Background())
 	// AutoMigrate
 	if err := global.GVA_DB.AutoMigrate(
+		&riotmodel.LeagueEntryDTO{},
+		&riotmodel.SummonerDTO{},
 		&riotmodel.MatchDto{},
 		&riotmodel.ParticipantDto{},
 		&riotmodel.TeamDto{},
-		&riotmodel.SummonerDTO{},
-		&riotmodel.LeagueEntryDTO{},
 	); err != nil {
 		global.GVA_LOG.Error("init gormdb model failed", zap.Error(err))
 	} else {

@@ -1,6 +1,7 @@
 package riotmodel
 
 import (
+	"encoding"
 	"encoding/json"
 	
 	"gorm.io/gorm"
@@ -8,7 +9,7 @@ import (
 
 type MatchDto struct {
 	gorm.Model
-	// Summoners []*SummonerDTO `gorm:"many2many:match_summoners"`
+	Summoners []*SummonerDTO `gorm:"many2many:match_summoners"`
 	
 	Metadata *MetadataDto `json:"metadata" gorm:"embedded"` // 比赛元数据
 	Info     *InfoDto     `json:"info" gorm:"embedded"`     // 比赛信息
@@ -38,4 +39,16 @@ func (p *MatchDto) UnmarshalJSON(data []byte) error {
 		team.MetaMatchID = matchID
 	}
 	return nil
+}
+
+var _ encoding.BinaryMarshaler = &MatchDto{}
+
+func (p *MatchDto) MarshalBinary() ([]byte, error) {
+	return json.Marshal(p)
+}
+
+var _ encoding.BinaryUnmarshaler = &MatchDto{}
+
+func (p *MatchDto) UnmarshalBinary(bt []byte) error {
+	return json.Unmarshal(bt, p)
 }

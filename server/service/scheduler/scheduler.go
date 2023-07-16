@@ -9,9 +9,7 @@ type Scheduler interface {
 type Task struct {
 	Key  string
 	Loc  string
-	Tier string
-	Rank string
-	URL  string
+	Data interface{}
 }
 
 type RiotDTOSchedule struct {
@@ -46,7 +44,7 @@ func (s *RiotDTOSchedule) Schedule() {
 	)
 	
 	for {
-		// reque 不空则pop出
+		// reque 不空则pop出 req
 		if req == nil && len(s.ReqQueue) > 0 {
 			// pop req
 			req = s.ReqQueue[0]

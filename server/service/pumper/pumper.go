@@ -1,6 +1,7 @@
 package pumper
 
 import (
+	"fmt"
 	"sync"
 	"time"
 	
@@ -8,83 +9,114 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/service/scheduler"
-	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type Pumper struct {
-	logger     *zap.Logger
-	db         *gorm.DB
-	lock       *sync.Mutex
-	rdb        *redis.Client
-	fetcher    fetcher.Fetcher
-	scheduler  scheduler.Scheduler
-	entriesDic map[string]map[string]*riotmodel.LeagueEntryDTO // entriesDic[Loc][SummonerID]
-	rater      chan struct{}
-	out        chan *ParseResult
-	entrieIdx  []uint
-	stgy       *RiotStrategy
+	logger      *zap.Logger
+	db          *gorm.DB
+	lock        *sync.Mutex
+	rdb         *redis.Client
+	fetcher     fetcher.Fetcher
+	scheduler   scheduler.Scheduler
+	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
+	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
+	rater       chan struct{}
+	out         chan *ParseResult
+	entrieIdx   []uint
+	summonerIdx []uint
+	stgy        *RiotStrategy
 }
 
 type ParseResult struct {
 	Type  string
 	Brief string
-	// Idx   uint
-	Page  int
 	Data  interface{}
 }
 
-func NewPumper(opts ...Option) *Pumper {
+func NewPumper(token string, opts ...Option) *Pumper {
 	stgy := defaultStrategy
 	for _, opt := range opts {
 		opt(stgy)
 	}
 	logger := global.GVA_LOG
 	db := global.GVA_DB
-	idx := make([]uint, 16)
-	// calculate each loc idx
-	var count int64
-	for _, loc := range stgy.Loc {
-		locStr, _ := utils.ConvertHostURL(loc)
-		res := db.Model(&riotmodel.LeagueEntryDTO{Loc: locStr}).Count(&count)
-		if err := res.Error; err != nil {
-			logger.Error("get idx failed", zap.Error(err))
-		}
-		idx[loc] = uint(count)
-	}
+	eIdx := make([]uint, 16)
+	sIdx := make([]uint, 16)
 	
 	return &Pumper{
-		logger:     logger,
-		db:         db,
-		rdb:        global.GVA_RDB,
-		lock:       &sync.Mutex{},
-		entrieIdx:  idx,
-		out:        make(chan *ParseResult),
-		rater:      make(chan struct{}),
-		entriesDic: make(map[string]map[string]*riotmodel.LeagueEntryDTO),
-		fetcher:    fetcher.NewBrowserFetcher(),
-		scheduler:  scheduler.NewSchdule(),
-		stgy:       stgy,
+		logger:      logger,
+		db:          db,
+		rdb:         global.GVA_RDB,
+		lock:        &sync.Mutex{},
+		entrieIdx:   eIdx,
+		summonerIdx: sIdx,
+		out:         make(chan *ParseResult),
+		rater:       make(chan struct{}),
+		entryMap:    make(map[string]map[string]*riotmodel.LeagueEntryDTO),
+		sumnMap:     make(map[string]map[string]*riotmodel.SummonerDTO),
+		fetcher: fetcher.NewBrowserFetcher(
+			fetcher.WithAPIToken(token),
+		),
+		scheduler: scheduler.NewSchdule(),
+		stgy:      stgy,
 	}
 }
+
 func (p *Pumper) Schedule() {
 	p.scheduler.Schedule()
 }
 
-func (p *Pumper) startTimer() {
+func (p *Pumper) StartTimer() {
 	ticker := time.NewTicker(time.Millisecond * 500)
 	for {
-		<-ticker.C
-		if p.fetcher.TryAcquire() {
-			p.rater <- struct{}{}
+		select {
+		case <-ticker.C:
+			if p.fetcher.TryAcquire() {
+				p.rater <- struct{}{}
+			}
+		}
+	}
+}
+
+func (p *Pumper) HandleResult(exit chan struct{}) {
+	for result := range p.out {
+		switch result.Type {
+		case "finish":
+			p.logger.Info(fmt.Sprintf("all %s result store done", result.Brief))
+			exit <- struct{}{}
+			continue
+		
+		case "entry":
+			entries := result.Data.([]*riotmodel.LeagueEntryDTO)
+			if err := p.db.Save(entries).Error; err != nil {
+				p.logger.Error("riot entry store failed", zap.Error(err))
+			}
+		
+		case "summoners":
+			summoners := result.Data.([]*riotmodel.SummonerDTO)
+			if err := p.db.Save(summoners).Error; err != nil {
+				p.logger.Error("riot summoner model store failed", zap.Error(err))
+			}
+		
+		case "match":
+			matches := result.Data.([]*riotmodel.MatchDto)
+			if err := p.db.Create(matches).Error; err != nil {
+				p.logger.Error("riot match model store failed", zap.Error(err))
+			}
 		}
 	}
 }
 
 func (p *Pumper) UpdateAll() {
-	p.InitEntries()
+	exit := make(chan struct{})
+	go p.Schedule()
+	go p.StartTimer()
+	go p.HandleResult(exit)
+	p.UpdateEntries(exit)
+	p.UpdateSumoner(exit)
 }
 
 func getQueueString(que uint) string {

@@ -30,8 +30,11 @@ type BrowserFetcher struct {
 
 var _ Fetcher = &BrowserFetcher{}
 
-func NewBrowserFetcher() *BrowserFetcher {
+func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 	conf := global.GVA_CONF.Fetcher
+	for _, opt := range opts {
+		opt(conf)
+	}
 	// init riot token
 	if conf.HeaderConfig.XRiotToken == "" {
 		workDir := global.GVA_CONF.DirTree.WorkDir

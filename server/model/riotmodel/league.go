@@ -17,6 +17,8 @@ type LeagueListDTO struct {
 
 type LeagueEntryDTO struct {
 	gorm.Model
+	// Summoner *SummonerDTO `gorm:"foreignKey:league_entry_id"`
+	
 	Loc          string         `json:"loc" gorm:"column:loc;type:varchar(100)"`                      // 地区
 	FreshBlood   bool           `json:"freshBlood" gorm:"column:fresh_blood"`                         // 是否是新晋选手
 	Wins         int            `json:"wins" gorm:"column:wins;type:smallint"`                        // 胜场次数（召唤师峡谷）
@@ -41,20 +43,12 @@ type MiniSeriesDTO struct {
 
 var _ encoding.BinaryMarshaler = &LeagueEntryDTO{}
 
-func (e *LeagueEntryDTO) MarshalBinary() ([]byte, error) {
-	return json.Marshal(e)
+func (p *LeagueEntryDTO) MarshalBinary() ([]byte, error) {
+	return json.Marshal(p)
 }
 
 var _ encoding.BinaryUnmarshaler = &LeagueEntryDTO{}
 
-func (e *LeagueEntryDTO) UnmarshalBinary(bt []byte) error {
-	return json.Unmarshal(bt, e)
-}
-
-func Entries2RdbObj(entries []*LeagueEntryDTO) (res map[string]*LeagueEntryDTO) {
-	res = make(map[string]*LeagueEntryDTO, len(entries))
-	for _, entry := range entries {
-		res[entry.SummonerID] = entry
-	}
-	return res
+func (p *LeagueEntryDTO) UnmarshalBinary(bt []byte) error {
+	return json.Unmarshal(bt, p)
 }

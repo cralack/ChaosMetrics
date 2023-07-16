@@ -1,9 +1,9 @@
 {
-    "id": "4XQrYAPbtnQQ5kGddGZfFNFHAHOdn2xjc7Q823a_FKDEp_WVDVCvSKy0YA",
-    "accountId": "mMmWIcNz78_N5JrrwIH8m732NP-dHTQx5umd0qUAfmsG13_AYapObSJh",
-    "puuid": "F4fFtqehQLBj8U5sKBZF--k-7akbtb1IX790lRd4whPI4pXDAuVyfswHetg2lz_kMe2NJ0gUo5EIig",
-    "name": "Mudife",
-    "profileIconId": 5764,
-    "revisionDate": 1687236980000,
-    "summonerLevel": 25
+    "id": "CA6s2lmln5pY47sa0BcpyV39Vq7vDVSTMUVtJ17h7J3UURCTcDFwFS4lrg",
+    "accountId": "aPovCktnElpVcnQquZZov8pfNTYlxZK6JHpVqCcyGflK7-j4RmzWLVr7",
+    "puuid": "P9beMh_CJNxAxC7sfv6VpbTlSD6s3Vp8M5Sqq6PInrhsYR65KO9Z5IsLuiYQ8eIx9Op5WULPxG6luw",
+    "name": "Wayyyyy",
+    "profileIconId": 7,
+    "revisionDate": 1689058440000,
+    "summonerLevel": 331
 }

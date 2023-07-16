@@ -27,6 +27,7 @@ func ConvertHostURL(loc uint) (loCode, hostURL string) {
 	host := ".api.riotgames.com"
 	return loCode, "https://" + loCode + host
 }
+
 func ConverHostLoCode(loCode string) uint {
 	platformCodeMap := map[string]uint{
 		"br1":  riotmodel.BR1,

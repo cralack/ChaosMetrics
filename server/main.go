@@ -13,13 +13,13 @@ import (
 
 func main() {
 	p := pumper.NewPumper(
-		pumper.WithLoc(
-			riotmodel.TW2,
-		),
+		"",
+		pumper.WithEndMark(riotmodel.DIAMOND, 1),
+		pumper.WithLoc(riotmodel.TW2),
 	)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, os.Kill)
-	go p.InitEntries()
+	go p.UpdateAll()
 	sig := <-quit
 	global.GVA_LOG.Info("catch signal,exiting...",
 		zap.Any("signal", sig))
