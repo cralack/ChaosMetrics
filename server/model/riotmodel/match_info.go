@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"time"
 	
+	"github.com/cralack/ChaosMetrics/server/global"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -62,6 +64,7 @@ type ObjectiveDto struct {
 }
 
 func (p *InfoDto) UnmarshalJSON(data []byte) error {
+	layout := time.RFC3339
 	var f map[string]interface{}
 	err := json.Unmarshal(data, &f)
 	if err != nil {
@@ -70,13 +73,27 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 	for k, v := range f {
 		switch k {
 		case "gameCreation":
-			gameCreationMillis := int64(v.(float64))
-			p.GameCreation = time.Unix(0, gameCreationMillis*int64(time.Millisecond)).UTC()
+			if gameCreationMillis, ok := v.(float64); ok {
+				p.GameCreation = time.Unix(0, int64(gameCreationMillis)*int64(time.Millisecond)).UTC()
+			}
+			if gameCreationMillis, ok := v.(string); ok {
+				if p.GameCreation, err = time.Parse(layout, gameCreationMillis); err != nil {
+					global.GVA_LOG.Error("parse failed", zap.Error(err))
+					return err
+				}
+			}
 		case "gameDuration":
 			p.GameDuration = int(v.(float64))
 		case "gameEndTimestamp":
-			gameEndTimestampMillis := int64(v.(float64))
-			p.GameEndTimestamp = time.Unix(0, gameEndTimestampMillis*int64(time.Millisecond)).UTC()
+			if gameEndTimestampMillis, ok := v.(float64); ok {
+				p.GameEndTimestamp = time.Unix(0, int64(gameEndTimestampMillis)*int64(time.Millisecond)).UTC()
+			}
+			if gameEndTimestampMillis, ok := v.(string); ok {
+				if p.GameEndTimestamp, err = time.Parse(layout, gameEndTimestampMillis); err != nil {
+					global.GVA_LOG.Error("parse failed", zap.Error(err))
+					return err
+				}
+			}
 		case "gameId":
 			p.GameID = int(v.(float64))
 		case "gameMode":
@@ -84,8 +101,15 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 		case "gameName":
 			p.GameName = v.(string)
 		case "gameStartTimestamp":
-			gameStartTimestampMillis := int64(v.(float64))
-			p.GameStartTimestamp = time.Unix(0, gameStartTimestampMillis*int64(time.Millisecond)).UTC()
+			if gameStartTimestampMillis, ok := v.(float64); ok {
+				p.GameStartTimestamp = time.Unix(0, int64(gameStartTimestampMillis)*int64(time.Millisecond)).UTC()
+			}
+			if gameStartTimestampMillis, ok := v.(string); ok {
+				if p.GameStartTimestamp, err = time.Parse(layout, gameStartTimestampMillis); err != nil {
+					global.GVA_LOG.Error("parse failed", zap.Error(err))
+					return err
+				}
+			}
 		case "gameType":
 			p.GameType = v.(string)
 		case "gameVersion":

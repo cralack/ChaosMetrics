@@ -10,7 +10,7 @@ import (
 func Test_pumper_update(t *testing.T) {
 	p := pumper.NewPumper(
 		"",
-		pumper.WithEndMark(riotmodel.DIAMOND, 1),
+		pumper.WithEndMark(riotmodel.DIAMOND, 4),
 	)
 	
 	p.UpdateAll()

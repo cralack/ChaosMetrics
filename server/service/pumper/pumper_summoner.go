@@ -209,8 +209,8 @@ func (p *Pumper) summonerCounter(loc string) {
 		<-ticker.C
 		cur = len(p.sumnMap[loc])
 		rate = float32(cur) / float32(total)
-		p.logger.Info(fmt.Sprintf("fetch %.02f%% (%d/%d) summoners",
-			rate*100, cur, total))
+		p.logger.Info(fmt.Sprintf("fetch %s %.02f%% (%d/%d) summoners",
+			loc, rate*100, cur, total))
 		if cur == total {
 			return
 		}

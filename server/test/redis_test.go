@@ -8,7 +8,6 @@ import (
 	"os"
 	"testing"
 	
-	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/redis/go-redis/v9"
 )
@@ -29,7 +28,6 @@ func Test_redis_crud(t *testing.T) {
 	}
 	entries := league.Entries
 	// init rdb
-	rdb := global.GVA_RDB
 	pipe := rdb.Pipeline()
 	// create && update
 	cmd := make([]*redis.IntCmd, 0, len(entries))

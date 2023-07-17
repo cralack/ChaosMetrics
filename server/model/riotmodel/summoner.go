@@ -31,6 +31,7 @@ type SummonerDTO struct {
 var _ DTO = &SummonerDTO{}
 
 func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
+	layout := time.RFC3339
 	var f map[string]interface{}
 	err := json.Unmarshal(data, &f)
 	if err != nil {
@@ -48,9 +49,7 @@ func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
 				p.RevisionDate = time.Unix(int64(revisionDateMillis)/1000, 0).UTC()
 			}
 			if revisionDateMillis, ok := v.(string); ok {
-				layout := time.RFC3339
-				p.RevisionDate, err = time.Parse(layout, revisionDateMillis)
-				if err != nil {
+				if p.RevisionDate, err = time.Parse(layout, revisionDateMillis); err != nil {
 					global.GVA_LOG.Error("parse failed", zap.Error(err))
 					return err
 				}

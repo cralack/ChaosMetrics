@@ -149,6 +149,8 @@ func (p *Pumper) FetchEntry() {
 				if err = json.Unmarshal(buff, &entries); err != nil {
 					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
 						"LeagueEntryDTO"), zap.Error(err))
+				} else {
+					p.logger.Info(fmt.Sprintf("fetch %s %s page %d done", t.Tier, t.Rank, page))
 				}
 				for _, e := range entries {
 					e.Loc = req.Loc
@@ -163,9 +165,11 @@ func (p *Pumper) FetchEntry() {
 							Brief: "entry",
 							Data:  nil,
 						}
+						// *need release scheduler resource*
+						return
 					}
-					// *need release scheduler resource*
-					return
+					
+					break
 				}
 				p.handleEntries(entries, req.Loc)
 				p.cacheEntries(entries, req.Loc)
@@ -176,6 +180,7 @@ func (p *Pumper) FetchEntry() {
 }
 
 func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {
+	
 	tmp := make([]*riotmodel.LeagueEntryDTO, 0, p.stgy.MaxSize)
 	loCode := utils.ConverHostLoCode(loc)
 	

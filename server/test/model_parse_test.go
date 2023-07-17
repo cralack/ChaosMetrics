@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,9 +9,11 @@ import (
 	"testing"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/redis/go-redis/v9"
+	"go.uber.org/zap"
 )
 
-func Test_parse_summoner(t *testing.T) {
+func Test_parse_summoners(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
 	// buff, err := f.Get(url)
@@ -37,6 +40,42 @@ func Test_parse_summoner(t *testing.T) {
 		fmt.Println("RevisionDate:", summoner.RevisionDate)
 		fmt.Println("SummonerLevel:", summoner.SummonerLevel)
 		fmt.Println()
+	}
+	
+	// gorm create
+	if err := db.Create(summoners).Error; err != nil {
+		logger.Info("db create summoners failed")
+	}
+	// gorm read
+	var tar []*riotmodel.SummonerDTO
+	if err = db.Find(&tar).Error; err != nil {
+		logger.Error("db ")
+	}
+	
+	// redis create
+	pipe := rdb.Pipeline()
+	ctx := context.Background()
+	key := "/summoner/tw2"
+	cmds := make([]*redis.IntCmd, 0, len(summoners))
+	for _, s := range summoners {
+		cmds = append(cmds, pipe.HSet(ctx, key, s.MetaSummonerID))
+	}
+	if err = rdb.HSet(ctx, key, summoners[0].MetaSummonerID, summoners[0]).Err(); err != nil {
+		logger.Info("")
+	}
+	if _, err = pipe.Exec(ctx); err != nil {
+		logger.Error("redis create summoners failed")
+	}
+	// redis read
+	redisMap := make(map[string]*riotmodel.SummonerDTO)
+	kvmap := rdb.HGetAll(ctx, key).Val()
+	for k, v := range kvmap {
+		var tmp riotmodel.SummonerDTO
+		if err := json.Unmarshal([]byte(v), &tmp); err != nil {
+			logger.Error("load entry form redis cache failed", zap.Error(err))
+		} else {
+			redisMap[k] = &tmp
+		}
 	}
 }
 
@@ -99,7 +138,7 @@ func Test_parse_match(t *testing.T) {
 		t.Fatal(err)
 	}
 	// parse
-	var res riotmodel.MatchDto
+	var res *riotmodel.MatchDto
 	err = json.Unmarshal(buff, &res)
 	if err != nil {
 		t.Fatal(err)
@@ -128,7 +167,7 @@ func Test_parse_match(t *testing.T) {
 			break
 		}
 	}
-
+	
 	// Retrieve information for the participant with FirstBloodKill
 	player := participants[idx]
 	fmt.Println("Kills/Deaths/Assists of First Blood Player:",
@@ -137,6 +176,43 @@ func Test_parse_match(t *testing.T) {
 		player.TotalDamageDealtToChampions)
 	fmt.Println("First Blood Player's match ID:",
 		player.MetaMatchID)
+	
+	// gorm create
+	if err := db.Create(res).Error; err != nil {
+		logger.Info("db create summoners failed")
+	}
+	// gorm read
+	var tar *riotmodel.MatchDto
+	if err = db.Where("meta_match_id = ?", "TW2_81882122").Find(&tar).Error; err != nil {
+		logger.Error("db ")
+	} else {
+		logger.Info(fmt.Sprintf("res == tar:%v", res.Metadata.MetaMatchID == tar.Metadata.MetaMatchID))
+	}
+	
+	// redis create
+	ctx := context.Background()
+	key := "/match/tw2"
+	if err := rdb.HSet(ctx, key, res.Metadata.MetaMatchID, res).Err(); err != nil {
+		logger.Error("redis create match failed")
+	}
+	
+	result := rdb.HGet(ctx, key, tar.Metadata.MetaMatchID).Val()
+	var tar2 *riotmodel.MatchDto
+	if err := json.Unmarshal([]byte(result), &tar2); err != nil {
+		logger.Error("redis read match failed")
+	}
+	// redis read
+	redisMap := make(map[string]*riotmodel.SummonerDTO)
+	kvmap := rdb.HGetAll(ctx, key).Val()
+	for k, v := range kvmap {
+		var tmp riotmodel.SummonerDTO
+		if err := json.Unmarshal([]byte(v), &tmp); err != nil {
+			logger.Error("load entry form redis cache failed", zap.Error(err))
+		} else {
+			redisMap[k] = &tmp
+		}
+		
+	}
 }
 
 func Test_parse_league(t *testing.T) {

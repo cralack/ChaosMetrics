@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 	
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -22,7 +24,6 @@ type User struct {
 
 func Test_db_crud_func(t *testing.T) {
 	// init gormdb
-	db := global.GVA_DB
 	db.Exec("DROP TABLE IF EXISTS users")
 	if err := db.AutoMigrate(&User{}); err != nil {
 		t.Fatal(err)
@@ -86,7 +87,6 @@ func Test_match_store(t *testing.T) {
 	}
 
 	// save data
-	db := global.GVA_DB
 	if err := db.Save(match).Error; err != nil {
 		t.Log(err)
 	}
@@ -130,7 +130,6 @@ func Test_summoners_store(t *testing.T) {
 		return
 	}
 	// store
-	db := global.GVA_DB
 	db.Save(summoners)
 }
 
@@ -163,7 +162,6 @@ func Test_summoner_entry_store(t *testing.T) {
 	}
 	// entry.Summoner = summoner
 	// summoner.Entry = entry
-	db := global.GVA_DB
 	db.Create(entry)
 	
 	var tar *riotmodel.LeagueEntryDTO
@@ -171,6 +169,42 @@ func Test_summoner_entry_store(t *testing.T) {
 	t.Log(tar.SummonerID)
 }
 
+func Test_isExist(t *testing.T) {
+	ctx := context.Background()
+	key := "/summoner/tw2"
+	redisMap := make(map[string]*riotmodel.SummonerDTO)
+	if size := rdb.HLen(ctx, key).Val(); size != 0 {
+		kvmap := rdb.HGetAll(ctx, key).Val()
+		for k, v := range kvmap {
+			var tmp riotmodel.SummonerDTO
+			if err := json.Unmarshal([]byte(v), &tmp); err != nil {
+				logger.Error("load entry form redis cache failed", zap.Error(err))
+			} else {
+				redisMap[k] = &tmp
+			}
+		}
+	}
+	
+	entryExistMap := make(map[string]bool)
+	keys := make([]string, 0, 2*len(redisMap))
+	for k := range redisMap {
+		keys = append(keys, k)
+	}
+	var existintEntry []*riotmodel.LeagueEntryDTO
+	if err := db.Where("summoner_id IN ?", keys).Find(&existintEntry).Error; err != nil {
+		t.Log(err)
+	}
+	for _, e := range existintEntry {
+		entryExistMap[e.SummonerID] = true
+	}
+	for _, k := range keys {
+		if _, has := entryExistMap[k]; !has {
+			entryExistMap[k] = false
+		}
+	}
+	logger.Info("ok")
+	
+}
 // may need setup gorm's logger silent before test
 // server/pkg/gormdb/gormdb.go:38
 // gormdb.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
