@@ -66,9 +66,9 @@ easier data exploration and visualization.
 2. Use at your own risk: Any consequences and risks arising from the use of this project are solely your responsibility. I am not liable for any losses or issues incurred.
 3. Code review: If you intend to use the code from this project in other projects or production environments, it is essential to conduct a thorough code review and testing to ensure it meets your requirements.
 4. Security: While I make efforts to ensure the security of the project, I do not guarantee protection against potential security vulnerabilities or attacks.
-5. This Golang project is still under development and construction, and may contain unknown errors, defects, or incomplete functionalities.
+5. This project is still under development and construction, and may contain unknown errors, defects, or incomplete functionalities.
 
-Please use this Golang project with caution and understand the associated risks. Thank you for your understanding and support!
+Please use this project with caution and understand the associated risks. Thank you for your understanding and support!
 
 ## License
 
