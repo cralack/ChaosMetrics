@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,6 +27,7 @@ type BrowserFetcher struct {
 	Logger       *zap.Logger
 	RaterLimiter rater.RateLimter
 	Timeout      time.Duration
+	pass         chan struct{}
 }
 
 var _ Fetcher = &BrowserFetcher{}
@@ -53,14 +55,19 @@ func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 		time.Minute*2,
 		time.Second/time.Duration(conf.RateLimiterConfig.EachSec),
 	)
+	// get timer start
+	pass := make(chan struct{})
+	go limiter.StartTimer(pass)
 	if err != nil {
 		global.GVA_LOG.Error("rate limiter init failed", zap.Error(err))
 	}
+	
 	return &BrowserFetcher{
 		Timeout:      global.GVA_CONF.Fetcher.Timeout,
 		Logger:       global.GVA_LOG,
 		RaterLimiter: limiter,
 		Conf:         conf,
+		pass:         pass,
 	}
 }
 
@@ -84,6 +91,9 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	req.Header.Set("Origin", header.Origin)
 	req.Header.Set("X-Riot-Token", header.XRiotToken)
 	
+	// require pass signal
+	<-f.pass
+	
 	// run req
 	resp, err := client.Do(req)
 	if err != nil {
@@ -92,7 +102,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	}
 	if resp.StatusCode != http.StatusOK {
 		f.Logger.Error(fmt.Sprintf("fetch failed:%s", resp.Status))
-		return nil, err
+		return nil, errors.New(url + resp.Status)
 	}
 	defer func() {
 		if cerr := resp.Body.Close(); err != nil {

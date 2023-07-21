@@ -81,8 +81,43 @@ func ConvertPlatformToHost(loc uint) string {
 		"EUROPE":   "europe.api.riotgames.com",
 		"SEA":      "sea.api.riotgames.com",
 	}
-
+	
 	region := platformToRegion[loc]
 	host := regionToHost[region]
 	return "https://" + host
+}
+
+func ConvertLanguageCode(lang uint) string {
+	langMap := map[uint]string{
+		riotmodel.LANG_cs_CZ: "cs_CZ",
+		riotmodel.LANG_el_GR: "el_GR",
+		riotmodel.LANG_pl_PL: "pl_PL",
+		riotmodel.LANG_ro_RO: "ro_RO",
+		riotmodel.LANG_hu_HU: "hu_HU",
+		riotmodel.LANG_en_GB: "en_GB",
+		riotmodel.LANG_de_DE: "de_DE",
+		riotmodel.LANG_es_ES: "es_ES",
+		riotmodel.LANG_it_IT: "it_IT",
+		riotmodel.LANG_fr_FR: "fr_FR",
+		riotmodel.LANG_ja_JP: "ja_JP",
+		riotmodel.LANG_ko_KR: "ko_KR",
+		riotmodel.LANG_es_MX: "es_MX",
+		riotmodel.LANG_es_AR: "es_AR",
+		riotmodel.LANG_pt_BR: "pt_BR",
+		riotmodel.LANG_en_US: "en_US",
+		riotmodel.LANG_en_AU: "en_AU",
+		riotmodel.LANG_ru_RU: "ru_RU",
+		riotmodel.LANG_tr_TR: "tr_TR",
+		riotmodel.LANG_ms_MY: "ms_MY",
+		riotmodel.LANG_en_PH: "en_PH",
+		riotmodel.LANG_en_SG: "en_SG",
+		riotmodel.LANG_th_TH: "th_TH",
+		riotmodel.LANG_vi_VN: "vi_VN",
+		riotmodel.LANG_id_ID: "id_ID",
+		riotmodel.LANG_zh_MY: "zh_MY",
+		riotmodel.LANG_zh_CN: "zh_CN",
+		riotmodel.LANG_zh_TW: "zh_TW",
+	}
+	
+	return langMap[lang]
 }

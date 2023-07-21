@@ -64,3 +64,15 @@ func (l *SlidingWindowLimiter) TryAcquire() bool {
 	l.counters[currentSmallWindow]++
 	return true
 }
+
+func (l *SlidingWindowLimiter) StartTimer(sig chan struct{}) {
+	ticker := time.NewTicker(time.Duration(l.smallWindow / 2))
+	for {
+		select {
+		case <-ticker.C:
+			if l.TryAcquire() {
+				sig <- struct{}{}
+			}
+		}
+	}
+}

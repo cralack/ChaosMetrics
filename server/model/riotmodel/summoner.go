@@ -12,9 +12,7 @@ import (
 
 type SummonerDTO struct {
 	gorm.Model
-	// EntryID uint `gorm:"column:league_entry_id"`
-	// Entry   *LeagueEntryDTO `gorm:"-"`
-	Matches []*MatchDto `gorm:"many2many:match_summoners"` // 比赛列表，多对多关系
+	Matches []*MatchDto `gorm:"many2many:match_summoners"` // 比赛列表，多对多关系 FIFO
 	
 	Loc            string    `gorm:"column:loc;type:varchar(100)" json:"loc"`
 	AccountID      string    `gorm:"column:account_id;type:varchar(100)" json:"accountId"`      // 加密的账号ID，最长为56个字符
@@ -31,14 +29,32 @@ type SummonerDTO struct {
 var _ DTO = &SummonerDTO{}
 
 func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
-	layout := time.RFC3339
 	var f map[string]interface{}
+	
 	err := json.Unmarshal(data, &f)
 	if err != nil {
 		return err
 	}
 	for k, v := range f {
 		switch k {
+		// gorm.Model
+		case "ID":
+			p.ID = uint(v.(float64))
+		case "DeletedAt":
+			if v != nil {
+				p.DeletedAt = v.(gorm.DeletedAt)
+			}
+		case "CreatedAt":
+			if p.CreatedAt, err = convertTime(v, time.RFC3339); err != nil {
+				global.GVA_LOG.Error("parse failed", zap.Error(err))
+				return err
+			}
+		case "UpdatedAt":
+			if p.UpdatedAt, err = convertTime(v, time.RFC3339); err != nil {
+				global.GVA_LOG.Error("parse failed", zap.Error(err))
+				return err
+			}
+		
 		case "accountId":
 			p.AccountID = v.(string)
 		case "profileIconId":
@@ -47,12 +63,9 @@ func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
 			// Assuming revisionDate is in milliseconds
 			if revisionDateMillis, ok := v.(float64); ok {
 				p.RevisionDate = time.Unix(int64(revisionDateMillis)/1000, 0).UTC()
-			}
-			if revisionDateMillis, ok := v.(string); ok {
-				if p.RevisionDate, err = time.Parse(layout, revisionDateMillis); err != nil {
-					global.GVA_LOG.Error("parse failed", zap.Error(err))
-					return err
-				}
+			} else if p.RevisionDate, err = convertTime(v, time.RFC3339); err != nil {
+				global.GVA_LOG.Error("parse failed", zap.Error(err))
+				return err
 			}
 		case "name":
 			p.Name = v.(string)
@@ -62,6 +75,7 @@ func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
 			p.PUUID = v.(string)
 		case "summonerLevel":
 			p.SummonerLevel = int(v.(float64))
+			
 		}
 	}
 	

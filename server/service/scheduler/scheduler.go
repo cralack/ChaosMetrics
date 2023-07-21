@@ -7,9 +7,10 @@ type Scheduler interface {
 }
 
 type Task struct {
-	Key  string
-	Loc  string
-	Data interface{}
+	Key   string
+	Loc   string
+	Retry uint
+	Data  interface{}
 }
 
 type RiotDTOSchedule struct {

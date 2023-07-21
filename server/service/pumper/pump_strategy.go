@@ -11,20 +11,23 @@ import (
 type RiotStrategy struct {
 	Loc           []uint        // 地区列表
 	Que           []uint        // 队列类型列表
-	EndMark       []uint        // 终止标记
+	TestEndMark   []uint        // 测试用终止标记
 	MaxSize       int           // Task最大切割尺寸
 	MaxMatchCount int           // 最大比赛场次
+	Retry         uint          // 任务重试次数
 	LifeTime      time.Duration // 缓存生命周期
 }
 
 type Option func(stgy *RiotStrategy) // RiotStrategy的配置选项
 
 var defaultStrategy = &RiotStrategy{
-	Loc:      []uint{riotmodel.TW2},             // 默认地区为台湾
-	Que:      []uint{riotmodel.RANKED_SOLO_5x5}, // 默认队列类型为排位赛5v5
-	EndMark:  []uint{riotmodel.IRON, 4},         // 默认终止标记为黑铁IV
-	MaxSize:  500,                               // 默认任务切割尺寸为500
-	LifeTime: time.Hour * 24,                    // 默认缓存生命周期为24小时
+	Loc:           []uint{riotmodel.TW2},             // 默认地区为台湾
+	Que:           []uint{riotmodel.RANKED_SOLO_5x5}, // 默认队列类型为排位赛5v5
+	TestEndMark:   []uint{riotmodel.DIAMOND, 1},      // 默认终止标记为钻I
+	MaxSize:       500,                               // 默认任务切割尺寸为500
+	MaxMatchCount: 20,                                // 默认读取最近20场比赛
+	Retry:         3,                                 // 默认单个任务重试次数3
+	LifeTime:      time.Hour * 24,                    // 默认缓存生命周期为24小时
 	// LifeTime: -1, // cache forever
 }
 
@@ -125,6 +128,6 @@ func WithEndMark(tier, div uint) Option {
 			global.GVA_LOG.Error("wrong param,end mark need DIAMON <= tier <= IRON" +
 				" && I <= div <= IV.using default option")
 		}
-		stgy.EndMark = []uint{tier, div}
+		stgy.TestEndMark = []uint{tier, div}
 	}
 }

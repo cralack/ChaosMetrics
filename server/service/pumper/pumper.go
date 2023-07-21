@@ -3,7 +3,6 @@ package pumper
 import (
 	"fmt"
 	"sync"
-	"time"
 	
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -23,7 +22,7 @@ type Pumper struct {
 	scheduler   scheduler.Scheduler
 	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
 	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
-	rater       chan struct{}
+	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
 	out         chan *ParseResult
 	entrieIdx   []uint
 	summonerIdx []uint
@@ -54,9 +53,9 @@ func NewPumper(token string, opts ...Option) *Pumper {
 		entrieIdx:   eIdx,
 		summonerIdx: sIdx,
 		out:         make(chan *ParseResult),
-		rater:       make(chan struct{}),
 		entryMap:    make(map[string]map[string]*riotmodel.LeagueEntryDTO),
 		sumnMap:     make(map[string]map[string]*riotmodel.SummonerDTO),
+		matchMap:    make(map[string]map[string]bool),
 		fetcher: fetcher.NewBrowserFetcher(
 			fetcher.WithAPIToken(token),
 		),
@@ -69,19 +68,7 @@ func (p *Pumper) Schedule() {
 	p.scheduler.Schedule()
 }
 
-func (p *Pumper) StartTimer() {
-	ticker := time.NewTicker(time.Millisecond * 500)
-	for {
-		select {
-		case <-ticker.C:
-			if p.fetcher.TryAcquire() {
-				p.rater <- struct{}{}
-			}
-		}
-	}
-}
-
-func (p *Pumper) HandleResult(exit chan struct{}) {
+func (p *Pumper) handleResult(exit chan struct{}) {
 	for result := range p.out {
 		switch result.Type {
 		case "finish":
@@ -103,7 +90,7 @@ func (p *Pumper) HandleResult(exit chan struct{}) {
 		
 		case "match":
 			matches := result.Data.([]*riotmodel.MatchDto)
-			if err := p.db.Create(matches).Error; err != nil {
+			if err := p.db.Save(matches).Error; err != nil {
 				p.logger.Error("riot match model store failed", zap.Error(err))
 			}
 		}
@@ -113,10 +100,10 @@ func (p *Pumper) HandleResult(exit chan struct{}) {
 func (p *Pumper) UpdateAll() {
 	exit := make(chan struct{})
 	go p.Schedule()
-	go p.StartTimer()
-	go p.HandleResult(exit)
+	go p.handleResult(exit)
 	p.UpdateEntries(exit)
 	p.UpdateSumoner(exit)
+	p.UpdateMatch(exit)
 }
 
 func getQueueString(que uint) string {

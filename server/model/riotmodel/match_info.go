@@ -16,6 +16,7 @@ type MetadataDto struct {
 }
 
 type InfoDto struct {
+	Loc                string            `json:"loc" gorm:"column:loc;type:varchar(20)"`                         // 游戏所在服务器
 	GameCreation       time.Time         `json:"gameCreation" gorm:"column:game_creation"`                       // 游戏创建时间戳
 	GameDuration       int               `json:"gameDuration" gorm:"column:game_duration;type:smallint"`         // 游戏持续时间
 	GameEndTimestamp   time.Time         `json:"gameEndTimestamp" gorm:"column:game_end_timestamp"`              // 游戏结束时间戳

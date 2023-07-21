@@ -9,6 +9,7 @@ import (
 	"testing"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
@@ -79,7 +80,7 @@ func Test_parse_summoners(t *testing.T) {
 	}
 }
 
-func Test_parse_championr_rotation(t *testing.T) {
+func Test_parse_champion_rotation(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	url := "https://tw2.api.riotgames.com/lol/platform/v3/champion-rotations"
 	buff, err := f.Get(url)
@@ -99,7 +100,7 @@ func Test_parse_championr_rotation(t *testing.T) {
 	t.Log(freeForNew)
 }
 
-func Test_parse_championr_mastery(t *testing.T) {
+func Test_parse_champion_mastery(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://tw2.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/F4fFtqehQLBj8U5sKBZF--k-7akbtb1IX790lRd4whPI4pXDAuVyfswHetg2lz_kMe2NJ0gUo5EIig/top"
 	// buff, err := f.Get(url)
@@ -256,4 +257,65 @@ func Test_parse_mortal(t *testing.T) {
 		t.Fatal(err)
 	}
 	
+}
+
+func Test_parse_champion(t *testing.T) {
+	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
+	version := "13.14.1"
+	championName := "Aatrox"
+	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion/%s.json",
+		version, lang, championName)
+	buff, err := f.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var res *riotmodel.ChampionSingleDTO
+	err = json.Unmarshal(buff, &res)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_parse_champions(t *testing.T) {
+	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
+	version := "13.14.1"
+	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion.json", version, lang)
+	buff, err := f.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var res *riotmodel.ChampionListDTO
+	err = json.Unmarshal(buff, &res)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_parse_version(t *testing.T) {
+	url := "https://ddragon.leagueoflegends.com/api/versions.json"
+	buff, err := f.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var res riotmodel.Version
+	err = json.Unmarshal(buff, &res)
+	if err != nil {
+		t.Fatal(err)
+	}
+	curVersion := res[0]
+	t.Logf(curVersion)
+}
+
+func Test_parse_item_list(t *testing.T) {
+	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
+	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/13.14.1/data/%s/item.json", lang)
+	buff, err := f.Get(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var res *riotmodel.ItemList
+	err = json.Unmarshal(buff, &res)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
+	"gorm.io/gorm/clause"
 )
 
 type summonerTask struct {
@@ -26,102 +27,6 @@ func (p *Pumper) UpdateSumoner(exit chan struct{}) {
 	}
 	go p.fetchSummoner()
 	<-exit
-}
-
-func (p *Pumper) createSummonerURL(loCode uint) {
-	loc, host := utils.ConvertHostURL(loCode)
-	go p.summonerCounter(loc)
-	// p.loadEntrie(loc)
-	p.loadSummoner(loc)
-	for sID := range p.entryMap[loc] {
-		if _, has := p.sumnMap[loc][sID]; has {
-			continue
-		}
-		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
-		p.scheduler.Push(&scheduler.Task{
-			Key: "summoner",
-			Loc: loc,
-			Data: &summonerTask{
-				summonerID: sID,
-				url:        url,
-			},
-		})
-		// p.logger.Info(url)
-	}
-	// finish signal
-	p.scheduler.Push(&scheduler.Task{
-		Key:  "summoner",
-		Loc:  loc,
-		Data: nil,
-	})
-	return
-}
-
-func (p *Pumper) fetchSummoner() {
-	var (
-		buff []byte
-		err  error
-		sumn *riotmodel.SummonerDTO
-	)
-	for {
-		<-p.rater
-		req := p.scheduler.Pull()
-		switch req.Key {
-		case "summoner":
-			if req.Data == nil {
-				// send finish signal
-				p.out <- &ParseResult{
-					Type:  "finish",
-					Brief: "summoner",
-					Data:  nil,
-				}
-				// *need release scheduler resource*
-				return
-			} else {
-				data := req.Data.(*summonerTask)
-				if buff, err = p.fetcher.Get(data.url); err != nil {
-					p.logger.Error(fmt.Sprintf("fetch summoner %s %s failed",
-						data.summoner.Name, data.summonerID), zap.Error(err))
-					// fetch again
-					p.scheduler.Push(req)
-					continue
-				}
-				if err = json.Unmarshal(buff, &sumn); err != nil {
-					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
-						"sumnDTO"), zap.Error(err))
-				}
-				p.handleSummoner(req.Loc, sumn)
-			}
-		}
-	}
-}
-
-func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO) {
-	if len(summoners) == 0 {
-		return
-	}
-	// set up redis pipe
-	loCode := utils.ConverHostLoCode(loc)
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	
-	for _, sumn := range summoners {
-		if s, has := p.sumnMap[loc][sumn.MetaSummonerID]; !has {
-			p.sumnMap[loc][sumn.MetaSummonerID] = sumn
-			sumn.Loc = loc
-			sumn.ID = p.summonerIdx[loCode]
-			p.summonerIdx[loCode]++
-		} else {
-			sumn.ID = s.ID
-		}
-		p.rdb.HSet(context.Background(), "/summoner/"+loc, sumn.MetaSummonerID, sumn)
-	}
-	
-	p.out <- &ParseResult{
-		Type: "summoners",
-		Data: summoners,
-	}
-	return
 }
 
 func (p *Pumper) loadSummoner(loc string) {
@@ -147,8 +52,8 @@ func (p *Pumper) loadSummoner(loc string) {
 	}
 	// load if gorm db data exist
 	var summoners []*riotmodel.SummonerDTO
-	if err := p.db.Where("loc = ?", loc).Find(&summoners).Error; err != nil {
-		p.logger.Error("load entry from gorm db failed", zap.Error(err))
+	if err := p.db.Where("loc = ?", loc).Find(&summoners).Preload(clause.Associations).Error; err != nil {
+		p.logger.Error("load summoner from gorm db failed", zap.Error(err))
 	}
 	if len(summoners) != 0 {
 		for _, s := range summoners {
@@ -183,6 +88,121 @@ func (p *Pumper) loadSummoner(loc string) {
 	p.handleSummoner(loc, tmp...)
 }
 
+func (p *Pumper) createSummonerURL(loCode uint) {
+	loc, host := utils.ConvertHostURL(loCode)
+	endTier, endRank := ConvertRankToStr(p.stgy.TestEndMark[0], p.stgy.TestEndMark[1])
+	// p.loadEntrie(loc)
+	p.loadSummoner(loc)
+	go p.summonerCounter(loc)
+	// expand from entry
+	for sID, entry := range p.entryMap[loc] {
+		if _, has := p.sumnMap[loc][sID]; has ||
+			(entry.Tier > endTier || (entry.Tier == endTier && entry.Rank > endRank)) {
+			continue
+		}
+		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
+		p.scheduler.Push(&scheduler.Task{
+			Key: "summoner",
+			Loc: loc,
+			Data: &summonerTask{
+				summonerID: sID,
+				url:        url,
+			},
+		})
+	}
+	// expand from self
+	for sID, sumn := range p.sumnMap[loc] {
+		if sumn.Name == "" {
+			url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
+			p.scheduler.Push(&scheduler.Task{
+				Key: "summoner",
+				Loc: loc,
+				Data: &summonerTask{
+					summonerID: sID,
+					url:        url,
+				},
+			})
+		}
+	}
+	// finish signal
+	p.scheduler.Push(&scheduler.Task{
+		Key:  "summoner",
+		Loc:  loc,
+		Data: nil,
+	})
+	return
+}
+
+func (p *Pumper) fetchSummoner() {
+	var (
+		buff []byte
+		err  error
+	)
+	for {
+		// <-p.Rater
+		req := p.scheduler.Pull()
+		switch req.Key {
+		case "summoner":
+			if req.Data == nil {
+				// send finish signal
+				p.out <- &ParseResult{
+					Type:  "finish",
+					Brief: "summoner",
+					Data:  nil,
+				}
+				// *need release scheduler resource*
+				return
+			} else {
+				data := req.Data.(*summonerTask)
+				if buff, err = p.fetcher.Get(data.url); err != nil || buff == nil {
+					p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
+					// fetch again
+					if req.Retry < p.stgy.Retry {
+						req.Retry++
+						p.scheduler.Push(req)
+					}
+					continue
+				}
+				var sumn *riotmodel.SummonerDTO
+				if err = json.Unmarshal(buff, &sumn); err != nil {
+					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
+						"sumnDTO"), zap.Error(err))
+				}
+				p.handleSummoner(req.Loc, sumn)
+			}
+		}
+	}
+}
+
+func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO) {
+	if len(summoners) == 0 {
+		return
+	}
+	// set up redis pipe
+	// tmp := make([]*riotmodel.SummonerDTO, 0, p.stgy.MaxSize)
+	loCode := utils.ConverHostLoCode(loc)
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	
+	for _, sumn := range summoners {
+		if s, has := p.sumnMap[loc][sumn.MetaSummonerID]; !has || s.ID < 1e9*loCode {
+			sumn.ID = p.summonerIdx[loCode]
+			p.summonerIdx[loCode]++
+		} else {
+			sumn.ID = s.ID
+		}
+		p.sumnMap[loc][sumn.MetaSummonerID] = sumn
+		sumn.Loc = loc
+		p.rdb.HSet(context.Background(), "/summoner/"+loc, sumn.MetaSummonerID, sumn)
+	}
+	
+	p.out <- &ParseResult{
+		Type: "summoners",
+		Data: summoners,
+	}
+	return
+}
+
 func (p *Pumper) cacheSummoners(summoners []*riotmodel.SummonerDTO, loc string) {
 	ctx := context.Background()
 	key := fmt.Sprintf("/summoner/%s", loc)
@@ -201,18 +221,26 @@ func (p *Pumper) summonerCounter(loc string) {
 	var (
 		total int
 		cur   int
+		delta int
 		rate  float32
 	)
-	ticker := time.NewTicker(time.Second * 5)
-	total = len(p.entryMap[loc])
+	ticker := time.NewTicker(time.Second * 15)
+	total = len(p.sumnMap[loc])
 	for {
 		<-ticker.C
-		cur = len(p.sumnMap[loc])
-		rate = float32(cur) / float32(total)
-		p.logger.Info(fmt.Sprintf("fetch %s %.02f%% (%d/%d) summoners",
-			loc, rate*100, cur, total))
-		if cur == total {
-			return
+		delta = cur
+		cur = 0
+		for _, s := range p.sumnMap[loc] {
+			if s.Name == "" {
+				cur++
+			}
 		}
+		delta -= cur
+		rate = float32(total-cur) / float32(total)
+		if delta > 0 {
+			p.logger.Info(fmt.Sprintf("fetch %s %05.02f%% (%04d/%04d) summoners",
+				loc, rate*100, total-cur, total))
+		}
+		
 	}
 }

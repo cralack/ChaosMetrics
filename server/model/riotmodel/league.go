@@ -17,7 +17,6 @@ type LeagueListDTO struct {
 
 type LeagueEntryDTO struct {
 	gorm.Model
-	// Summoner *SummonerDTO `gorm:"foreignKey:league_entry_id"`
 	
 	Loc          string         `json:"loc" gorm:"column:loc;type:varchar(100)"`                      // 地区
 	FreshBlood   bool           `json:"freshBlood" gorm:"column:fresh_blood"`                         // 是否是新晋选手
@@ -27,11 +26,14 @@ type LeagueEntryDTO struct {
 	Inactive     bool           `json:"inactive" gorm:"column:inactive"`                              // 是否处于非活跃状态
 	Veteran      bool           `json:"veteran" gorm:"column:veteran"`                                // 是否是资深选手
 	HotStreak    bool           `json:"hotStreak" gorm:"column:hot_streak"`                           // 是否处于连胜状态
-	Tier         string         `json:"tier_" gorm:"column:tier;type:varchar(100)"`                   // 段位
+	Tier         string         `json:"tier" gorm:"column:tier;type:varchar(100)"`                    // 段位
 	Rank         string         `json:"rank" gorm:"column:rank;type:varchar(100)"`                    // 段位
 	LeaguePoints int            `json:"leaguePoints" gorm:"column:league_points;type:smallint"`       // 段位积分
 	Losses       int            `json:"losses" gorm:"column:losses;type:smallint"`                    // 负场次数（召唤师峡谷）
 	SummonerID   string         `json:"summonerId" gorm:"column:summoner_id;type:varchar(100);index"` // 玩家的加密召唤师ID
+	// riot update on jul 20,23
+	LeagueID string `json:"leagueId" gorm:"column:league_id;type:varchar(100)"`   // 联赛ID
+	QueType  string `json:"queueType" gorm:"column:queue_type;type:varchar(100)"` // 排位类型
 }
 
 type MiniSeriesDTO struct {

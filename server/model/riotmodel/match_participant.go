@@ -10,7 +10,7 @@ type ParticipantDto struct {
 	MetaMatchID string `gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
 	
 	Assists                        int       `json:"assists" gorm:"column:assists;type:varchar(100)"`                                    // 助攻数
-	BaronKills                     int       `json:"baronKills" gorm:"column:baron_kills;type:smallint"`                                 // 击杀大龙数
+	BaronKills                     int       `json:"baronKills" gorm:"column:baron_kills"`                                               // 击杀大龙数
 	BountyLevel                    int       `json:"bountyLevel" gorm:"column:bounty_level;type:smallint"`                               // 赏金等级
 	ChampExperience                int       `json:"champExperience" gorm:"column:champ_experience;type:int"`                            // 英雄经验
 	ChampLevel                     int       `json:"champLevel" gorm:"column:champ_level;type:smallint"`                                 // 英雄等级
@@ -38,13 +38,13 @@ type ParticipantDto struct {
 	InhibitorKills                 int       `json:"inhibitorKills" gorm:"column:inhibitor_kills;type:smallint"`                         // 击杀抑制塔数
 	InhibitorTakedowns             int       `json:"inhibitorTakedowns" gorm:"column:inhibitor_takedowns;type:smallint"`                 // 击杀抑制塔参与数
 	InhibitorsLost                 int       `json:"inhibitorsLost" gorm:"column:inhibitors_lost;type:smallint"`                         // 失去的抑制塔数
-	Item0                          int       `json:"item0" gorm:"column:item0;type:smallint"`                                            // 物品0
-	Item1                          int       `json:"item1" gorm:"column:item1;type:smallint"`                                            // 物品1
-	Item2                          int       `json:"item2" gorm:"column:item2;type:smallint"`                                            // 物品2
-	Item3                          int       `json:"item3" gorm:"column:item3;type:smallint"`                                            // 物品3
-	Item4                          int       `json:"item4" gorm:"column:item4;type:smallint"`                                            // 物品4
-	Item5                          int       `json:"item5" gorm:"column:item5;type:smallint"`                                            // 物品5
-	Item6                          int       `json:"item6" gorm:"column:item6;type:smallint"`                                            // 物品6
+	Item0                          int       `json:"item0" gorm:"column:item0;type:int"`                                                 // 物品0
+	Item1                          int       `json:"item1" gorm:"column:item1;type:int"`                                                 // 物品1
+	Item2                          int       `json:"item2" gorm:"column:item2;type:int"`                                                 // 物品2
+	Item3                          int       `json:"item3" gorm:"column:item3;type:int"`                                                 // 物品3
+	Item4                          int       `json:"item4" gorm:"column:item4;type:int"`                                                 // 物品4
+	Item5                          int       `json:"item5" gorm:"column:item5;type:int"`                                                 // 物品5
+	Item6                          int       `json:"item6" gorm:"column:item6;type:int"`                                                 // 物品6
 	ItemsPurchased                 int       `json:"itemsPurchased" gorm:"column:items_purchased;type:smallint"`                         // 购买物品数
 	KillingSprees                  int       `json:"killingSprees" gorm:"column:killing_sprees;type:smallint"`                           // 连杀数
 	Kills                          int       `json:"kills" gorm:"column:kills;type:smallint"`                                            // 击杀数
