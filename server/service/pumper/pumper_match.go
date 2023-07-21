@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -205,10 +204,27 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc string) {
 	if _, err := pipe.Exec(ctx); err != nil {
 		p.logger.Error("redis store match failed", zap.Error(err))
 	}
-	
-	p.out <- &ParseResult{
-		Type:  "match",
-		Brief: "matches size:" + strconv.Itoa(len(matches)),
-		Data:  matches,
+	var chunks [][]*riotmodel.MatchDto
+	totalSize := len(matches)
+	chunkSize := 5
+	if totalSize > chunkSize {
+		for i := 0; i < totalSize; i += chunkSize {
+			end := i + chunkSize
+			if end > totalSize {
+				end = totalSize
+			}
+			chunks = append(chunks, matches[i:end])
+		}
+	} else {
+		chunks = append(chunks, matches)
 	}
+	for _, chunk := range chunks {
+		p.out <- &ParseResult{
+			Type:  "match",
+			Brief: chunk[0].Metadata.MetaMatchID,
+			Data:  chunk,
+		}
+	}
+	
+	return
 }
