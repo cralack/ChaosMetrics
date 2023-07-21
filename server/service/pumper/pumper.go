@@ -92,6 +92,8 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 			matches := result.Data.([]*riotmodel.MatchDto)
 			if err := p.db.Create(matches).Error; err != nil {
 				p.logger.Error("riot match model store failed", zap.Error(err))
+			} else {
+				p.logger.Info(result.Brief)
 			}
 		}
 	}

@@ -162,12 +162,12 @@ func (p *Pumper) fetchMatch() {
 				// deal relation
 				summoner := data.sumn
 				summoner.Matches = append(summoner.Matches, matches...)
-				p.handleMatches(matches, req.Loc)
+				p.handleMatches(matches, req.Loc, summoner.Name)
 			}
 		}
 	}
 }
-func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc string) {
+func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc, sName string) {
 	loCode := utils.ConverHostLoCode(loc)
 	ctx := context.Background()
 	key := fmt.Sprintf("/match/%s", loc)
@@ -221,7 +221,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc string) {
 	for _, chunk := range chunks {
 		p.out <- &ParseResult{
 			Type:  "match",
-			Brief: chunk[0].Metadata.MetaMatchID,
+			Brief: sName,
 			Data:  chunk,
 		}
 	}
