@@ -67,7 +67,12 @@ func (p *Pumper) createMatchID(loCode uint) {
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
 		startTime, endTime, p.stgy.MaxMatchCount)
-	for sid, summoner := range p.sumnMap[loc] {
+	// avoid recursive calls
+	copySumnMap := make(map[string]*riotmodel.SummonerDTO)
+	for sid, s := range p.sumnMap[loc] {
+		copySumnMap[sid] = s
+	}
+	for sid, summoner := range copySumnMap {
 		if summoner.Matches == nil {
 			summoner.Matches = make([]*riotmodel.MatchDto, 0, p.stgy.MaxMatchCount)
 		}
@@ -75,7 +80,6 @@ func (p *Pumper) createMatchID(loCode uint) {
 		if _, has := p.entryMap[loc][sid]; has || !has && len(summoner.Matches) < p.stgy.MaxMatchCount {
 			url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
 				host, summoner.PUUID, queryParams)
-			
 			p.scheduler.Push(&scheduler.Task{
 				Key:   "match",
 				Loc:   loc,
@@ -136,6 +140,9 @@ func (p *Pumper) fetchMatch() {
 				host := utils.ConvertPlatformToHost(loc)
 				// fetch match
 				for _, matchID := range matchList {
+					if _, has := p.matchMap[req.Loc][matchID]; has {
+						continue
+					}
 					if _, has := oldMatchList[matchID]; has {
 						continue
 					} else {
@@ -147,6 +154,7 @@ func (p *Pumper) fetchMatch() {
 						if err = json.Unmarshal(buff, &tmp); err != nil {
 							p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
 								"MatchDto"), zap.Error(err))
+							continue
 						}
 						matches = append(matches, tmp)
 						p.matchMap[req.Loc][matchID] = true

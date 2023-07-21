@@ -90,7 +90,7 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 		
 		case "match":
 			matches := result.Data.([]*riotmodel.MatchDto)
-			if err := p.db.Save(matches).Error; err != nil {
+			if err := p.db.Create(matches).Error; err != nil {
 				p.logger.Error("riot match model store failed", zap.Error(err))
 			}
 		}
