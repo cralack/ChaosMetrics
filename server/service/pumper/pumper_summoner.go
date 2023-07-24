@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 	"time"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -138,6 +139,15 @@ func (p *Pumper) fetchSummoner() {
 		buff []byte
 		err  error
 	)
+	
+	defer func() {
+		if err := recover(); err != nil {
+			p.logger.Error("fetcher panic",
+				zap.Any("err", err),
+				zap.String("stack", string(debug.Stack())))
+		}
+	}()
+	
 	for {
 		// <-p.Rater
 		req := p.scheduler.Pull()

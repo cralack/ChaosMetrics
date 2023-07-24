@@ -24,6 +24,7 @@ const (
 	GRANDMASTER        // top 201-701 players
 	MASTER             // top 702-2922 players
 	DIAMOND
+	EMERALD
 	PLATINUM
 	GOLD
 	SILVER

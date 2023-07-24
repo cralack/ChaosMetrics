@@ -12,7 +12,8 @@ import (
 
 type SummonerDTO struct {
 	gorm.Model
-	Matches []*MatchDto `gorm:"many2many:match_summoners"` // 比赛列表，多对多关系 FIFO
+	Matches string `gorm:"column:matches"`
+	// Matches []*MatchDto `gorm:"many2many:match_summoners"` // 比赛列表，多对多关系 FIFO
 	
 	Loc            string    `gorm:"column:loc;type:varchar(100)" json:"loc"`
 	AccountID      string    `gorm:"column:account_id;type:varchar(100)" json:"accountId"`      // 加密的账号ID，最长为56个字符

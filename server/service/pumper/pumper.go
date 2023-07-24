@@ -90,10 +90,13 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 		
 		case "match":
 			matches := result.Data.([]*riotmodel.MatchDto)
+			if len(matches) == 0 {
+				continue
+			}
 			if err := p.db.Create(matches).Error; err != nil {
-				p.logger.Error("riot match model store failed", zap.Error(err))
+				p.logger.Error(result.Brief+"'s match store failed", zap.Error(err))
 			} else {
-				p.logger.Info(result.Brief)
+				p.logger.Info(fmt.Sprintf("%s's match store succeed", result.Brief))
 			}
 		}
 	}
@@ -142,6 +145,8 @@ func ConvertRankToStr(tier, div uint) (string, string) {
 		return "MASTER", "I"
 	case riotmodel.DIAMOND:
 		return "DIAMOND", d
+	case riotmodel.EMERALD:
+		return "EMERALD", d
 	case riotmodel.PLATINUM:
 		return "PLATINUM", d
 	case riotmodel.GOLD:

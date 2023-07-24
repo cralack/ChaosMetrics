@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"strings"
+	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
@@ -120,4 +122,12 @@ func ConvertLanguageCode(lang uint) string {
 	}
 	
 	return langMap[lang]
+}
+
+func ConvertSliceToStr(s []string) string {
+	return strings.Join(s, ",")
+}
+
+func ConvertStrToSlice(str string) []string {
+	return strings.Split(str, ",")
 }

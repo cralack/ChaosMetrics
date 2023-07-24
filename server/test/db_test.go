@@ -205,6 +205,7 @@ func Test_isExist(t *testing.T) {
 	logger.Info("ok")
 	
 }
+
 // may need setup gorm's logger silent before test
 // server/pkg/gormdb/gormdb.go:38
 // gormdb.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark

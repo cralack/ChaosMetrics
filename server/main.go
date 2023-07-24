@@ -14,7 +14,7 @@ import (
 func main() {
 	p := pumper.NewPumper(
 		"",
-		pumper.WithEndMark(riotmodel.DIAMOND, 1),
+		pumper.WithEndMark(riotmodel.DIAMOND, 4),
 		pumper.WithLoc(riotmodel.TW2),
 	)
 	quit := make(chan os.Signal, 1)

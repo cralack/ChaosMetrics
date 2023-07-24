@@ -3,7 +3,6 @@ package fetcher
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -51,7 +50,7 @@ func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 	}
 	// init rate limiter
 	limiter, err := rater.NewSlidingWindowLimiter(
-		conf.RateLimiterConfig.Each2Min-5,
+		conf.RateLimiterConfig.Each2Min-2,
 		time.Minute*2,
 		time.Second/time.Duration(conf.RateLimiterConfig.EachSec),
 	)
@@ -97,11 +96,9 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	// run req
 	resp, err := client.Do(req)
 	if err != nil {
-		f.Logger.Error("fetch failed", zap.Error(err))
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		f.Logger.Error(fmt.Sprintf("fetch failed:%s", resp.Status))
 		return nil, errors.New(url + resp.Status)
 	}
 	defer func() {

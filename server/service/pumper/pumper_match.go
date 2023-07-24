@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 	"time"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -27,35 +28,63 @@ func (p *Pumper) UpdateMatch(exit chan struct{}) {
 }
 
 func (p *Pumper) loadMatch(loc string) {
-	ctx := context.Background()
-	key := fmt.Sprintf("/match/%s", loc)
+	var (
+		matches  []*riotmodel.MatchDto
+		redisMap map[string]bool
+		size     int64
+		err      error
+	)
 	if _, has := p.matchMap[loc]; !has {
 		p.matchMap[loc] = make(map[string]bool)
 	}
-	// load if redis cache exist
-	if size := p.rdb.HLen(ctx, key).Val(); size != 0 {
-		keys := p.rdb.HKeys(ctx, key).Val()
-		for _, k := range keys {
-			p.matchMap[loc][k] = true
-		}
-	}
 	// load if gorm db data exist
-	var matches []*riotmodel.MatchDto
-	if err := p.db.Where("loc = ?", loc).Find(&matches).Error; err != nil {
+	if err = p.db.Where("loc = ?", loc).Find(&matches).Error; err != nil {
 		p.logger.Error("load match from gorm db failed", zap.Error(err))
 	}
 	if len(matches) != 0 {
 		for _, m := range matches {
+			// assign to local map
 			if _, has := p.matchMap[loc][m.Metadata.MetaMatchID]; !has {
 				p.matchMap[loc][m.Metadata.MetaMatchID] = true
 			}
 		}
 	}
+	ctx := context.Background()
+	key := fmt.Sprintf("/match/%s", loc)
+	
+	// load if redis cache exist
+	if size = p.rdb.HLen(ctx, key).Val(); size != 0 {
+		redisMap = make(map[string]bool, size)
+		keys := p.rdb.HKeys(ctx, key).Val()
+		dels := make([]string, 0, size)
+		for _, k := range keys {
+			if _, has := p.matchMap[loc][k]; !has {
+				dels = append(dels, k)
+			} else {
+				redisMap[k] = true
+			}
+		}
+		// sync db to cache
+		p.rdb.HDel(ctx, key, dels...)
+	}
+	pipe := p.rdb.Pipeline()
+	cmds := make([]*redis.IntCmd, 0, len(matches))
+	for _, m := range matches {
+		if _, has := redisMap[m.Metadata.MetaMatchID]; !has {
+			cmds = append(cmds, pipe.HSet(ctx, key, m.Metadata.MetaMatchID, true))
+		}
+	}
+	if _, err = pipe.Exec(ctx); err != nil {
+		p.logger.Error("sync match form db to cache failed", zap.Error(err))
+	}
 }
 
 func (p *Pumper) createMatchID(loCode uint) {
 	var (
-		url string
+		url      string
+		sid      string
+		summoner *riotmodel.SummonerDTO
+		has      bool
 	)
 	loc, _ := utils.ConvertHostURL(loCode)
 	host := utils.ConvertPlatformToHost(loCode)
@@ -66,17 +95,11 @@ func (p *Pumper) createMatchID(loCode uint) {
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
 		startTime, endTime, p.stgy.MaxMatchCount)
-	// avoid recursive calls
-	copySumnMap := make(map[string]*riotmodel.SummonerDTO)
-	for sid, s := range p.sumnMap[loc] {
-		copySumnMap[sid] = s
-	}
-	for sid, summoner := range copySumnMap {
-		if summoner.Matches == nil {
-			summoner.Matches = make([]*riotmodel.MatchDto, 0, p.stgy.MaxMatchCount)
-		}
+	
+	for sid, summoner = range p.sumnMap[loc] {
+		matchList := utils.ConvertStrToSlice(summoner.Matches)
 		// ranker || no rank tier && len(match)<require
-		if _, has := p.entryMap[loc][sid]; has || !has && len(summoner.Matches) < p.stgy.MaxMatchCount {
+		if _, has = p.entryMap[loc][sid]; has || !has && len(matchList) < p.stgy.MaxMatchCount {
 			url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
 				host, summoner.PUUID, queryParams)
 			p.scheduler.Push(&scheduler.Task{
@@ -90,16 +113,32 @@ func (p *Pumper) createMatchID(loCode uint) {
 			})
 		}
 	}
+	
+	// finish signal
+	p.scheduler.Push(&scheduler.Task{
+		Key:  "match",
+		Loc:  loc,
+		Data: nil,
+	})
+	return
 }
 
 func (p *Pumper) fetchMatch() {
 	var (
-		buff      []byte
-		err       error
-		matches   []*riotmodel.MatchDto
-		matchList []string
-		url       string
+		buff         []byte
+		err          error
+		matches      []*riotmodel.MatchDto
+		curMatchList []string
+		url          string
 	)
+	defer func() {
+		if err := recover(); err != nil {
+			p.logger.Error("fetcher panic",
+				zap.Any("err", err),
+				zap.String("stack", string(debug.Stack())))
+		}
+	}()
+	
 	for {
 		req := p.scheduler.Pull()
 		switch req.Key {
@@ -115,7 +154,7 @@ func (p *Pumper) fetchMatch() {
 				return
 			} else {
 				data := req.Data.(*matchTask)
-				// get match list
+				// get old & cur match list
 				if buff, err = p.fetcher.Get(data.URL); err != nil || buff == nil {
 					p.logger.Error(fmt.Sprintf("fetch summoner %s's match failed",
 						data.sumn.MetaSummonerID), zap.Error(err))
@@ -125,20 +164,26 @@ func (p *Pumper) fetchMatch() {
 					}
 					continue
 				}
-				if err = json.Unmarshal(buff, &matchList); err != nil {
+				if err = json.Unmarshal(buff, &curMatchList); err != nil {
 					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
 						"sumnDTO"), zap.Error(err))
 				}
+				// get old match list
 				oldMatchList := make(map[string]struct{})
-				for _, m := range data.sumn.Matches {
-					oldMatchList[m.Metadata.MetaMatchID] = struct{}{}
+				for _, matchID := range utils.ConvertStrToSlice(data.sumn.Matches) {
+					oldMatchList[matchID] = struct{}{}
 				}
+				// update summoner's match list
+				summoner := data.sumn
+				summoner.Matches = utils.ConvertSliceToStr(curMatchList)
+				p.logger.Info(fmt.Sprintf("updating %s's match list", summoner.Name))
+				p.handleSummoner(req.Loc, summoner)
 				// init val
 				matches = make([]*riotmodel.MatchDto, 0, p.stgy.MaxMatchCount)
 				loc := utils.ConverHostLoCode(req.Loc)
 				host := utils.ConvertPlatformToHost(loc)
 				// fetch match
-				for _, matchID := range matchList {
+				for _, matchID := range curMatchList {
 					if _, has := p.matchMap[req.Loc][matchID]; has {
 						continue
 					}
@@ -148,6 +193,11 @@ func (p *Pumper) fetchMatch() {
 						url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
 						if buff, err = p.fetcher.Get(url); err != nil || buff == nil {
 							p.logger.Error(fmt.Sprintf("fetch %s failed", matchID), zap.Error(err))
+							if req.Retry < p.stgy.Retry {
+								req.Retry++
+								p.scheduler.Push(req)
+							}
+							continue
 						}
 						var tmp *riotmodel.MatchDto
 						if err = json.Unmarshal(buff, &tmp); err != nil {
@@ -159,9 +209,9 @@ func (p *Pumper) fetchMatch() {
 						p.matchMap[req.Loc][matchID] = true
 					}
 				}
-				// deal relation
-				summoner := data.sumn
-				summoner.Matches = append(summoner.Matches, matches...)
+				if len(matches) == 0 {
+					continue
+				}
 				p.handleMatches(matches, req.Loc, summoner.Name)
 			}
 		}
@@ -174,7 +224,6 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc, sName string)
 	pipe := p.rdb.Pipeline()
 	pipe.Expire(ctx, key, p.stgy.LifeTime)
 	cmds := make([]*redis.IntCmd, 0, len(matches))
-	tmpSumnList := make([]*riotmodel.SummonerDTO, 0, 10*len(matches))
 	
 	for _, m := range matches {
 		gameId := uint(m.Info.GameID)
@@ -185,46 +234,16 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc, sName string)
 		cmds = append(cmds, pipe.HSet(ctx, key, m.Metadata.MetaMatchID, true))
 		for i, par := range m.Info.Participants {
 			par.ID = loCode*1e12 + gameId*10 + uint(i)
-			if sumn, has := p.sumnMap[loc][par.SummonerId]; has {
-				m.Summoners = append(m.Summoners, sumn)
-			} else {
-				tmp := &riotmodel.SummonerDTO{
-					MetaSummonerID: par.SummonerId,
-					RevisionDate:   time.Now(),
-					Loc:            loc,
-				}
-				tmpSumnList = append(tmpSumnList, tmp)
-				m.Summoners = append(m.Summoners, tmp)
-			}
 		}
-	}
-	if len(tmpSumnList) > 0 {
-		p.handleSummoner(loc, tmpSumnList...)
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
 		p.logger.Error("redis store match failed", zap.Error(err))
 	}
-	var chunks [][]*riotmodel.MatchDto
-	totalSize := len(matches)
-	chunkSize := 5
-	if totalSize > chunkSize {
-		for i := 0; i < totalSize; i += chunkSize {
-			end := i + chunkSize
-			if end > totalSize {
-				end = totalSize
-			}
-			chunks = append(chunks, matches[i:end])
-		}
-	} else {
-		chunks = append(chunks, matches)
-	}
-	for _, chunk := range chunks {
-		p.out <- &ParseResult{
-			Type:  "match",
-			Brief: sName,
-			Data:  chunk,
-		}
-	}
 	
+	p.out <- &ParseResult{
+		Type:  "match",
+		Brief: sName,
+		Data:  matches,
+	}
 	return
 }
