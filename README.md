@@ -1,4 +1,4 @@
-# League of Legends 各种模式个人数据分析项目
+# League of Legends 个人数据分析项目
 
 [English](./README-en.md) | 简体中文
 

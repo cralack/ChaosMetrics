@@ -1,4 +1,4 @@
-# League of Legends each Mode Personal Data Analysis Project
+# League of Legends Personal Data Analysis Project
 
 English | [简体中文](./README.md)
 
