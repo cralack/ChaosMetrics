@@ -1,43 +1,51 @@
-# League of Legends ARAM Mode Personal Data Analysis Project
+# League of Legends each Mode Personal Data Analysis Project
 
 English | [简体中文](./README.md)
 
 ## Overview
 
-This project focuses on the analysis of personal data in League of Legends' ARAM (All Random All Mid) mode. ARAM is a
-popular game mode in League of Legends where players are assigned random champions and battle on a single lane called
-the "Howling Abyss."
+The objective of this project is to analyze individual data related to the game "League of Legends" (LOL), with a 
+potential emphasis on the ARAM (All Random All Mid) game mode.
 
-The goal of this project is to gather personal data related to ARAM matches and perform various analyses to gain
-insights into gameplay performance, champion statistics, win rates, and more. By analyzing this data, we aim to discover
-patterns, trends, and strategies that can enhance our understanding of ARAM gameplay.
+The goal of this project is to collect personal data relevant to LOL matches and conduct various analyses to gain 
+insights into game performance, hero statistics, win rates, and other aspects. By analyzing this data, we aim to 
+uncover patterns, trends, and strategies within the game mode, thereby enhancing our understanding of the game.
 
 ## Data Collection
 
-To collect the necessary data, we utilize the Riot Games API, which provides access to various game-related information.
-We retrieve data such as match history, champion statistics, player rankings, and match details specifically related to
-ARAM mode. The API allows us to access the data programmatically and store it for further analysis.
+To collect the necessary data, we will utilize the Riot Games API, which provides various pieces of information related
+to the game.
+
+We will use the API to retrieve data such as match history, hero statistics, player rankings, and detailed match 
+information relevant to "League of Legends" (LOL) matches. The API allows us to programmatically access this data and 
+store it for further analysis.
+
+By leveraging the Riot Games API, we can efficiently gather and organize the data required to perform in-depth analyses 
+on individual gameplay, hero performance, and other relevant aspects of the game. This will enable us to gain valuable 
+insights and draw conclusions to enhance our understanding of the game and potentially uncover trends or strategies 
+within each game mode.
+
 
 ## Analysis Techniques
 
 Once the data is collected, we employ various analysis techniques to extract meaningful insights. These techniques
 include:
 
-1. **Win Rate Analysis**: We calculate the win rate for different champions in ARAM mode to identify the most successful
+1. **Win Rate Analysis**: We calculate the win rate for different champions in each mode to identify the most successful
    and popular picks.
 2. **Performance Metrics**: We analyze individual performance metrics such as kill-death-assist (KDA) ratios, damage
    dealt, healing done, and other relevant statistics to evaluate player performance.
-3. **Item Build Analysis**: We examine the most commonly purchased items by players in ARAM mode to identify popular and
+3. **Item Build Analysis**: We examine the most commonly purchased items by players in each mode to identify popular and
    effective item builds.
 4. **Team Composition Analysis**: We explore the impact of team compositions on win rates and identify synergistic or
    optimal champion combinations.
-5. **Game Duration Analysis**: We investigate the average game duration in ARAM mode and examine factors that contribute
+5. **Game Duration Analysis**: We investigate the average game duration in each mode and examine factors that contribute
    to shorter or longer matches.
 
 ## Results and Visualizations
 
 The results of our analysis are presented through informative visualizations such as graphs, charts, and tables. These
-visual representations help in understanding the patterns and trends in ARAM gameplay more intuitively. We aim to
+visual representations help in understanding the patterns and trends in each gameplay more intuitively. We aim to
 provide clear and concise summaries of our findings to make the results easily interpretable.
 
 ## Usage
@@ -46,9 +54,9 @@ To replicate the analysis or explore the collected data further, follow these st
 
 1. Clone the repository to your local machine.
 2. Install the required dependencies and libraries as mentioned in the setup instructions.
-3. Run the data collection script to retrieve the latest ARAM match data from the Riot Games API.
+3. Run the data collection script to retrieve the latest each match data from the Riot Games API.
 4. Execute the analysis scripts to perform various analyses and generate visualizations.
-5. Explore the generated results and visualizations to gain insights into ARAM gameplay.
+5. Explore the generated results and visualizations to gain insights into each gameplay.
 
 ## Contributions and Future Enhancements
 
