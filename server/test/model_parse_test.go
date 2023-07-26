@@ -180,39 +180,40 @@ func Test_parse_match(t *testing.T) {
 	
 	// gorm create
 	if err := db.Create(res).Error; err != nil {
-		logger.Info("db create summoners failed")
+		logger.Info("db create match failed")
 	}
 	// gorm read
 	var tar *riotmodel.MatchDto
 	if err = db.Where("meta_match_id = ?", "TW2_81882122").Find(&tar).Error; err != nil {
-		logger.Error("db ")
+		logger.Error("db read match failed")
 	} else {
 		logger.Info(fmt.Sprintf("res == tar:%v", res.Metadata.MetaMatchID == tar.Metadata.MetaMatchID))
+	}
+	// gorm delete
+	if err := db.Delete(&riotmodel.MatchDto{}, "meta_match_id = ?", "TW2_81882122").Error; err != nil {
+		logger.Error("db delete match failed ")
 	}
 	
 	// redis create
 	ctx := context.Background()
 	key := "/match/tw2"
-	if err := rdb.HSet(ctx, key, res.Metadata.MetaMatchID, res).Err(); err != nil {
+	if err := rdb.HSet(ctx, key, res.Metadata.MetaMatchID, true).Err(); err != nil {
 		logger.Error("redis create match failed")
 	}
 	
+	// redis read
 	result := rdb.HGet(ctx, key, tar.Metadata.MetaMatchID).Val()
-	var tar2 *riotmodel.MatchDto
-	if err := json.Unmarshal([]byte(result), &tar2); err != nil {
+	if result != "1" {
 		logger.Error("redis read match failed")
 	}
-	// redis read
-	redisMap := make(map[string]*riotmodel.SummonerDTO)
-	kvmap := rdb.HGetAll(ctx, key).Val()
-	for k, v := range kvmap {
-		var tmp riotmodel.SummonerDTO
-		if err := json.Unmarshal([]byte(v), &tmp); err != nil {
-			logger.Error("load entry form redis cache failed", zap.Error(err))
-		} else {
-			redisMap[k] = &tmp
-		}
-		
+	keys := rdb.HKeys(ctx, key).Val()
+	kvmap := make(map[string]bool)
+	for _, k := range keys {
+		kvmap[k] = true
+	}
+	// redis delete
+	if err := rdb.HDel(ctx, key, tar.Metadata.MetaMatchID).Err(); err != nil {
+		logger.Error("redis delete match failed")
 	}
 }
 
