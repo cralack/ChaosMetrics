@@ -126,6 +126,7 @@ func (p *Pumper) createMatchID(loCode uint) {
 func (p *Pumper) fetchMatch() {
 	var (
 		buff         []byte
+		cnt          int
 		err          error
 		matches      []*riotmodel.MatchDto
 		curMatchList []string
@@ -133,7 +134,7 @@ func (p *Pumper) fetchMatch() {
 	)
 	defer func() {
 		if err := recover(); err != nil {
-			p.logger.Error("fetcher panic",
+			p.logger.Panic("fetcher panic",
 				zap.Any("err", err),
 				zap.String("stack", string(debug.Stack())))
 		}
@@ -176,7 +177,7 @@ func (p *Pumper) fetchMatch() {
 				// update summoner's match list
 				summoner := data.sumn
 				summoner.Matches = utils.ConvertSliceToStr(curMatchList)
-				p.logger.Info(fmt.Sprintf("updating %s's match list", summoner.Name))
+				cnt++
 				p.handleSummoner(req.Loc, summoner)
 				// init val
 				matches = make([]*riotmodel.MatchDto, 0, p.stgy.MaxMatchCount)
@@ -205,10 +206,17 @@ func (p *Pumper) fetchMatch() {
 								"MatchDto"), zap.Error(err))
 							continue
 						}
-						matches = append(matches, tmp)
+						// remake?
+						if tmp.Info.GameCreation.IsZero() {
+							p.logger.Info("wrong match")
+						} else {
+							matches = append(matches, tmp)
+						}
 						p.matchMap[req.Loc][matchID] = true
 					}
 				}
+				p.logger.Info(fmt.Sprintf(
+					"updating %s's match list @ %d,store %d matches", summoner.Name, cnt, len(matches)))
 				if len(matches) == 0 {
 					continue
 				}
@@ -217,7 +225,11 @@ func (p *Pumper) fetchMatch() {
 		}
 	}
 }
+
 func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc, sName string) {
+	if len(matches) == 0 {
+		return
+	}
 	loCode := utils.ConverHostLoCode(loc)
 	ctx := context.Background()
 	key := fmt.Sprintf("/match/%s", loc)
@@ -226,6 +238,11 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc, sName string)
 	cmds := make([]*redis.IntCmd, 0, len(matches))
 	
 	for _, m := range matches {
+		if m == nil || m.Info == nil || len(m.Info.Teams) != 2 ||
+			len(m.Info.Participants) < 8 {
+			p.logger.Error(sName + "'s wrong match")
+			continue
+		}
 		gameId := uint(m.Info.GameID)
 		m.ID = loCode*1e11 + gameId
 		m.Info.Teams[0].ID = loCode*1e12 + gameId*10 + 1
@@ -247,3 +264,4 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDto, loc, sName string)
 	}
 	return
 }
+

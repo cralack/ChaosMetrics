@@ -159,7 +159,7 @@ func (p *Pumper) fetchEntry() {
 	// catch panic
 	defer func() {
 		if err := recover(); err != nil {
-			p.logger.Error("fetcher panic",
+			p.logger.Panic("fetcher panic",
 				zap.Any("err", err),
 				zap.String("stack", string(debug.Stack())))
 		}
@@ -254,7 +254,9 @@ func (p *Pumper) fetchEntry() {
 }
 
 func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {
-	
+	if len(entries) == 0 {
+		return
+	}
 	tmp := make([]*riotmodel.LeagueEntryDTO, 0, p.stgy.MaxSize)
 	loCode := utils.ConverHostLoCode(loc)
 	

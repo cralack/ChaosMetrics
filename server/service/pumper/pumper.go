@@ -95,8 +95,6 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 			}
 			if err := p.db.Create(matches).Error; err != nil {
 				p.logger.Error(result.Brief+"'s match store failed", zap.Error(err))
-			} else {
-				p.logger.Info(fmt.Sprintf("%s's match store succeed", result.Brief))
 			}
 		}
 	}

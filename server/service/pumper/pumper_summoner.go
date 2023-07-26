@@ -92,7 +92,6 @@ func (p *Pumper) loadSummoner(loc string) {
 func (p *Pumper) createSummonerURL(loCode uint) {
 	loc, host := utils.ConvertHostURL(loCode)
 	endTier, endRank := ConvertRankToStr(p.stgy.TestEndMark[0], p.stgy.TestEndMark[1])
-	// p.loadEntrie(loc)
 	p.loadSummoner(loc)
 	go p.summonerCounter(loc)
 	// expand from entry
@@ -142,7 +141,7 @@ func (p *Pumper) fetchSummoner() {
 	
 	defer func() {
 		if err := recover(); err != nil {
-			p.logger.Error("fetcher panic",
+			p.logger.Panic("fetcher panic",
 				zap.Any("err", err),
 				zap.String("stack", string(debug.Stack())))
 		}
@@ -234,23 +233,16 @@ func (p *Pumper) summonerCounter(loc string) {
 		delta int
 		rate  float32
 	)
-	ticker := time.NewTicker(time.Second * 15)
-	total = len(p.sumnMap[loc])
+	ticker := time.NewTicker(time.Second * 5)
+	total = len(p.entryMap[loc])
 	for {
 		<-ticker.C
-		delta = cur
-		cur = 0
-		for _, s := range p.sumnMap[loc] {
-			if s.Name == "" {
-				cur++
-			}
-		}
-		delta -= cur
-		rate = float32(total-cur) / float32(total)
+		delta = len(p.sumnMap[loc]) - cur
+		cur = len(p.sumnMap[loc])
+		rate = float32(cur) / float32(total)
 		if delta > 0 {
 			p.logger.Info(fmt.Sprintf("fetch %s %05.02f%% (%04d/%04d) summoners",
-				loc, rate*100, total-cur, total))
+				loc, rate*100, cur, total))
 		}
-		
 	}
 }
