@@ -208,7 +208,7 @@ func (p *Pumper) fetchMatch() {
 						}
 						// remake?
 						if tmp.Info.GameCreation.IsZero() {
-							p.logger.Info("wrong match")
+							p.logger.Info(summoner.Name + "'s remake match")
 						} else {
 							matches = append(matches, tmp)
 						}
