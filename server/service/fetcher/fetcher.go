@@ -33,6 +33,8 @@ var _ Fetcher = &BrowserFetcher{}
 
 func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 	conf := global.GVA_CONF.Fetcher
+	conf.RequireRateLimiter = true
+	
 	for _, opt := range opts {
 		opt(conf)
 	}
@@ -50,7 +52,7 @@ func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 	}
 	// init rate limiter
 	limiter, err := rater.NewSlidingWindowLimiter(
-		conf.RateLimiterConfig.Each2Min-2,
+		conf.RateLimiterConfig.Each2Min,
 		time.Minute*2,
 		time.Second/time.Duration(conf.RateLimiterConfig.EachSec),
 	)
@@ -90,8 +92,10 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	req.Header.Set("Origin", header.Origin)
 	req.Header.Set("X-Riot-Token", header.XRiotToken)
 	
-	// require pass signal
-	<-f.pass
+	// require pass signal(rate limiter)
+	if f.Conf.RequireRateLimiter {
+		<-f.pass
+	}
 	
 	// run req
 	resp, err := client.Do(req)
@@ -99,7 +103,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New(url + resp.Status)
+		return nil, errors.New(resp.Status)
 	}
 	defer func() {
 		if cerr := resp.Body.Close(); err != nil {
@@ -118,6 +122,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	
 	return body, nil
 }
+
 func (f *BrowserFetcher) TryAcquire() bool {
 	return f.RaterLimiter.TryAcquire()
 }

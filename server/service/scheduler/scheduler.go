@@ -1,6 +1,7 @@
 package scheduler
 
 type Scheduler interface {
+	Count() int
 	Schedule()
 	Push(...*Task)
 	Pull() *Task
@@ -26,6 +27,10 @@ func NewSchdule() *RiotDTOSchedule {
 		RequestCh: make(chan *Task),
 		WorkerCh:  make(chan *Task),
 	}
+}
+
+func (s *RiotDTOSchedule) Count() int {
+	return len(s.ReqQueue)
 }
 
 func (s *RiotDTOSchedule) Push(reqs ...*Task) {

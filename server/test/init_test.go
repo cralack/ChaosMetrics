@@ -10,9 +10,9 @@ import (
 // basic pkg init test
 func Test_config(t *testing.T) {
 	conf := global.GVA_CONF
-	logger.Info(conf.Env)
-	logger.Info(conf.DirTree.WorkDir)
-	logger.Info(conf.Dbconf.Driver)
-	logger.Info(strconv.Itoa(conf.LogConf.MaxSize))
-	logger.Info(strconv.Itoa(int(conf.Fetcher.Timeout)))
+	logger.Debug(conf.Env)
+	logger.Debug(conf.DirTree.WorkDir)
+	logger.Debug(conf.Dbconf.Driver)
+	logger.Debug(strconv.Itoa(conf.LogConf.MaxSize))
+	logger.Debug(strconv.Itoa(int(conf.Fetcher.Timeout)))
 }

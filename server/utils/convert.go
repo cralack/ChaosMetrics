@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
 	"strings"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -130,4 +133,28 @@ func ConvertSliceToStr(s []string) string {
 
 func ConvertStrToSlice(str string) []string {
 	return strings.Split(str, ",")
+}
+
+// ConvertVersionToIdx return a 4 digit str xxyy
+func ConvertVersionToIdx(version string) (uint, error) {
+	versions := strings.Split(version, ".")
+	if len(versions) < 3 {
+		return 0, errors.New("wrong version")
+	}
+	versionNums := make([]int, 0, 2)
+	for _, str := range versions[:2] {
+		if num, err := strconv.Atoi(str); err != nil {
+			return 0, err
+		} else {
+			versionNums = append(versionNums, num)
+		}
+	}
+	
+	str := fmt.Sprintf("%02d%02d", versionNums[0], versionNums[1])
+	idx, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, err
+	}
+	
+	return uint(idx), nil
 }

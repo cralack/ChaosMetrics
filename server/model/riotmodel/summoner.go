@@ -1,11 +1,11 @@
 package riotmodel
 
 import (
-	"encoding"
 	"encoding/json"
 	"time"
 	
 	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/model"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -13,7 +13,6 @@ import (
 type SummonerDTO struct {
 	gorm.Model
 	Matches string `gorm:"column:matches"`
-	// Matches []*MatchDto `gorm:"many2many:match_summoners"` // 比赛列表，多对多关系 FIFO
 	
 	Loc            string    `gorm:"column:loc;type:varchar(100)" json:"loc"`
 	AccountID      string    `gorm:"column:account_id;type:varchar(100)" json:"accountId"`      // 加密的账号ID，最长为56个字符
@@ -26,10 +25,11 @@ type SummonerDTO struct {
 	TournamentID   string    `gorm:"column:tournament_id;type:varchar(100)"`                    // 锦标赛ID
 }
 
-// check implement
-var _ DTO = &SummonerDTO{}
+func (s *SummonerDTO) TableName() string {
+	return "summoners"
+}
 
-func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
+func (s *SummonerDTO) UnmarshalJSON(data []byte) error {
 	var f map[string]interface{}
 	
 	err := json.Unmarshal(data, &f)
@@ -40,42 +40,42 @@ func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
 		switch k {
 		// gorm.Model
 		case "ID":
-			p.ID = uint(v.(float64))
+			s.ID = uint(v.(float64))
 		case "DeletedAt":
 			if v != nil {
-				p.DeletedAt = v.(gorm.DeletedAt)
+				s.DeletedAt = v.(gorm.DeletedAt)
 			}
 		case "CreatedAt":
-			if p.CreatedAt, err = convertTime(v, time.RFC3339); err != nil {
+			if s.CreatedAt, err = model.ConvertTime(v, time.RFC3339); err != nil {
 				global.GVA_LOG.Error("parse failed", zap.Error(err))
 				return err
 			}
 		case "UpdatedAt":
-			if p.UpdatedAt, err = convertTime(v, time.RFC3339); err != nil {
+			if s.UpdatedAt, err = model.ConvertTime(v, time.RFC3339); err != nil {
 				global.GVA_LOG.Error("parse failed", zap.Error(err))
 				return err
 			}
 		
 		case "accountId":
-			p.AccountID = v.(string)
+			s.AccountID = v.(string)
 		case "profileIconId":
-			p.ProfileIconID = int(v.(float64))
+			s.ProfileIconID = int(v.(float64))
 		case "revisionDate":
 			// Assuming revisionDate is in milliseconds
 			if revisionDateMillis, ok := v.(float64); ok {
-				p.RevisionDate = time.Unix(int64(revisionDateMillis)/1000, 0).UTC()
-			} else if p.RevisionDate, err = convertTime(v, time.RFC3339); err != nil {
+				s.RevisionDate = time.Unix(int64(revisionDateMillis)/1000, 0).UTC()
+			} else if s.RevisionDate, err = model.ConvertTime(v, time.RFC3339); err != nil {
 				global.GVA_LOG.Error("parse failed", zap.Error(err))
 				return err
 			}
 		case "name":
-			p.Name = v.(string)
+			s.Name = v.(string)
 		case "id":
-			p.MetaSummonerID = v.(string)
+			s.MetaSummonerID = v.(string)
 		case "puuid":
-			p.PUUID = v.(string)
+			s.PUUID = v.(string)
 		case "summonerLevel":
-			p.SummonerLevel = int(v.(float64))
+			s.SummonerLevel = int(v.(float64))
 			
 		}
 	}
@@ -83,14 +83,9 @@ func (p *SummonerDTO) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-var _ encoding.BinaryMarshaler = &SummonerDTO{}
-
-func (p *SummonerDTO) MarshalBinary() ([]byte, error) {
-	return json.Marshal(p)
+func (s *SummonerDTO) MarshalBinary() ([]byte, error) {
+	return json.Marshal(s)
 }
-
-var _ encoding.BinaryUnmarshaler = &SummonerDTO{}
-
-func (p *SummonerDTO) UnmarshalBinary(bt []byte) error {
-	return json.Unmarshal(bt, p)
+func (s *SummonerDTO) UnmarshalBinary(bt []byte) error {
+	return json.Unmarshal(bt, s)
 }

@@ -16,8 +16,8 @@ import (
 type Pumper struct {
 	logger      *zap.Logger
 	db          *gorm.DB
-	lock        *sync.Mutex
 	rdb         *redis.Client
+	lock        *sync.Mutex
 	fetcher     fetcher.Fetcher
 	scheduler   scheduler.Scheduler
 	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
@@ -26,7 +26,7 @@ type Pumper struct {
 	out         chan *ParseResult
 	entrieIdx   []uint
 	summonerIdx []uint
-	stgy        *RiotStrategy
+	stgy        *Strategy
 }
 
 type ParseResult struct {
@@ -35,32 +35,30 @@ type ParseResult struct {
 	Data  interface{}
 }
 
-func NewPumper(token string, opts ...Option) *Pumper {
+func NewPumper(opts ...Option) *Pumper {
 	stgy := defaultStrategy
 	for _, opt := range opts {
 		opt(stgy)
 	}
-	logger := global.GVA_LOG
-	db := global.GVA_DB
-	eIdx := make([]uint, 16)
-	sIdx := make([]uint, 16)
 	
 	return &Pumper{
-		logger:      logger,
-		db:          db,
-		rdb:         global.GVA_RDB,
-		lock:        &sync.Mutex{},
-		entrieIdx:   eIdx,
-		summonerIdx: sIdx,
+		logger: global.GVA_LOG,
+		db:     global.GVA_DB,
+		rdb:    global.GVA_RDB,
+		lock:   &sync.Mutex{},
+		fetcher: fetcher.NewBrowserFetcher(
+			fetcher.WithAPIToken(stgy.Token),
+		),
+		scheduler: scheduler.NewSchdule(),
+		
+		entrieIdx:   make([]uint, 16),
+		summonerIdx: make([]uint, 16),
 		out:         make(chan *ParseResult),
 		entryMap:    make(map[string]map[string]*riotmodel.LeagueEntryDTO),
 		sumnMap:     make(map[string]map[string]*riotmodel.SummonerDTO),
 		matchMap:    make(map[string]map[string]bool),
-		fetcher: fetcher.NewBrowserFetcher(
-			fetcher.WithAPIToken(token),
-		),
-		scheduler: scheduler.NewSchdule(),
-		stgy:      stgy,
+		
+		stgy: stgy,
 	}
 }
 
@@ -89,7 +87,7 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 			}
 		
 		case "match":
-			matches := result.Data.([]*riotmodel.MatchDto)
+			matches := result.Data.([]*riotmodel.MatchDB)
 			if len(matches) == 0 {
 				continue
 			}
@@ -104,6 +102,7 @@ func (p *Pumper) UpdateAll() {
 	exit := make(chan struct{})
 	go p.Schedule()
 	go p.handleResult(exit)
+	
 	p.UpdateEntries(exit)
 	p.UpdateSumoner(exit)
 	p.UpdateMatch(exit)
@@ -158,4 +157,49 @@ func ConvertRankToStr(tier, div uint) (string, string) {
 	}
 	
 	return "", ""
+}
+
+func ConvertStrToRank(tierStr, divStr string) (uint, uint) {
+	var tier uint
+	var div uint
+	
+	switch tierStr {
+	case "CHALLENGER":
+		tier = riotmodel.CHALLENGER
+	case "GRANDMASTER":
+		tier = riotmodel.GRANDMASTER
+	case "MASTER":
+		tier = riotmodel.MASTER
+	case "DIAMOND":
+		tier = riotmodel.DIAMOND
+	case "EMERALD":
+		tier = riotmodel.EMERALD
+	case "PLATINUM":
+		tier = riotmodel.PLATINUM
+	case "GOLD":
+		tier = riotmodel.GOLD
+	case "SILVER":
+		tier = riotmodel.SILVER
+	case "BRONZE":
+		tier = riotmodel.BRONZE
+	case "IRON":
+		tier = riotmodel.IRON
+	default:
+		return 0, 0
+	}
+	
+	switch divStr {
+	case "I":
+		div = 1
+	case "II":
+		div = 2
+	case "III":
+		div = 3
+	case "IV":
+		div = 4
+	default:
+		return 0, 0
+	}
+	
+	return tier, div
 }

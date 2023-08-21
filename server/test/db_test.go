@@ -80,7 +80,7 @@ func Test_match_store(t *testing.T) {
 		t.Fatal(err)
 	}
 	// parse
-	var match *riotmodel.MatchDto
+	var match *riotmodel.MatchDTO
 	err = json.Unmarshal(buff, &match)
 	if err != nil {
 		t.Fatal(err)
@@ -93,7 +93,7 @@ func Test_match_store(t *testing.T) {
 	t.Log("all model store succeed")
 	
 	// load data 1
-	var tar1 *riotmodel.MatchDto
+	var tar1 *riotmodel.MatchDTO
 	if err = db.Where("meta_match_id", "TW2_81882122").Preload(
 		clause.Associations).First(&tar1).Error; err != nil {
 		t.Log(err)
@@ -101,7 +101,7 @@ func Test_match_store(t *testing.T) {
 	t.Log(tar1.Metadata.DataVersion)
 	
 	// load data 2
-	tar2 := &riotmodel.MatchDto{
+	tar2 := &riotmodel.MatchDTO{
 		Metadata: &riotmodel.MetadataDto{
 			MetaMatchID: "TW2_81882122",
 		},
@@ -202,7 +202,7 @@ func Test_isExist(t *testing.T) {
 			entryExistMap[k] = false
 		}
 	}
-	logger.Info("ok")
+	logger.Debug("ok")
 	
 }
 

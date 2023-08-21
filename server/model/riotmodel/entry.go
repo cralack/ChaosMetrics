@@ -1,7 +1,6 @@
 package riotmodel
 
 import (
-	"encoding"
 	"encoding/json"
 	
 	"gorm.io/gorm"
@@ -43,14 +42,14 @@ type MiniSeriesDTO struct {
 	Wins     int    `json:"wins" gorm:"column:wins"`         // 小系列赛中的胜场次
 }
 
-var _ encoding.BinaryMarshaler = &LeagueEntryDTO{}
-
-func (p *LeagueEntryDTO) MarshalBinary() ([]byte, error) {
-	return json.Marshal(p)
+func (e *LeagueEntryDTO) TableName() string {
+	return "entries"
 }
 
-var _ encoding.BinaryUnmarshaler = &LeagueEntryDTO{}
-
-func (p *LeagueEntryDTO) UnmarshalBinary(bt []byte) error {
-	return json.Unmarshal(bt, p)
+func (e *LeagueEntryDTO) MarshalBinary() ([]byte, error) {
+	return json.Marshal(e)
 }
+func (e *LeagueEntryDTO) UnmarshalBinary(bt []byte) error {
+	return json.Unmarshal(bt, e)
+}
+

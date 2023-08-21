@@ -1,7 +1,12 @@
 package gormdb
 
 import (
+	"log"
+	"os"
+	"time"
+	
 	"github.com/cralack/ChaosMetrics/server/global"
+	"gorm.io/gorm/logger"
 	
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -34,8 +39,16 @@ func GetDB() (*gorm.DB, error) {
 			},
 		}
 	} else {
+		defaultLogger := logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
+			SlowThreshold:             500 * time.Millisecond,
+			LogLevel:                  logger.Warn,
+			IgnoreRecordNotFoundError: false,
+			Colorful:                  true,
+		})
+		
 		gormConf = &gorm.Config{
 			// logger: logger.Default.LogMode(logger.Silent), // 禁用日志输出
+			Logger: defaultLogger,
 		}
 	}
 	// get gormdb con

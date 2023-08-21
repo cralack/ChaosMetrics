@@ -6,7 +6,6 @@ import (
 	
 	"github.com/cralack/ChaosMetrics/server/global"
 	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 type MetadataDto struct {
@@ -16,26 +15,25 @@ type MetadataDto struct {
 }
 
 type InfoDto struct {
-	Loc                string            `json:"loc" gorm:"column:loc;type:varchar(20)"`                         // 游戏所在服务器
-	GameCreation       time.Time         `json:"gameCreation" gorm:"column:game_creation"`                       // 游戏创建时间戳
-	GameDuration       int               `json:"gameDuration" gorm:"column:game_duration;type:smallint"`         // 游戏持续时间
-	GameEndTimestamp   time.Time         `json:"gameEndTimestamp" gorm:"column:game_end_timestamp"`              // 游戏结束时间戳
-	GameID             int               `json:"gameId" gorm:"column:game_id;type:int"`                          // 游戏ID
-	GameMode           string            `json:"gameMode" gorm:"column:game_mode;type:varchar(100)"`             // 游戏模式
-	GameName           string            `json:"gameName" gorm:"column:game_name;type:varchar(100)"`             // 游戏名称
-	GameStartTimestamp time.Time         `json:"gameStartTimestamp" gorm:"column:game_start_timestamp"`          // 游戏开始时间戳
-	GameType           string            `json:"gameType" gorm:"column:game_type;type:varchar(100)"`             // 游戏类型
-	GameVersion        string            `json:"gameVersion" gorm:"column:game_version;type:varchar(100)"`       // 游戏版本
-	MapID              int               `json:"mapId" gorm:"column:map_id;type:smallint"`                       // 地图ID
-	Participants       []*ParticipantDto `json:"participants" gorm:"foreignKey:match_id"`                        // 参与者列表
-	PlatformID         string            `json:"platformId" gorm:"column:platform_id;type:varchar(100)"`         // 比赛所在平台
-	QueueID            int               `json:"queueId" gorm:"column:queue_id;type:smallint"`                   // 队列ID
-	Teams              []*TeamDto        `json:"teams"  gorm:"foreignKey:match_id"`                              // 队伍列表
-	TournamentCode     string            `json:"tournamentCode" gorm:"column:tournament_code;type:varchar(100)"` // 生成比赛的锦标赛代码
+	Loc                string         `json:"loc" gorm:"column:loc;type:varchar(20)"`                         // 游戏所在服务器
+	GameCreation       time.Time      `json:"gameCreation" gorm:"column:game_creation"`                       // 游戏创建时间戳
+	GameDuration       int            `json:"gameDuration" gorm:"column:game_duration;type:smallint"`         // 游戏持续时间
+	GameEndTimestamp   time.Time      `json:"gameEndTimestamp" gorm:"column:game_end_timestamp"`              // 游戏结束时间戳
+	GameID             int            `json:"gameId" gorm:"column:game_id;type:int"`                          // 游戏ID
+	GameMode           string         `json:"gameMode" gorm:"column:game_mode;type:varchar(100)"`             // 游戏模式
+	GameName           string         `json:"gameName" gorm:"column:game_name;type:varchar(100)"`             // 游戏名称
+	GameStartTimestamp time.Time      `json:"gameStartTimestamp" gorm:"column:game_start_timestamp"`          // 游戏开始时间戳
+	GameType           string         `json:"gameType" gorm:"column:game_type;type:varchar(100)"`             // 游戏类型
+	GameVersion        string         `json:"gameVersion" gorm:"column:game_version;type:varchar(100)"`       // 游戏版本
+	MapID              int            `json:"mapId" gorm:"column:map_id;type:smallint"`                       // 地图ID
+	Participants       []*Participant `json:"participants" gorm:"foreignKey:match_id"`                        // 参与者列表
+	PlatformID         string         `json:"platformId" gorm:"column:platform_id;type:varchar(100)"`         // 比赛所在平台
+	QueueID            int            `json:"queueId" gorm:"column:queue_id;type:smallint"`                   // 队列ID
+	Teams              []*Team        `json:"teams"  gorm:"foreignKey:match_id"`                              // 队伍列表
+	TournamentCode     string         `json:"tournamentCode" gorm:"column:tournament_code;type:varchar(100)"` // 生成比赛的锦标赛代码
 }
 
-type TeamDto struct {
-	gorm.Model
+type Team struct {
 	MatchID     uint   `gorm:"column:match_id"`                              // 匹配matchDTO_id
 	MetaMatchID string `gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
 	
@@ -127,8 +125,7 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			for _, par := range p.Participants {
-				par.PerksORM = &PerksORM{}
-				par.PerksMeta.parsePerksMeta(par.PerksORM)
+				par.PerksSTR = par.PerksMeta.parsePerksMeta()
 			}
 		case "platformId":
 			p.PlatformID = v.(string)

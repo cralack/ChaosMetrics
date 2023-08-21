@@ -18,8 +18,6 @@ type ChampionMasteryDto struct {
 	TokensEarned                 int       `json:"tokensEarned"`                 // 当前英雄等级下获得的代币数。当英雄等级提升时，tokensEarned重置为0。
 }
 
-var _ DTO = &ChampionMasteryDto{}
-
 func (p *ChampionMasteryDto) UnmarshalJSON(data []byte) error {
 	var f map[string]interface{}
 	err := json.Unmarshal(data, &f)

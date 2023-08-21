@@ -14,9 +14,6 @@ package riotmodel
 // 	UnmarshalJSON([]byte) error
 // }
 
-type DTO interface {
-	UnmarshalJSON(data []byte) error
-}
 
 // TIER LEVEL
 const (
@@ -97,4 +94,12 @@ const (
 	LANG_zh_MY        // Chinese (Malaysia)
 	LANG_zh_CN        // Chinese (China)
 	LANG_zh_TW        // Chinese (Taiwan)
+)
+
+const (
+	CLASSIC     = iota // 召唤师峡谷 mapid:11
+	ARAM               // 大乱斗 mapid:12
+	NEXUSBLITZ         // 扭曲丛林？ mapid:21
+	CONVERGENCE        // ??? mapid:22
+	CHERRY             // 斗魂竞技场 mapid:30
 )

@@ -10,9 +10,6 @@ type ChampionRotationDTO struct {
 	MaxNewPlayerLevel            int   `json:"maxNewPlayerLevel"`
 }
 
-// check implement
-var _ DTO = &ChampionRotationDTO{}
-
 func (p *ChampionRotationDTO) UnmarshalJSON(data []byte) error {
 	var aux struct {
 		FreeChampionIds              []int `json:"freeChampionIds"`

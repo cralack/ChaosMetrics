@@ -91,13 +91,13 @@ func (p *Pumper) loadSummoner(loc string) {
 
 func (p *Pumper) createSummonerURL(loCode uint) {
 	loc, host := utils.ConvertHostURL(loCode)
-	endTier, endRank := ConvertRankToStr(p.stgy.TestEndMark[0], p.stgy.TestEndMark[1])
 	p.loadSummoner(loc)
 	go p.summonerCounter(loc)
 	// expand from entry
 	for sID, entry := range p.entryMap[loc] {
+		curTier, curRank := ConvertStrToRank(entry.Tier, entry.Rank)
 		if _, has := p.sumnMap[loc][sID]; has ||
-			(entry.Tier > endTier || (entry.Tier == endTier && entry.Rank > endRank)) {
+			(curTier > p.stgy.TestEndMark[0] || (curTier == p.stgy.TestEndMark[0] && curRank > p.stgy.TestEndMark[1])) {
 			continue
 		}
 		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
@@ -205,10 +205,27 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 		p.rdb.HSet(context.Background(), "/summoner/"+loc, sumn.MetaSummonerID, sumn)
 	}
 	
-	p.out <- &ParseResult{
-		Type: "summoners",
-		Data: summoners,
+	// check oversize && split
+	if len(summoners) < p.stgy.MaxSize {
+		p.out <- &ParseResult{
+			Type: "summoners",
+			Data: summoners,
+		}
+	} else {
+		totalSize := len(summoners)
+		chunkSize := p.stgy.MaxSize
+		for i := 0; i < totalSize; i += chunkSize {
+			end := i + chunkSize
+			if end > totalSize {
+				end = totalSize
+			}
+			p.out <- &ParseResult{
+				Type: "summoners",
+				Data: summoners[i:end],
+			}
+		}
 	}
+	
 	return
 }
 
@@ -233,7 +250,7 @@ func (p *Pumper) summonerCounter(loc string) {
 		delta int
 		rate  float32
 	)
-	ticker := time.NewTicker(time.Second * 5)
+	ticker := time.NewTicker(time.Second * 30)
 	total = len(p.entryMap[loc])
 	for {
 		<-ticker.C

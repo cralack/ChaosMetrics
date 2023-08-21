@@ -7,11 +7,14 @@ import (
 	"os"
 	"sort"
 	"testing"
+	"time"
+	"unsafe"
 	
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
+	"gorm.io/gorm/clause"
 )
 
 func Test_parse_summoners(t *testing.T) {
@@ -45,12 +48,12 @@ func Test_parse_summoners(t *testing.T) {
 	
 	// gorm create
 	if err := db.Create(summoners).Error; err != nil {
-		logger.Info("db create summoners failed")
+		logger.Debug("orm create summoners failed")
 	}
 	// gorm read
 	var tar []*riotmodel.SummonerDTO
 	if err = db.Find(&tar).Error; err != nil {
-		logger.Error("db ")
+		logger.Error("orm ")
 	}
 	
 	// redis create
@@ -62,7 +65,7 @@ func Test_parse_summoners(t *testing.T) {
 		cmds = append(cmds, pipe.HSet(ctx, key, s.MetaSummonerID))
 	}
 	if err = rdb.HSet(ctx, key, summoners[0].MetaSummonerID, summoners[0]).Err(); err != nil {
-		logger.Info("")
+		logger.Debug("")
 	}
 	if _, err = pipe.Exec(ctx); err != nil {
 		logger.Error("redis create summoners failed")
@@ -132,14 +135,14 @@ func Test_parse_match(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://sea.api.riotgames.com/lol/match/v5/matches/TW2_81882122"
 	// buff, err := f.Get(url)
-
+	
 	// load local json data
 	buff, err := os.ReadFile(path + "match.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
 	// parse
-	var res *riotmodel.MatchDto
+	var res *riotmodel.MatchDTO
 	err = json.Unmarshal(buff, &res)
 	if err != nil {
 		t.Fatal(err)
@@ -161,6 +164,8 @@ func Test_parse_match(t *testing.T) {
 	// Find the participant with FirstBloodKill
 	var idx int
 	for i, p := range participants {
+		// fmt.Printf("%s 's TimeCCingOthers:%d\n\r", p.ChampionName, p.TimeCCingOthers)
+		// fmt.Printf("%s 's TotalTimeCCDealt:%d\n\r", p.ChampionName, p.TotalTimeCCDealt)
 		if p.FirstBloodKill {
 			fmt.Println("Champion Name of First Blood Kill:",
 				p.ChampionName)
@@ -175,24 +180,27 @@ func Test_parse_match(t *testing.T) {
 		player.Kills, player.Deaths, player.Assists)
 	fmt.Println("Total Damage Dealt to Champions by First Blood Player:",
 		player.TotalDamageDealtToChampions)
-	fmt.Println("First Blood Player's match ID:",
-		player.MetaMatchID)
 	
 	// gorm create
 	if err := db.Create(res).Error; err != nil {
-		logger.Info("db create match failed")
+		logger.Debug("orm create match failed")
 	}
 	// gorm read
-	var tar *riotmodel.MatchDto
-	if err = db.Where("meta_match_id = ?", "TW2_81882122").Find(&tar).Error; err != nil {
-		logger.Error("db read match failed")
+	var tar *riotmodel.MatchDTO
+	if err = db.Where("meta_match_id = ?", "TW2_81882122").Preload(
+		clause.Associations).Find(&tar).Error; err != nil {
+		logger.Error("orm read match failed")
 	} else {
-		logger.Info(fmt.Sprintf("res == tar:%v", res.Metadata.MetaMatchID == tar.Metadata.MetaMatchID))
+		logger.Debug(fmt.Sprintf("res == tar:%v", len(res.Info.Participants) == len(tar.Info.Participants)))
 	}
-	// gorm delete
-	if err := db.Delete(&riotmodel.MatchDto{}, "meta_match_id = ?", "TW2_81882122").Error; err != nil {
-		logger.Error("db delete match failed ")
-	}
+	// gorm soft delete
+	// if err = orm.Select(clause.Associations).Delete(tar).Error; err != nil {
+	// 	logger.Error("orm soft delete match failed ")
+	// }
+	// gorm hard delete
+	// if err = orm.Unscoped().Select(clause.Associations).Delete(tar).Error; err != nil {
+	// 	logger.Error("orm hard delete match failed ")
+	// }
 	
 	// redis create
 	ctx := context.Background()
@@ -214,6 +222,84 @@ func Test_parse_match(t *testing.T) {
 	// redis delete
 	if err := rdb.HDel(ctx, key, tar.Metadata.MetaMatchID).Err(); err != nil {
 		logger.Error("redis delete match failed")
+	}
+}
+
+func Test_parse_match_list(t *testing.T) {
+	const (
+		maxMatch = 20
+		loc      = riotmodel.TW2
+	)
+	var (
+		buff []byte
+		err  error
+		list []string
+	)
+	puuid := "6RtCOQdb0rlWO0S714_nYds_xDw2-bwrB8IsVzJbAQi8uBfosVT5UyfayA9oirdE5pCFMEFB6TkAlA"
+	host := utils.ConvertPlatformToHost(loc)
+	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
+	endTime := time.Now().Unix()                     // cur time unix
+	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d", startTime, endTime, maxMatch)
+	url := fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s", host, puuid, queryParams)
+	if buff, err = f.Get(url); err != nil {
+		t.Log(err)
+	}
+	
+	if err = json.Unmarshal(buff, &list); err != nil {
+		t.Log(err)
+	}
+	t.Log(list)
+	ques := make([]int, 0, 20)
+	for _, matchId := range list {
+		url := fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchId)
+		if buff, err = f.Get(url); err != nil {
+			t.Log(err)
+		}
+		var match *riotmodel.MatchDTO
+		if err = json.Unmarshal(buff, &match); err != nil {
+			t.Log(err)
+		}
+		ques = append(ques, match.Info.QueueID)
+	}
+	t.Log(ques)
+}
+
+func Test_parse_matchs(t *testing.T) {
+	var (
+		buff  []byte
+		err   error
+		match *riotmodel.MatchDTO
+	)
+	matchList := []string{"TW2_97186217", "TW2_97161015", "TW2_97131970", "TW2_97119501", "TW2_97106562", "TW2_78013194", "TW2_71558421", "TW2_59549103", "TW2_59539001", "TW2_59527321", "TW2_59516488", "TW2_59509451", "TW2_59502083", "TW2_42926206", "TW2_30891005", "TW2_30846799", "TW2_25739350", "TW2_25511607", "TW2_25501389", "TW2_25454450"}
+	for _, matchId := range matchList {
+		buff, err = f.Get("https://sea.api.riotgames.com/lol/match/v5/matches/" + matchId)
+		if err != nil {
+			t.Log(err)
+		}
+		if err = json.Unmarshal(buff, &match); err != nil {
+			t.Log(err)
+		}
+	}
+}
+
+func Test_parse_matchLine(t *testing.T) {
+	// fetching remote JSON data (3~5 seconds per request)
+	// url := "https://sea.api.riotgames.com/lol/match/v5/matches/TW2_81882122/timeline"
+	// buff, err := f.Get(url)
+	
+	// load local json data
+	buff, err := os.ReadFile(path + "match_timeline.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	
+	// parse
+	var res *riotmodel.MatchTimelineDTO
+	err = json.Unmarshal(buff, &res)
+	if err != nil {
+		t.Fatal(err)
+	} else {
+		t.Log(unsafe.Sizeof(res))
 	}
 }
 
@@ -275,6 +361,10 @@ func Test_parse_champion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	champion := res.Data[championName]
+	if err := db.Create(champion).Error; err != nil {
+		t.Log(err)
+	}
 }
 
 func Test_parse_champions(t *testing.T) {
@@ -298,7 +388,7 @@ func Test_parse_version(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var res riotmodel.Version
+	var res []string
 	err = json.Unmarshal(buff, &res)
 	if err != nil {
 		t.Fatal(err)

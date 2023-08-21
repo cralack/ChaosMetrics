@@ -3,6 +3,7 @@ package test
 import (
 	"github.com/cralack/ChaosMetrics/server/global"
 	_ "github.com/cralack/ChaosMetrics/server/init"
+	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/redis/go-redis/v9"
@@ -25,18 +26,20 @@ func init() {
 	rdb = global.GVA_RDB
 	logger = global.GVA_LOG
 	// wipe gdb && rdb
-	// global.GVA_DB.Exec("DROP TABLE IF EXISTS match_dtos, match_summoners, participant_dtos, summoner_dtos, team_dtos, league_entry_dtos")
+	global.GVA_DB.Exec("DROP TABLE IF EXISTS analyzed_champions")
 	// global.GVA_RDB.FlushDB(context.Background())
 	// AutoMigrate
 	if err := db.AutoMigrate(
 		&riotmodel.LeagueEntryDTO{},
 		&riotmodel.SummonerDTO{},
-		&riotmodel.MatchDto{},
-		&riotmodel.ParticipantDto{},
-		&riotmodel.TeamDto{},
+		// match
+		&riotmodel.MatchDB{},
+		&riotmodel.ParticipantDB{},
+		
+		&anres.Champion{},
 	); err != nil {
 		logger.Error("init gormdb model failed", zap.Error(err))
 	} else {
-		logger.Info("init gormdb model succeed")
+		logger.Debug("init gormdb model succeed")
 	}
 }

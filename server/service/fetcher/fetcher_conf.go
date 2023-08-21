@@ -11,3 +11,9 @@ func WithAPIToken(token string) Option {
 		conf.HeaderConfig.XRiotToken = token
 	}
 }
+
+func WithRateLimiter(flag bool) Option {
+	return func(conf *config.FetcherConfig) {
+		conf.RequireRateLimiter = flag
+	}
+}

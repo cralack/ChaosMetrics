@@ -109,8 +109,10 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 	
 	// generate BEST URL task
 	for tier = riotmodel.CHALLENGER; tier <= riotmodel.MASTER; tier++ {
+		if tier > p.stgy.TestEndMark[0] || (tier == p.stgy.TestEndMark[0] && rank > p.stgy.TestEndMark[1]) {
+			return
+		}
 		t, r := ConvertRankToStr(tier, 1)
-		
 		url = fmt.Sprintf("%s/lol/league/v4/%sleagues/by-queue/%s",
 			host, strings.ToLower(t), queStr)
 		p.scheduler.Push(&scheduler.Task{
@@ -126,12 +128,12 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 	// generate MORTAL URL task
 	for tier = riotmodel.DIAMOND; tier <= riotmodel.IRON; tier++ {
 		for rank = 1; rank <= 4; rank++ {
+			if tier > p.stgy.TestEndMark[0] || (tier == p.stgy.TestEndMark[0] && rank > p.stgy.TestEndMark[1]) {
+				return
+			}
 			t, r := ConvertRankToStr(tier, rank)
 			url = fmt.Sprintf("%s/lol/league/v4/entries/%s/%s/%s",
 				host, queStr, t, r)
-			if tier > p.stgy.TestEndMark[0] || (tier == p.stgy.TestEndMark[0] && rank > p.stgy.TestEndMark[1]) {
-				break
-			}
 			p.scheduler.Push(&scheduler.Task{
 				Key: "mortalEntry",
 				Loc: locStr,
@@ -143,6 +145,7 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 			})
 		}
 	}
+	
 }
 
 func (p *Pumper) fetchEntry() {
@@ -170,8 +173,6 @@ func (p *Pumper) fetchEntry() {
 		// fetch and parse
 		switch req.Key {
 		case "bestEntry":
-			// rate limiter
-			// <-p.Rater
 			data := req.Data.(*entryTask)
 			// api: /lol/league/v4/{BEST}leagues/by-queue/{queue}
 			if buff, err = p.fetcher.Get(data.URL); err != nil || buff == nil {
@@ -201,13 +202,20 @@ func (p *Pumper) fetchEntry() {
 				len(entries), data.Tier))
 			p.handleEntries(entries, req.Loc)
 			p.cacheEntries(entries, req.Loc)
+			if data.Tier == endTier && data.Rank == endRank {
+				p.out <- &ParseResult{
+					Type:  "finish",
+					Brief: "entry",
+					Data:  nil,
+				}
+				// *need release scheduler resource*
+				return
+			}
 		
 		case "mortalEntry":
 			page = 0
 			for {
 				page++
-				// rate limiter
-				// <-p.Rater
 				data := req.Data.(*entryTask)
 				// api: /lol/league/v4/entries/{queue}/{tier}/{division}
 				if buff, err = p.fetcher.Get(fmt.Sprintf("%s?page=%s",
@@ -242,7 +250,6 @@ func (p *Pumper) fetchEntry() {
 						// *need release scheduler resource*
 						return
 					}
-					
 					break
 				}
 				p.handleEntries(entries, req.Loc)

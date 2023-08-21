@@ -19,7 +19,7 @@ var (
 	GVA_ENV  uint
 	GVA_CONF *config.Server
 	GVA_DB   *gorm.DB
+	GVA_RDB  *redis.Client
 	GVA_VP   *viper.Viper
 	GVA_LOG  *zap.Logger
-	GVA_RDB  *redis.Client
 )

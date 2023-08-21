@@ -8,7 +8,8 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-type RiotStrategy struct {
+type Strategy struct {
+	Token         string
 	Loc           []uint        // 地区列表
 	Que           []uint        // 队列类型列表
 	TestEndMark   []uint        // 测试用终止标记
@@ -18,9 +19,10 @@ type RiotStrategy struct {
 	LifeTime      time.Duration // 缓存生命周期
 }
 
-type Option func(stgy *RiotStrategy) // RiotStrategy的配置选项
+type Option func(stgy *Strategy) // Strategy的配置选项
 
-var defaultStrategy = &RiotStrategy{
+var defaultStrategy = &Strategy{
+	Token:         "",
 	Loc:           []uint{riotmodel.TW2},             // 默认地区为台湾
 	Que:           []uint{riotmodel.RANKED_SOLO_5x5}, // 默认队列类型为排位赛5v5
 	TestEndMark:   []uint{riotmodel.DIAMOND, 1},      // 默认终止标记为钻I
@@ -33,7 +35,7 @@ var defaultStrategy = &RiotStrategy{
 
 //	Example:WithLoc(riotmodel.BR1,riotmodel.EUN1)
 func WithLoc(locs ...uint) Option {
-	return func(stgy *RiotStrategy) {
+	return func(stgy *Strategy) {
 		tmp := make([]uint, 0, 16)
 		for _, loc := range locs {
 			if 16 < loc {
@@ -49,7 +51,7 @@ func WithLoc(locs ...uint) Option {
 //	Example:WithAreaLoc(riotmodel.LOC_ALL)
 //	Example:WithAreaLoc(riotmodel.LOC_AMERICAS,riotmodel.LOC_ASIA)
 func WithAreaLoc(areas ...uint) Option {
-	return func(stgy *RiotStrategy) {
+	return func(stgy *Strategy) {
 		tmp := make([]uint, 0, 16)
 		america := []uint{
 			riotmodel.BR1,
@@ -107,7 +109,7 @@ func WithAreaLoc(areas ...uint) Option {
 
 //	Example:WithQues(riotmodel.RANKED_SOLO_5x5)
 func WithQues(ques ...uint) Option {
-	return func(stgy *RiotStrategy) {
+	return func(stgy *Strategy) {
 		tmp := make([]uint, 0, 3)
 		for _, que := range ques {
 			if 3 < que {
@@ -123,11 +125,20 @@ func WithQues(ques ...uint) Option {
 //	Example:WithEndMark(riotmodel.DIAMOND,1)
 //	Example:WithEndMark(riotmodel.IRON,4)
 func WithEndMark(tier, div uint) Option {
-	return func(stgy *RiotStrategy) {
-		if riotmodel.IRON < tier || tier < riotmodel.DIAMOND || 4 < div || div < 1 {
+	return func(stgy *Strategy) {
+		if riotmodel.IRON < tier || 4 < div || div < 1 {
 			global.GVA_LOG.Error("wrong param,end mark need DIAMON <= tier <= IRON" +
 				" && I <= div <= IV.using default option")
+			return
 		}
 		stgy.TestEndMark = []uint{tier, div}
+	}
+}
+
+func WithToken(token string) Option {
+	return func(stgy *Strategy) {
+		if token != "" {
+			stgy.Token = token
+		}
 	}
 }

@@ -39,7 +39,7 @@ func init() {
 		panic(err)
 	}
 	
-	global.GVA_LOG.Info("env pkg init succeed")
+	global.GVA_LOG.Debug("env pkg init succeed")
 	
 	// // if.need.AutoMigrate
 	// if err := global.GVA_DB.AutoMigrate(
