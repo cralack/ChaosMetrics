@@ -8,11 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/config"
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/service/rater"
-	
+
 	"go.uber.org/zap"
 )
 
@@ -34,7 +34,7 @@ var _ Fetcher = &BrowserFetcher{}
 func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 	conf := global.GVA_CONF.Fetcher
 	conf.RequireRateLimiter = true
-	
+
 	for _, opt := range opts {
 		opt(conf)
 	}
@@ -52,7 +52,7 @@ func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 	}
 	// init rate limiter
 	limiter, err := rater.NewSlidingWindowLimiter(
-		conf.RateLimiterConfig.Each2Min,
+		conf.RateLimiterConfig.Each2Min-2,
 		time.Minute*2,
 		time.Second/time.Duration(conf.RateLimiterConfig.EachSec),
 	)
@@ -62,7 +62,7 @@ func NewBrowserFetcher(opts ...Option) *BrowserFetcher {
 	if err != nil {
 		global.GVA_LOG.Error("rate limiter init failed", zap.Error(err))
 	}
-	
+
 	return &BrowserFetcher{
 		Timeout:      global.GVA_CONF.Fetcher.Timeout,
 		Logger:       global.GVA_LOG,
@@ -83,7 +83,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// set header
 	header := global.GVA_CONF.Fetcher.HeaderConfig
 	req.Header.Set("User-Agent", header.UserAgent)
@@ -91,12 +91,12 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	req.Header.Set("Accept-Charset", header.AcceptCharset)
 	req.Header.Set("Origin", header.Origin)
 	req.Header.Set("X-Riot-Token", header.XRiotToken)
-	
+
 	// require pass signal(rate limiter)
 	if f.Conf.RequireRateLimiter {
 		<-f.pass
 	}
-	
+
 	// run req
 	resp, err := client.Do(req)
 	if err != nil {
@@ -111,7 +111,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 				zap.Error(cerr))
 		}
 	}()
-	
+
 	// get buffer
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -119,7 +119,7 @@ func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 			zap.Error(err))
 		return nil, err
 	}
-	
+
 	return body, nil
 }
 
