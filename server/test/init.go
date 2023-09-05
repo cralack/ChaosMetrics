@@ -35,11 +35,11 @@ func init() {
 		// match
 		&riotmodel.MatchDB{},
 		&riotmodel.ParticipantDB{},
-		
+
 		&anres.Champion{},
 	); err != nil {
-		logger.Error("init gormdb model failed", zap.Error(err))
+		logger.Error("init xgorm model failed", zap.Error(err))
 	} else {
-		logger.Debug("init gormdb model succeed")
+		logger.Debug("init xgorm model succeed")
 	}
 }

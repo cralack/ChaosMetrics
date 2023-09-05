@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 	"testing"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"go.uber.org/zap"
@@ -23,12 +23,12 @@ type User struct {
 }
 
 func Test_db_crud_func(t *testing.T) {
-	// init gormdb
+	// init xgorm
 	db.Exec("DROP TABLE IF EXISTS users")
 	if err := db.AutoMigrate(&User{}); err != nil {
 		t.Fatal(err)
 	}
-	
+
 	// 增
 	db.Create(&User{
 		Name: "snoop",
@@ -67,7 +67,7 @@ func Test_db_crud_func(t *testing.T) {
 			"Sex":  true,
 			"Age":  19,
 		})
-	
+
 	// 删
 	db.Where("id in (?)", []int{1, 3}).Delete(&User{})
 	db.Where("id=?", 2).Unscoped().Delete(&User{})
@@ -91,7 +91,7 @@ func Test_match_store(t *testing.T) {
 		t.Log(err)
 	}
 	t.Log("all model store succeed")
-	
+
 	// load data 1
 	var tar1 *riotmodel.MatchDTO
 	if err = db.Where("meta_match_id", "TW2_81882122").Preload(
@@ -99,7 +99,7 @@ func Test_match_store(t *testing.T) {
 		t.Log(err)
 	}
 	t.Log(tar1.Metadata.DataVersion)
-	
+
 	// load data 2
 	tar2 := &riotmodel.MatchDTO{
 		Metadata: &riotmodel.MetadataDto{
@@ -109,7 +109,7 @@ func Test_match_store(t *testing.T) {
 	if err = db.Preload(clause.Associations).First(&tar2).Error; err != nil {
 		t.Log(err)
 	}
-	
+
 	/*
 		Currently it looks like the model doesn't need to change or delete data
 	*/
@@ -121,7 +121,7 @@ func Test_summoners_store(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	// parse to model
 	var summoners []*riotmodel.SummonerDTO
 	err = json.Unmarshal(buff, &summoners)
@@ -150,7 +150,7 @@ func Test_summoner_entry_store(t *testing.T) {
 			entry = e
 		}
 	}
-	
+
 	buff, err = os.ReadFile(path + "summoner.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -163,7 +163,7 @@ func Test_summoner_entry_store(t *testing.T) {
 	// entry.Summoner = summoner
 	// summoner.Entry = entry
 	db.Create(entry)
-	
+
 	var tar *riotmodel.LeagueEntryDTO
 	db.Preload(clause.Associations).First(&tar)
 	t.Log(tar.SummonerID)
@@ -184,7 +184,7 @@ func Test_isExist(t *testing.T) {
 			}
 		}
 	}
-	
+
 	entryExistMap := make(map[string]bool)
 	keys := make([]string, 0, 2*len(redisMap))
 	for k := range redisMap {
@@ -203,19 +203,19 @@ func Test_isExist(t *testing.T) {
 		}
 	}
 	logger.Debug("ok")
-	
+
 }
 
 // may need setup gorm's logger silent before test
-// server/pkg/gormdb/gormdb.go:38
-// gormdb.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
+// server/pkg/xgorm/xgorm.go:38
+// xgorm.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
 func Benchmark_db_store_1(b *testing.B) {
 	// load json
 	buff, err := os.ReadFile(path + "challenger_league.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// parse to model
 	var league *riotmodel.LeagueListDTO
 	err = json.Unmarshal(buff, &league)
@@ -254,7 +254,7 @@ func Benchmark_db_store_1(b *testing.B) {
 			b.StopTimer()
 		})
 	}
-	
+
 	/*
 										local result
 		goos: windows
@@ -264,29 +264,29 @@ func Benchmark_db_store_1(b *testing.B) {
 		Benchmark_db_store
 		Benchmark_db_store/1_entries
 		Benchmark_db_store/1_entries-12                      128          11071534 ns/op
-	
+
 		Benchmark_db_store/10_entries
 		Benchmark_db_store/10_entries-12                     120          10154584 ns/op
-	
+
 		Benchmark_db_store/0.1k_entries
 		Benchmark_db_store/0.1k_entries-12                    88          19098601 ns/op
-	
+
 		Benchmark_db_store/1k_entries
 		Benchmark_db_store/1k_entries-12                      20          76719330 ns/op
-	
+
 		Benchmark_db_store/10k_entries
 		Benchmark_db_store/10k_entries-12                     10         107688520 ns/op
 	*/
 }
 
-// gormdb.Save([size]*riotmodel.LeagueEntryDTO) size=1k~10k store benchmark
+// xgorm.Save([size]*riotmodel.LeagueEntryDTO) size=1k~10k store benchmark
 func Benchmark_db_store_2(b *testing.B) {
 	// load json
 	buff, err := os.ReadFile(path + "challenger_league.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// parse to model
 	var league *riotmodel.LeagueListDTO
 	err = json.Unmarshal(buff, &league)
@@ -323,7 +323,7 @@ func Benchmark_db_store_2(b *testing.B) {
 			b.StopTimer()
 		})
 	}
-	
+
 	/*
 											local result
 		goos: windows
@@ -333,33 +333,33 @@ func Benchmark_db_store_2(b *testing.B) {
 		Benchmark_db_store_2
 		Benchmark_db_store_2/100_entries
 		Benchmark_db_store_2/100_entries-12                   97          15569600 ns/op
-	
+
 		Benchmark_db_store_2/200_entries
 		Benchmark_db_store_2/200_entries-12                   57          22760793 ns/op
-	
+
 		Benchmark_db_store_2/300_entries
 		Benchmark_db_store_2/300_entries-12                   54          25559107 ns/op
-	
+
 		Benchmark_db_store_2/400_entries
 		Benchmark_db_store_2/400_entries-12                   54          37813459 ns/op
-	
+
 		Benchmark_db_store_2/500_entries
 		Benchmark_db_store_2/500_entries-12                   40          40469692 ns/op
-	
+
 		Benchmark_db_store_2/600_entries
 		Benchmark_db_store_2/600_entries-12                   24          59813025 ns/op
-	
+
 		Benchmark_db_store_2/700_entries
 		Benchmark_db_store_2/700_entries-12                   26          55035704 ns/op
-	
+
 		Benchmark_db_store_2/800_entries
 		Benchmark_db_store_2/800_entries-12                   21          54065381 ns/op
-	
+
 		Benchmark_db_store_2/900_entries
 		Benchmark_db_store_2/900_entries-12                   25          62689404 ns/op
-	
+
 		Benchmark_db_store_2/1000_entries
 		Benchmark_db_store_2/1000_entries-12                  19          65841416 ns/op
-	
+
 	*/
 }

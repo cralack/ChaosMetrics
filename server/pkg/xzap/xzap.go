@@ -67,13 +67,7 @@ func Zap(env uint) (*zap.Logger, error) {
 
 	zap.ReplaceGlobals(log)
 
-	// flushes buffer, if any
-	defer func() {
-		err = log.Sync()
-		if err != nil {
-			log.Error("sync failed", zap.Error(err))
-		}
-	}()
+	log.Sync()
 
 	if err != nil {
 		panic(err)

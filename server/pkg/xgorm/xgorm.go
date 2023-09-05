@@ -51,7 +51,7 @@ func GetDB() (*gorm.DB, error) {
 			Logger: defaultLogger,
 		}
 	}
-	// get xgorm con
+	// get gorm con
 	db, err = gorm.Open(
 		mysql.Open(global.GVA_CONF.Dbconf.DSN),
 		gormConf,
