@@ -1,4 +1,4 @@
-package gredis
+package xredis
 
 import (
 	"github.com/redis/go-redis/v9"

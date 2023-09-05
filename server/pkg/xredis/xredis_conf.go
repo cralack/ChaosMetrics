@@ -1,9 +1,9 @@
-package gredis
+package xredis
 
 import (
 	"errors"
 	"strconv"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/redis/go-redis/v9"
 )

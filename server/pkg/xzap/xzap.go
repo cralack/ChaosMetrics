@@ -1,4 +1,4 @@
-package zlog
+package xzap
 
 import (
 	"os"
@@ -64,9 +64,9 @@ func Zap(env uint) (*zap.Logger, error) {
 			// zap.AddStacktrace(logConf.Level),
 		)
 	}
-	
+
 	zap.ReplaceGlobals(log)
-	
+
 	// flushes buffer, if any
 	defer func() {
 		err = log.Sync()
@@ -74,10 +74,10 @@ func Zap(env uint) (*zap.Logger, error) {
 			log.Error("sync failed", zap.Error(err))
 		}
 	}()
-	
+
 	if err != nil {
 		panic(err)
 	}
-	
+
 	return log, nil
 }

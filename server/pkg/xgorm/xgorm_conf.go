@@ -1,4 +1,4 @@
-package gormdb
+package xgorm
 
 import (
 	"net"

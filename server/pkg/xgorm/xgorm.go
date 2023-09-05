@@ -1,13 +1,13 @@
-package gormdb
+package xgorm
 
 import (
 	"log"
 	"os"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"gorm.io/gorm/logger"
-	
+
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,7 +21,7 @@ func GetDB() (*gorm.DB, error) {
 	if global.GVA_CONF.Dbconf.DSN == "" {
 		err := GetDBConfig()
 		if err != nil {
-			global.GVA_LOG.Error("get gormdb config failed",
+			global.GVA_LOG.Error("get xgorm config failed",
 				zap.Error(err))
 		}
 	}
@@ -45,13 +45,13 @@ func GetDB() (*gorm.DB, error) {
 			IgnoreRecordNotFoundError: false,
 			Colorful:                  true,
 		})
-		
+
 		gormConf = &gorm.Config{
 			// logger: logger.Default.LogMode(logger.Silent), // 禁用日志输出
 			Logger: defaultLogger,
 		}
 	}
-	// get gormdb con
+	// get xgorm con
 	db, err = gorm.Open(
 		mysql.Open(global.GVA_CONF.Dbconf.DSN),
 		gormConf,

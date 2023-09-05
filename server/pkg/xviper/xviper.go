@@ -1,4 +1,4 @@
-package vconf
+package xviper
 
 import (
 	"fmt"

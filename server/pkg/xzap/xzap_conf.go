@@ -1,11 +1,11 @@
-package zlog
+package xzap
 
 import (
 	"fmt"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
-	
+
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
