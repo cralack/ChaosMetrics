@@ -3,14 +3,14 @@ package riotmodel
 import (
 	"encoding/json"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"go.uber.org/zap"
 )
 
 type MetadataDto struct {
 	DataVersion  string   `json:"dataVersion" gorm:"column:data_version;type:varchar(100)"`    // 比赛数据版本
-	MetaMatchID  string   `json:"matchId" gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
+	MatchID      string   `json:"matchId" gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
 	Participants []string `json:"participants" gorm:"-"`                                       // 参与者 PUUID 列表
 }
 
@@ -34,9 +34,6 @@ type InfoDto struct {
 }
 
 type Team struct {
-	MatchID     uint   `gorm:"column:match_id"`                              // 匹配matchDTO_id
-	MetaMatchID string `gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
-	
 	Bans       []*BanDto      `json:"bans" gorm:"-"`                       // 禁用的英雄列表
 	Objectives *ObjectivesDto `json:"objectives" gorm:"embedded"`          // 目标
 	TeamId     int            `json:"teamId" gorm:"team_id;type:smallint"` // 队伍ID
@@ -46,6 +43,25 @@ type Team struct {
 type BanDto struct {
 	ChampionId int `json:"championId;type:smallint"` // 禁用的英雄ID
 	PickTurn   int `json:"pickTurn;type:smallint"`   // 禁用的顺序
+}
+
+func (p *BanDto) UnmarshalJSON(data []byte) error {
+	var f map[string]interface{}
+	err := json.Unmarshal(data, &f)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range f {
+		switch k {
+		case "championId":
+			p.ChampionId = int(v.(float64))
+		case "pickTurn":
+			p.PickTurn = int(v.(float64))
+		}
+	}
+
+	return nil
 }
 
 type ObjectivesDto struct {
@@ -146,6 +162,6 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 			// Handle other fields as needed
 		}
 	}
-	
+
 	return nil
 }

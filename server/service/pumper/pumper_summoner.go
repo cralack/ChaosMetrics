@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/scheduler"
 	"github.com/cralack/ChaosMetrics/server/utils"
@@ -37,7 +37,7 @@ func (p *Pumper) loadSummoner(loc string) {
 	if _, has := p.sumnMap[loc]; !has {
 		p.sumnMap[loc] = make(map[string]*riotmodel.SummonerDTO)
 	}
-	
+
 	// load if redis cache exist
 	redisMap := make(map[string]*riotmodel.SummonerDTO)
 	if size := p.rdb.HLen(ctx, key).Val(); size != 0 {
@@ -73,18 +73,18 @@ func (p *Pumper) loadSummoner(loc string) {
 			tmp = append(tmp, s)
 		}
 	}
-	var max uint = 0
+	var mx uint = 0
 	for k, s := range p.sumnMap[loc] {
 		if _, has := redisMap[k]; !has {
 			tmp = append(tmp, s)
 		}
-		if max < s.ID {
-			max = s.ID
+		if mx < s.ID {
+			mx = s.ID
 		}
 	}
 	loCode := utils.ConverHostLoCode(loc)
 	p.lock.Lock()
-	p.summonerIdx[loCode] += (max+1)%(loCode*1e9) + (loCode * 1e9)
+	p.summonerIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
 	p.handleSummoner(loc, tmp...)
 }
@@ -138,7 +138,7 @@ func (p *Pumper) fetchSummoner() {
 		buff []byte
 		err  error
 	)
-	
+
 	defer func() {
 		if err := recover(); err != nil {
 			p.logger.Panic("fetcher panic",
@@ -146,7 +146,7 @@ func (p *Pumper) fetchSummoner() {
 				zap.String("stack", string(debug.Stack())))
 		}
 	}()
-	
+
 	for {
 		// <-p.Rater
 		req := p.scheduler.Pull()
@@ -192,7 +192,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	loCode := utils.ConverHostLoCode(loc)
 	p.lock.Lock()
 	defer p.lock.Unlock()
-	
+
 	for _, sumn := range summoners {
 		if s, has := p.sumnMap[loc][sumn.MetaSummonerID]; !has || s.ID < 1e9*loCode {
 			sumn.ID = p.summonerIdx[loCode]
@@ -204,7 +204,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 		sumn.Loc = loc
 		p.rdb.HSet(context.Background(), "/summoner/"+loc, sumn.MetaSummonerID, sumn)
 	}
-	
+
 	// check oversize && split
 	if len(summoners) < p.stgy.MaxSize {
 		p.out <- &ParseResult{
@@ -225,7 +225,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 			}
 		}
 	}
-	
+
 	return
 }
 

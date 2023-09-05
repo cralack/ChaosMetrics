@@ -103,7 +103,7 @@ func Test_match_store(t *testing.T) {
 	// load data 2
 	tar2 := &riotmodel.MatchDTO{
 		Metadata: &riotmodel.MetadataDto{
-			MetaMatchID: "TW2_81882122",
+			MatchID: "TW2_81882122",
 		},
 	}
 	if err = db.Preload(clause.Associations).First(&tar2).Error; err != nil {

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
-	
+
 	"gorm.io/gorm"
 )
 
 type MatchDB struct {
 	gorm.Model
-	
+
 	Analyzed       bool             `gorm:"column:analyzed;not null;default:false"`                      // 分析标记
 	MetaMatchID    string           `json:"matchId" gorm:"column:meta_match_id;index;type:varchar(100)"` // 比赛ID
 	Loc            string           `json:"loc" gorm:"column:loc;type:varchar(20)"`                      // 游戏所在服务器
@@ -31,7 +31,7 @@ func (m *MatchDB) TableName() string {
 
 type ParticipantDB struct {
 	gorm.Model
-	
+
 	MatchID                   uint    `json:"-" gorm:"column:match_id"`                                              // 匹配matchDTO_id
 	MetaMatchID               string  `json:"match_id" gorm:"column:meta_match_id;index;type:varchar(100)"`          // 比赛ID
 	Kills                     int     `json:"kills" gorm:"column:kills;type:smallint"`                               // 击杀数
@@ -111,7 +111,7 @@ func (m *MatchDB) ParseClassicAndARAM(match *MatchDTO, matchTL *MatchTimelineDTO
 			return nil
 		}
 		partics[p.ParticipantId-1] = &ParticipantDB{
-			MetaMatchID:               match.Metadata.MetaMatchID,
+			MetaMatchID:               match.Metadata.MatchID,
 			Assists:                   p.Assists,
 			Deaths:                    p.Deaths,
 			Kills:                     p.Kills,
@@ -185,7 +185,7 @@ func (m *MatchDB) ParseClassicAndARAM(match *MatchDTO, matchTL *MatchTimelineDTO
 			}
 		}
 	}
-	
+
 	var (
 		buff []byte
 		err  error
@@ -197,7 +197,7 @@ func (m *MatchDB) ParseClassicAndARAM(match *MatchDTO, matchTL *MatchTimelineDTO
 		} else {
 			partics[i].Build.Skill = string(buff)
 		}
-		
+
 		partics[i].Build.ItemOrder = itemOrder[i]
 		if buff, err = json.Marshal(itemOrder[i]); err != nil {
 			return err

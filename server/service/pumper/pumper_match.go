@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/scheduler"
 	"github.com/cralack/ChaosMetrics/server/utils"
@@ -53,7 +53,7 @@ func (p *Pumper) loadMatch(loc string) {
 	}
 	ctx := context.Background()
 	key := fmt.Sprintf("/match/%s", loc)
-	
+
 	// load if redis cache exist
 	if size = p.rdb.HLen(ctx, key).Val(); size != 0 {
 		redisMap = make(map[string]bool, size)
@@ -94,13 +94,13 @@ func (p *Pumper) createMatchListURL(loCode uint) {
 	loc, _ := utils.ConvertHostURL(loCode)
 	host := utils.ConvertPlatformToHost(loCode)
 	p.loadMatch(loc)
-	
+
 	// init query val
 	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
 		startTime, endTime, p.stgy.MaxMatchCount)
-	
+
 	for sid, summoner = range p.sumnMap[loc] {
 		matchList := utils.ConvertStrToSlice(summoner.Matches)
 		// ranker || no rank tier && len(match)<require
@@ -119,10 +119,10 @@ func (p *Pumper) createMatchListURL(loCode uint) {
 			count++
 		}
 	}
-	
+
 	// task counter
 	// p.taskCounter(loc, count)
-	
+
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
 		Key:  "match",
@@ -148,7 +148,7 @@ func (p *Pumper) fetchMatch() {
 				zap.String("stack", string(debug.Stack())))
 		}
 	}()
-	
+
 	for {
 		req := p.scheduler.Pull()
 		switch req.Key {
@@ -225,7 +225,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		match   *riotmodel.MatchDTO
 		matchTL *riotmodel.MatchTimelineDTO
 	)
-	
+
 	sumName := req.Data.(*matchTask).sumn.Name
 	// fetch match
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
@@ -265,10 +265,10 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 			sumName, matchID), zap.Error(err))
 		return
 	}
-	
+
 	res = &riotmodel.MatchDB{
 		Analyzed:       false,
-		MetaMatchID:    match.Metadata.MetaMatchID,
+		MetaMatchID:    match.Metadata.MatchID,
 		Loc:            strings.ToLower(match.Info.PlatformID),
 		GameCreation:   match.Info.GameCreation,
 		GameDuration:   match.Info.GameDuration,
@@ -289,12 +289,12 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	if len(matches) == 0 {
 		return
 	}
-	
+
 	ctx := context.Background()
 	pipe := p.rdb.Pipeline()
 	// pipe.Expire(ctx, key, p.stgy.LifeTime)
 	cmds := make([]*redis.IntCmd, 0, len(matches))
-	
+
 	for _, m := range matches {
 		loCode := utils.ConverHostLoCode(m.Loc)
 		key := fmt.Sprintf("/match/%s", m.Loc)
@@ -315,7 +315,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	if _, err := pipe.Exec(ctx); err != nil {
 		p.logger.Error("redis store match failed", zap.Error(err))
 	}
-	
+
 	var chunks [][]*riotmodel.MatchDB
 	totalSize := len(matches)
 	chunkSize := 5
@@ -335,7 +335,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 			chunks = append(chunks, matches[i:end])
 		}
 	}
-	
+
 	for _, chunk := range chunks {
 		p.out <- &ParseResult{
 			Type:  "match",
@@ -345,4 +345,3 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	}
 	return
 }
-

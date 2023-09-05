@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/scheduler"
 	"github.com/cralack/ChaosMetrics/server/utils"
@@ -41,7 +41,7 @@ func (p *Pumper) loadEntrie(loc string) {
 	if _, has := p.entryMap[loc]; !has {
 		p.entryMap[loc] = make(map[string]*riotmodel.LeagueEntryDTO)
 	}
-	
+
 	// load if redis cache exist
 	redisMap := make(map[string]*riotmodel.LeagueEntryDTO)
 	if size := p.rdb.HLen(ctx, key).Val(); size != 0 {
@@ -55,7 +55,7 @@ func (p *Pumper) loadEntrie(loc string) {
 			}
 		}
 	}
-	
+
 	// load if gorm db data exist
 	var entries []*riotmodel.LeagueEntryDTO
 	if err := p.db.Where("loc = ?", loc).Find(&entries).Error; err != nil {
@@ -70,7 +70,7 @@ func (p *Pumper) loadEntrie(loc string) {
 		} // assign to redis
 		p.cacheEntries(entries, loc)
 	}
-	
+
 	// check local && redis map diff
 	tmp := make([]*riotmodel.LeagueEntryDTO, 0, p.stgy.MaxSize)
 	for k, e := range redisMap {
@@ -79,19 +79,19 @@ func (p *Pumper) loadEntrie(loc string) {
 			tmp = append(tmp, e)
 		}
 	}
-	var max uint = 0
+	var mx uint = 0
 	for k, e := range p.entryMap[loc] {
 		if _, has := redisMap[k]; !has {
 			tmp = append(tmp, e)
 		}
-		if max < e.ID {
-			max = e.ID
+		if mx < e.ID {
+			mx = e.ID
 		}
 	}
-	
+
 	loCode := utils.ConverHostLoCode(loc)
 	p.lock.Lock()
-	p.entrieIdx[loCode] += (max+1)%(loCode*1e9) + (loCode * 1e9)
+	p.entrieIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
 	// store diff to db
 	p.handleEntries(tmp, loc)
@@ -106,7 +106,7 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 	locStr, host := utils.ConvertHostURL(loc)
 	queStr := getQueueString(que)
 	p.loadEntrie(locStr)
-	
+
 	// generate BEST URL task
 	for tier = riotmodel.CHALLENGER; tier <= riotmodel.MASTER; tier++ {
 		if tier > p.stgy.TestEndMark[0] || (tier == p.stgy.TestEndMark[0] && rank > p.stgy.TestEndMark[1]) {
@@ -145,7 +145,7 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 			})
 		}
 	}
-	
+
 }
 
 func (p *Pumper) fetchEntry() {
@@ -167,7 +167,7 @@ func (p *Pumper) fetchEntry() {
 				zap.String("stack", string(debug.Stack())))
 		}
 	}()
-	
+
 	for {
 		req := p.scheduler.Pull()
 		// fetch and parse
@@ -211,7 +211,7 @@ func (p *Pumper) fetchEntry() {
 				// *need release scheduler resource*
 				return
 			}
-		
+
 		case "mortalEntry":
 			page = 0
 			for {
@@ -255,7 +255,7 @@ func (p *Pumper) fetchEntry() {
 				p.handleEntries(entries, req.Loc)
 				p.cacheEntries(entries, req.Loc)
 			}
-			
+
 		}
 	}
 }
@@ -266,10 +266,10 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 	}
 	tmp := make([]*riotmodel.LeagueEntryDTO, 0, p.stgy.MaxSize)
 	loCode := utils.ConverHostLoCode(loc)
-	
+
 	p.lock.Lock()
 	defer p.lock.Unlock()
-	
+
 	for _, entry := range entries {
 		// entry doenst exist:create new data
 		if e, has := p.entryMap[loc][entry.SummonerID]; !has {
@@ -282,7 +282,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 		}
 		tmp = append(tmp, entry)
 	}
-	
+
 	if len(tmp) == 0 {
 		return
 	}
@@ -301,7 +301,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 	} else {
 		chunks = append(chunks, tmp)
 	}
-	
+
 	// send to DB handler
 	for _, chunk := range chunks {
 		p.out <- &ParseResult{

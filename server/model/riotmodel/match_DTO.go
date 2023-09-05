@@ -9,9 +9,8 @@ type MatchDTO struct {
 	Info     *InfoDto     `json:"info" gorm:"embedded"`     // 比赛信息
 }
 
-
 // UnmarshalJSON assigning the matchID to each substructure
-func (m *MatchDTO) UnmarshalJSON(data []byte) error {
+func (p *MatchDTO) UnmarshalJSON(data []byte) error {
 	// avoid recursion call
 	var tmp struct {
 		Metadata *MetadataDto `json:"metadata"` // 比赛元数据
@@ -20,16 +19,8 @@ func (m *MatchDTO) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
-	// assigning the matchID to each substructure
-	m.Info = tmp.Info
-	m.Metadata = tmp.Metadata
-	// matchID := m.Metadata.MetaMatchID
-	// for _, part := range m.Info.Participants {
-	// 	part.MetaMatchID = matchID
-	// }
-	// for _, team := range m.Info.Teams {
-	// 	team.MetaMatchID = matchID
-	// }
+
+	p.Info = tmp.Info
+	p.Metadata = tmp.Metadata
 	return nil
 }
-

@@ -38,8 +38,8 @@ func init() {
 
 		&anres.Champion{},
 	); err != nil {
-		logger.Error("init xgorm model failed", zap.Error(err))
+		logger.Error("init orm model failed", zap.Error(err))
 	} else {
-		logger.Debug("init xgorm model succeed")
+		logger.Debug("init orm model succeed")
 	}
 }
