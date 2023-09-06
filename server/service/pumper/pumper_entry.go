@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"runtime/debug"
-	"strconv"
 	"strings"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -18,7 +16,6 @@ import (
 type entryTask struct {
 	Tier string
 	Rank string
-	URL  string
 }
 
 func (p *Pumper) UpdateEntries(exit chan struct{}) {
@@ -29,7 +26,7 @@ func (p *Pumper) UpdateEntries(exit chan struct{}) {
 		}
 	}
 	// go Watch_ETCD
-	go p.fetchEntry()
+	// go p.fetchEntry()
 	// blocking until handle final
 	<-exit
 }
@@ -116,12 +113,12 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 		url = fmt.Sprintf("%s/lol/league/v4/%sleagues/by-queue/%s",
 			host, strings.ToLower(t), queStr)
 		p.scheduler.Push(&scheduler.Task{
-			Key: "bestEntry",
-			Loc: locStr,
+			Type: "bestEntry",
+			Loc:  locStr,
+			URL:  url,
 			Data: &entryTask{
 				Tier: t,
 				Rank: r,
-				URL:  url,
 			},
 		})
 	}
@@ -135,129 +132,17 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 			url = fmt.Sprintf("%s/lol/league/v4/entries/%s/%s/%s",
 				host, queStr, t, r)
 			p.scheduler.Push(&scheduler.Task{
-				Key: "mortalEntry",
-				Loc: locStr,
+				Type: "mortalEntry",
+				Loc:  locStr,
+				URL:  url,
 				Data: &entryTask{
 					Tier: t,
 					Rank: r,
-					URL:  url,
 				},
 			})
 		}
 	}
 
-}
-
-func (p *Pumper) fetchEntry() {
-	var (
-		page    int
-		buff    []byte
-		err     error
-		list    *riotmodel.LeagueListDTO
-		entries []*riotmodel.LeagueEntryDTO
-		endTier string
-		endRank string
-	)
-	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark[0], p.stgy.TestEndMark[1])
-	// catch panic
-	defer func() {
-		if err := recover(); err != nil {
-			p.logger.Panic("fetcher panic",
-				zap.Any("err", err),
-				zap.String("stack", string(debug.Stack())))
-		}
-	}()
-
-	for {
-		req := p.scheduler.Pull()
-		// fetch and parse
-		switch req.Key {
-		case "bestEntry":
-			data := req.Data.(*entryTask)
-			// api: /lol/league/v4/{BEST}leagues/by-queue/{queue}
-			if buff, err = p.fetcher.Get(data.URL); err != nil || buff == nil {
-				p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
-					zap.Error(err))
-				// fetch again
-				if req.Retry < p.stgy.Retry {
-					req.Retry++
-					p.scheduler.Push(req)
-				}
-				continue
-			}
-			if err = json.Unmarshal(buff, &list); err != nil {
-				p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
-					"LeagueListDTO"), zap.Error(err))
-			}
-			entries = list.Entries
-			if len(entries) == 0 {
-				continue
-			}
-			for _, e := range entries {
-				e.Tier = data.Tier
-				e.Loc = req.Loc
-			}
-			list = nil
-			p.logger.Info(fmt.Sprintf("all %d %s data fetch done",
-				len(entries), data.Tier))
-			p.handleEntries(entries, req.Loc)
-			p.cacheEntries(entries, req.Loc)
-			if data.Tier == endTier && data.Rank == endRank {
-				p.out <- &ParseResult{
-					Type:  "finish",
-					Brief: "entry",
-					Data:  nil,
-				}
-				// *need release scheduler resource*
-				return
-			}
-
-		case "mortalEntry":
-			page = 0
-			for {
-				page++
-				data := req.Data.(*entryTask)
-				// api: /lol/league/v4/entries/{queue}/{tier}/{division}
-				if buff, err = p.fetcher.Get(fmt.Sprintf("%s?page=%s",
-					data.URL, strconv.Itoa(page))); err != nil {
-					p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
-						zap.Error(err))
-					if req.Retry < p.stgy.Retry {
-						req.Retry++
-						p.scheduler.Push(req)
-					}
-					continue
-				}
-				if err = json.Unmarshal(buff, &entries); err != nil {
-					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
-						"LeagueEntryDTO"), zap.Error(err))
-				} else {
-					p.logger.Info(fmt.Sprintf("fetch %s %s page %d done", data.Tier, data.Rank, page))
-				}
-				for _, e := range entries {
-					e.Loc = req.Loc
-				}
-				// send finish signal
-				if len(entries) == 0 {
-					p.logger.Info(fmt.Sprintf("all %s %s data fetch done at page %d",
-						data.Tier, data.Rank, page))
-					if data.Tier == endTier && data.Rank == endRank {
-						p.out <- &ParseResult{
-							Type:  "finish",
-							Brief: "entry",
-							Data:  nil,
-						}
-						// *need release scheduler resource*
-						return
-					}
-					break
-				}
-				p.handleEntries(entries, req.Loc)
-				p.cacheEntries(entries, req.Loc)
-			}
-
-		}
-	}
 }
 
 func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {

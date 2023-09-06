@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -18,14 +17,13 @@ import (
 
 type matchTask struct {
 	sumn *riotmodel.SummonerDTO
-	URL  string
 }
 
 func (p *Pumper) UpdateMatch(exit chan struct{}) {
 	for _, loc := range p.stgy.Loc {
 		go p.createMatchListURL(loc)
 	}
-	go p.fetchMatch()
+	// go p.fetchMatch()
 	<-exit
 }
 
@@ -108,12 +106,11 @@ func (p *Pumper) createMatchListURL(loCode uint) {
 			url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
 				host, summoner.PUUID, queryParams)
 			p.scheduler.Push(&scheduler.Task{
-				Key:   "match",
-				Loc:   loc,
-				Retry: 0,
+				Type: "match",
+				Loc:  loc,
+				URL:  url,
 				Data: &matchTask{
 					sumn: summoner,
-					URL:  url,
 				},
 			})
 			count++
@@ -125,96 +122,11 @@ func (p *Pumper) createMatchListURL(loCode uint) {
 
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
-		Key:  "match",
+		Type: "match",
 		Loc:  loc,
 		Data: nil,
 	})
 	return
-}
-
-func (p *Pumper) fetchMatch() {
-	var (
-		buff         []byte
-		cnt          int
-		err          error
-		matches      []*riotmodel.MatchDB
-		curMatchList []string
-		// url          string
-	)
-	defer func() {
-		if err := recover(); err != nil {
-			p.logger.Panic("fetcher panic",
-				zap.Any("err", err),
-				zap.String("stack", string(debug.Stack())))
-		}
-	}()
-
-	for {
-		req := p.scheduler.Pull()
-		switch req.Key {
-		case "match":
-			if req.Data == nil {
-				// send finish signal
-				p.out <- &ParseResult{
-					Type:  "finish",
-					Brief: "match",
-					Data:  nil,
-				}
-				// *need release scheduler resource*
-				return
-			} else {
-				data := req.Data.(*matchTask)
-				// get old & cur match list
-				if buff, err = p.fetcher.Get(data.URL); err != nil || buff == nil {
-					p.logger.Error(fmt.Sprintf("fetch summoner %s's match list failed",
-						data.sumn.Name), zap.Error(err))
-					if req.Retry < p.stgy.Retry {
-						req.Retry++
-						p.scheduler.Push(req)
-					}
-					continue
-				}
-				if err = json.Unmarshal(buff, &curMatchList); err != nil {
-					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
-						"match"), zap.Error(err))
-				}
-				// get old match list
-				oldMatchList := make(map[string]struct{})
-				for _, matchID := range utils.ConvertStrToSlice(data.sumn.Matches) {
-					oldMatchList[matchID] = struct{}{}
-				}
-				// update summoner's match list
-				summoner := data.sumn
-				summoner.Matches = utils.ConvertSliceToStr(curMatchList)
-				cnt++
-				p.handleSummoner(req.Loc, summoner)
-				// init val
-				matches = make([]*riotmodel.MatchDB, 0, p.stgy.MaxMatchCount)
-				loc := utils.ConverHostLoCode(req.Loc)
-				host := utils.ConvertPlatformToHost(loc)
-				// fetch match
-				for _, matchID := range curMatchList {
-					if _, has := p.matchMap[req.Loc][matchID]; has {
-						continue
-					}
-					if _, has := oldMatchList[matchID]; has {
-						continue
-					} else {
-						p.matchMap[req.Loc][matchID] = true
-						if tmp := p.FetchMatchByID(req, host, matchID); tmp != nil {
-							matches = append(matches, tmp)
-						}
-					}
-				}
-				p.logger.Info(fmt.Sprintf("updating %s's match list @ %d,store %d matches",
-					summoner.Name, cnt, len(matches)))
-				if len(matches) == 0 {
-					continue
-				}
-				p.handleMatches(matches, summoner.Name)
-			}
-		}
-	}
 }
 
 func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res *riotmodel.MatchDB) {

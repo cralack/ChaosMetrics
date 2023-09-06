@@ -1,13 +1,17 @@
 package pumper
 
 import (
+	"encoding/json"
 	"fmt"
+	"runtime/debug"
+	"strconv"
 	"sync"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/service/scheduler"
+	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -40,7 +44,7 @@ func NewPumper(opts ...Option) *Pumper {
 	for _, opt := range opts {
 		opt(stgy)
 	}
-	
+
 	return &Pumper{
 		logger: global.GVA_LOG,
 		db:     global.GVA_DB,
@@ -50,14 +54,14 @@ func NewPumper(opts ...Option) *Pumper {
 			fetcher.WithAPIToken(stgy.Token),
 		),
 		scheduler: scheduler.NewSchdule(),
-		
+
 		entrieIdx:   make([]uint, 16),
 		summonerIdx: make([]uint, 16),
 		out:         make(chan *ParseResult),
 		entryMap:    make(map[string]map[string]*riotmodel.LeagueEntryDTO),
 		sumnMap:     make(map[string]map[string]*riotmodel.SummonerDTO),
 		matchMap:    make(map[string]map[string]bool),
-		
+
 		stgy: stgy,
 	}
 }
@@ -73,19 +77,19 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 			p.logger.Info(fmt.Sprintf("all %s result store done", result.Brief))
 			exit <- struct{}{}
 			continue
-		
+
 		case "entry":
 			entries := result.Data.([]*riotmodel.LeagueEntryDTO)
 			if err := p.db.Save(entries).Error; err != nil {
 				p.logger.Error("riot entry store failed", zap.Error(err))
 			}
-		
+
 		case "summoners":
 			summoners := result.Data.([]*riotmodel.SummonerDTO)
 			if err := p.db.Save(summoners).Error; err != nil {
 				p.logger.Error("riot summoner model store failed", zap.Error(err))
 			}
-		
+
 		case "match":
 			matches := result.Data.([]*riotmodel.MatchDB)
 			if len(matches) == 0 {
@@ -101,11 +105,205 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 func (p *Pumper) UpdateAll() {
 	exit := make(chan struct{})
 	go p.Schedule()
+	go p.fetch()
 	go p.handleResult(exit)
-	
+
 	p.UpdateEntries(exit)
 	p.UpdateSumoner(exit)
 	p.UpdateMatch(exit)
+}
+
+// core func
+func (p *Pumper) fetch() {
+	var (
+		page         int
+		cnt          int
+		buff         []byte
+		err          error
+		list         *riotmodel.LeagueListDTO
+		entries      []*riotmodel.LeagueEntryDTO
+		matches      []*riotmodel.MatchDB
+		curMatchList []string
+		endTier      string
+		endRank      string
+	)
+	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark[0], p.stgy.TestEndMark[1])
+	// catch panic
+	defer func() {
+		if err := recover(); err != nil {
+			p.logger.Panic("fetcher panic",
+				zap.Any("err", err),
+				zap.String("stack", string(debug.Stack())))
+		}
+	}()
+
+	for {
+		req := p.scheduler.Pull()
+		if req.Data == nil {
+			// send finish signal
+			p.out <- &ParseResult{
+				Type:  "finish",
+				Brief: req.Type,
+				Data:  nil,
+			}
+			continue
+		}
+
+		// fetch and parse
+		switch req.Type {
+		case "bestEntry":
+			data := req.Data.(*entryTask)
+			// api: /lol/league/v4/{BEST}leagues/by-queue/{queue}
+			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
+				p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
+					zap.Error(err))
+				// fetch again
+				if req.Retry < p.stgy.Retry {
+					req.Retry++
+					p.scheduler.Push(req)
+				}
+				continue
+			}
+			if err = json.Unmarshal(buff, &list); err != nil {
+				p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
+					"LeagueListDTO"), zap.Error(err))
+			}
+			entries = list.Entries
+			if len(entries) == 0 {
+				continue
+			}
+			for _, e := range entries {
+				e.Tier = data.Tier
+				e.Loc = req.Loc
+			}
+			list = nil
+			p.logger.Info(fmt.Sprintf("all %d %s data fetch done",
+				len(entries), data.Tier))
+			p.handleEntries(entries, req.Loc)
+			p.cacheEntries(entries, req.Loc)
+			if data.Tier == endTier && data.Rank == endRank {
+				p.out <- &ParseResult{
+					Type:  "finish",
+					Brief: "entry",
+					Data:  nil,
+				}
+				// *need release scheduler resource*
+				continue
+			}
+
+		case "mortalEntry":
+			page = 0
+			for {
+				page++
+				data := req.Data.(*entryTask)
+				// api: /lol/league/v4/entries/{queue}/{tier}/{division}
+				if buff, err = p.fetcher.Get(fmt.Sprintf("%s?page=%s",
+					req.URL, strconv.Itoa(page))); err != nil {
+					p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
+						zap.Error(err))
+					if req.Retry < p.stgy.Retry {
+						req.Retry++
+						p.scheduler.Push(req)
+					}
+					continue
+				}
+				if err = json.Unmarshal(buff, &entries); err != nil {
+					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
+						"LeagueEntryDTO"), zap.Error(err))
+				} else {
+					p.logger.Info(fmt.Sprintf("fetch %s %s page %d done", data.Tier, data.Rank, page))
+				}
+				for _, e := range entries {
+					e.Loc = req.Loc
+				}
+				// send finish signal
+				if len(entries) == 0 {
+					p.logger.Info(fmt.Sprintf("all %s %s data fetch done at page %d",
+						data.Tier, data.Rank, page))
+					if data.Tier == endTier && data.Rank == endRank {
+						p.out <- &ParseResult{
+							Type:  "finish",
+							Brief: "entry",
+							Data:  nil,
+						}
+					}
+					break
+				}
+				p.handleEntries(entries, req.Loc)
+				p.cacheEntries(entries, req.Loc)
+			}
+
+		case "summoner":
+			data := req.Data.(*summonerTask)
+			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
+				p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
+				// fetch again
+				if req.Retry < p.stgy.Retry {
+					req.Retry++
+					p.scheduler.Push(req)
+				}
+				continue
+			}
+			var sumn *riotmodel.SummonerDTO
+			if err = json.Unmarshal(buff, &sumn); err != nil {
+				p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
+					"sumnDTO"), zap.Error(err))
+			}
+			p.handleSummoner(req.Loc, sumn)
+
+		case "match":
+
+			data := req.Data.(*matchTask)
+			// get old & cur match list
+			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
+				p.logger.Error(fmt.Sprintf("fetch summoner %s's match list failed",
+					data.sumn.Name), zap.Error(err))
+				if req.Retry < p.stgy.Retry {
+					req.Retry++
+					p.scheduler.Push(req)
+				}
+				continue
+			}
+			if err = json.Unmarshal(buff, &curMatchList); err != nil {
+				p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
+					"match"), zap.Error(err))
+			}
+			// get old match list
+			oldMatchList := make(map[string]struct{})
+			for _, matchID := range utils.ConvertStrToSlice(data.sumn.Matches) {
+				oldMatchList[matchID] = struct{}{}
+			}
+			// update summoner's match list
+			summoner := data.sumn
+			summoner.Matches = utils.ConvertSliceToStr(curMatchList)
+			cnt++
+			p.handleSummoner(req.Loc, summoner)
+			// init val
+			matches = make([]*riotmodel.MatchDB, 0, p.stgy.MaxMatchCount)
+			loc := utils.ConverHostLoCode(req.Loc)
+			host := utils.ConvertPlatformToHost(loc)
+			// fetch match
+			for _, matchID := range curMatchList {
+				if _, has := p.matchMap[req.Loc][matchID]; has {
+					continue
+				}
+				if _, has := oldMatchList[matchID]; has {
+					continue
+				} else {
+					p.matchMap[req.Loc][matchID] = true
+					if tmp := p.FetchMatchByID(req, host, matchID); tmp != nil {
+						matches = append(matches, tmp)
+					}
+				}
+			}
+			p.logger.Info(fmt.Sprintf("updating %s's match list @ %d,store %d matches",
+				summoner.Name, cnt, len(matches)))
+			if len(matches) == 0 {
+				continue
+			}
+			p.handleMatches(matches, summoner.Name)
+		}
+	}
 }
 
 func getQueueString(que uint) string {
@@ -155,14 +353,14 @@ func ConvertRankToStr(tier, div uint) (string, string) {
 	case riotmodel.IRON:
 		return "IRON", d
 	}
-	
+
 	return "", ""
 }
 
 func ConvertStrToRank(tierStr, divStr string) (uint, uint) {
 	var tier uint
 	var div uint
-	
+
 	switch tierStr {
 	case "CHALLENGER":
 		tier = riotmodel.CHALLENGER
@@ -187,7 +385,7 @@ func ConvertStrToRank(tierStr, divStr string) (uint, uint) {
 	default:
 		return 0, 0
 	}
-	
+
 	switch divStr {
 	case "I":
 		div = 1
@@ -200,6 +398,6 @@ func ConvertStrToRank(tierStr, divStr string) (uint, uint) {
 	default:
 		return 0, 0
 	}
-	
+
 	return tier, div
 }

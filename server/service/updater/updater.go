@@ -428,7 +428,7 @@ func (u *Updater) UpdatePerks() {
 // 		cnt += len(res)
 //
 // 		u.Schduler.requestCh <- &scheduler.Task{
-// 			// Key:    key,
+// 			// Type:    key,
 // 			// Brief:  key + ":" + strconv.Itoa(page),
 // 			// Buffer: res,
 // 		}

@@ -7,9 +7,10 @@ type Scheduler interface {
 }
 
 type Task struct {
-	Key      string
+	Type     string
 	Loc      string
 	ApiToken string
+	URL      string
 	Priority int
 	Retry    uint
 	Data     interface{}
@@ -48,7 +49,7 @@ func (s *RiotDTOSchedule) Schedule() {
 	)
 
 	for {
-		//priority queue first
+		// priority queue first
 		if req == nil && len(s.priReqQueue) > 0 {
 			req = s.priReqQueue[0]
 			s.priReqQueue = s.priReqQueue[1:]

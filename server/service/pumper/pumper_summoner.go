@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"runtime/debug"
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -17,7 +16,6 @@ import (
 
 type summonerTask struct {
 	summonerID string
-	url        string
 	summoner   *riotmodel.SummonerDTO
 }
 
@@ -26,7 +24,7 @@ func (p *Pumper) UpdateSumoner(exit chan struct{}) {
 		// Generate URLs
 		go p.createSummonerURL(loc)
 	}
-	go p.fetchSummoner()
+	// go p.fetchSummoner()
 	<-exit
 }
 
@@ -102,11 +100,11 @@ func (p *Pumper) createSummonerURL(loCode uint) {
 		}
 		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
 		p.scheduler.Push(&scheduler.Task{
-			Key: "summoner",
-			Loc: loc,
+			Type: "summoner",
+			Loc:  loc,
+			URL:  url,
 			Data: &summonerTask{
 				summonerID: sID,
-				url:        url,
 			},
 		})
 	}
@@ -115,72 +113,22 @@ func (p *Pumper) createSummonerURL(loCode uint) {
 		if sumn.Name == "" {
 			url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
 			p.scheduler.Push(&scheduler.Task{
-				Key: "summoner",
-				Loc: loc,
+				Type: "summoner",
+				Loc:  loc,
+				URL:  url,
 				Data: &summonerTask{
 					summonerID: sID,
-					url:        url,
 				},
 			})
 		}
 	}
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
-		Key:  "summoner",
+		Type: "summoner",
 		Loc:  loc,
 		Data: nil,
 	})
 	return
-}
-
-func (p *Pumper) fetchSummoner() {
-	var (
-		buff []byte
-		err  error
-	)
-
-	defer func() {
-		if err := recover(); err != nil {
-			p.logger.Panic("fetcher panic",
-				zap.Any("err", err),
-				zap.String("stack", string(debug.Stack())))
-		}
-	}()
-
-	for {
-		// <-p.Rater
-		req := p.scheduler.Pull()
-		switch req.Key {
-		case "summoner":
-			if req.Data == nil {
-				// send finish signal
-				p.out <- &ParseResult{
-					Type:  "finish",
-					Brief: "summoner",
-					Data:  nil,
-				}
-				// *need release scheduler resource*
-				return
-			} else {
-				data := req.Data.(*summonerTask)
-				if buff, err = p.fetcher.Get(data.url); err != nil || buff == nil {
-					p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
-					// fetch again
-					if req.Retry < p.stgy.Retry {
-						req.Retry++
-						p.scheduler.Push(req)
-					}
-					continue
-				}
-				var sumn *riotmodel.SummonerDTO
-				if err = json.Unmarshal(buff, &sumn); err != nil {
-					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
-						"sumnDTO"), zap.Error(err))
-				}
-				p.handleSummoner(req.Loc, sumn)
-			}
-		}
-	}
 }
 
 func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO) {
@@ -251,15 +199,23 @@ func (p *Pumper) summonerCounter(loc string) {
 		rate  float32
 	)
 	ticker := time.NewTicker(time.Second * 30)
+	checkTicker := time.NewTicker(time.Second)
 	total = len(p.entryMap[loc])
 	for {
-		<-ticker.C
-		delta = len(p.sumnMap[loc]) - cur
-		cur = len(p.sumnMap[loc])
-		rate = float32(cur) / float32(total)
-		if delta > 0 {
-			p.logger.Info(fmt.Sprintf("fetch %s %05.02f%% (%04d/%04d) summoners",
-				loc, rate*100, cur, total))
+		select {
+		case <-checkTicker.C:
+			if cur == total {
+				p.logger.Info("all ready fetch 100% summoners")
+				return
+			}
+		case <-ticker.C:
+			delta = len(p.sumnMap[loc]) - cur
+			cur = len(p.sumnMap[loc])
+			rate = float32(cur) / float32(total)
+			if delta > 0 {
+				p.logger.Info(fmt.Sprintf("fetch %s %05.02f%% (%04d/%04d) summoners",
+					loc, rate*100, cur, total))
+			}
 		}
 	}
 }

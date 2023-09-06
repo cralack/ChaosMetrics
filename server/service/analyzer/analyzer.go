@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -30,7 +30,7 @@ type Analyzer struct {
 	lock   *sync.Mutex
 	schd   scheduler.Scheduler
 	updt   *updater.Updater
-	
+
 	curVersion    string
 	analyzedCount []int64
 	stgy          *Strategy
@@ -45,7 +45,7 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 	for _, opt := range opts {
 		opt(stgy)
 	}
-	
+
 	return &Analyzer{
 		logger:        global.GVA_LOG,
 		db:            global.GVA_DB,
@@ -67,7 +67,7 @@ func (a *Analyzer) Analyze() {
 	exit := make(chan struct{})
 	go a.schd.Schedule()
 	go a.handleMatches(exit)
-	
+
 	a.loadChampionTemplate()
 	for _, loc := range a.stgy.Loc {
 		a.loadMatch(loc)
@@ -118,7 +118,7 @@ func (a *Analyzer) loadMatch(loCode uint) {
 		err     error
 		matches []*riotmodel.MatchDB
 	)
-	
+
 	loc, _ := utils.ConvertHostURL(loCode)
 	// preload when begin
 	if err = a.db.Where("loc = ?", loc).Where("analyzed = ?", false).Preload(
@@ -128,7 +128,7 @@ func (a *Analyzer) loadMatch(loCode uint) {
 		// 	false).Find(&matches).Error; err != nil {
 		a.logger.Error("load match from gorm db failed", zap.Error(err))
 	}
-	
+
 	// count analyzed
 	var totalCount int64
 	if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
@@ -136,14 +136,14 @@ func (a *Analyzer) loadMatch(loCode uint) {
 		a.logger.Error("count analyzed failed", zap.Error(err))
 		return
 	}
-	
+
 	a.lock.Lock()
 	a.analyzedCount[loCode] += totalCount
 	a.lock.Unlock()
-	
+
 	// start counter
 	go a.counter(len(matches), loCode)
-	
+
 	// chunk if oversize
 	if len(matches) > a.stgy.BatchSize {
 		totalSize := len(matches)
@@ -159,7 +159,7 @@ func (a *Analyzer) loadMatch(loCode uint) {
 			// 	a.logger.Error("load participant failed", zap.Error(err))
 			// }
 			a.schd.Push(&scheduler.Task{
-				Key:  anaKey,
+				Type: anaKey,
 				Loc:  loc,
 				Data: tmp,
 			})
@@ -169,14 +169,14 @@ func (a *Analyzer) loadMatch(loCode uint) {
 		// 	a.logger.Error("load participant failed", zap.Error(err))
 		// }
 		a.schd.Push(&scheduler.Task{
-			Key:  anaKey,
+			Type: anaKey,
 			Loc:  loc,
 			Data: matches,
 		})
 	}
-	
+
 	a.schd.Push(&scheduler.Task{
-		Key:  "finish",
+		Type: "finish",
 		Data: nil,
 	})
 	return
@@ -212,7 +212,7 @@ func (a *Analyzer) loadChampionTemplate() {
 	if err != nil {
 		a.logger.Error("get champions failed", zap.Error(err))
 	}
-	
+
 	// parse
 	for _, v := range values {
 		var cham *riotmodel.ChampionDTO
@@ -230,7 +230,7 @@ func (a *Analyzer) loadChampionTemplate() {
 func (a *Analyzer) handleMatches(exit chan struct{}) {
 	for {
 		req := a.schd.Pull()
-		switch req.Key {
+		switch req.Type {
 		case "finish":
 			exit <- struct{}{}
 			return
@@ -241,7 +241,7 @@ func (a *Analyzer) handleMatches(exit chan struct{}) {
 			}
 		}
 	}
-	
+
 }
 
 func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
@@ -285,7 +285,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	// 		banId := uint(id)*1e8 + verIdx*1e4 + loCode*1e2 + modeIdx
 	// 	}
 	// }
-	
+
 	// match partic
 	// tar = make([]*anres.Champion, 0, len(match.Participants))
 	for _, par := range match.Participants {
@@ -340,15 +340,15 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 			tmp.ID = tarId
 		}
 		// analyze data
-		
+
 		if err = a.handleAnares(tmp, par); err != nil {
 			a.logger.Error("parse match failed", zap.Error(err))
 			return
 		}
 		a.analyzed[tarId] = tmp
-		
+
 	}
-	
+
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	// analyzed match count
@@ -362,7 +362,7 @@ func (a *Analyzer) counter(total int, loc uint) {
 		rate float32
 	)
 	ticker := time.NewTicker(time.Second * 15)
-	
+
 	for {
 		// count
 		cur = a.analyzedCount[loc]
@@ -414,7 +414,7 @@ func (a *Analyzer) handleAnares(tar *anres.Champion, par *riotmodel.ParticipantD
 		a.logger.Error("wrong version")
 		return err
 	}
-	
+
 	switch tar.GameMode {
 	case "ARAM":
 		startCapital = 1400
@@ -508,7 +508,7 @@ func (a *Analyzer) handleAnares(tar *anres.Champion, par *riotmodel.ParticipantD
 	} else {
 		tar.SpellSTR = string(buff)
 	}
-	
+
 	tar.WinRate = tar.TotalWin / (tar.TotalPlayed + 1)
 	tar.PickRate = (tar.TotalPlayed + 1) / float32(totalCount)
 	tar.AvgKDA = (tar.AvgKDA*tar.TotalPlayed + par.KDA) / (tar.TotalPlayed + 1)
@@ -520,7 +520,7 @@ func (a *Analyzer) handleAnares(tar *anres.Champion, par *riotmodel.ParticipantD
 	tar.AvgDeadTime = (tar.AvgDeadTime*tar.TotalPlayed + float32(par.TotalTimeSpentDead)) / (tar.TotalPlayed + 1)
 	tar.TotalPlayed++
 	tar.RankScore = 0
-	
+
 	judge(tar)
 	return nil
 }
