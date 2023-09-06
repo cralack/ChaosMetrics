@@ -1,45 +1,43 @@
 package scheduler
 
 type Scheduler interface {
-	Count() int
 	Schedule()
 	Push(...*Task)
 	Pull() *Task
 }
 
 type Task struct {
-	Key   string
-	Loc   string
-	Retry uint
-	Data  interface{}
+	Key      string
+	Loc      string
+	ApiToken string
+	Priority int
+	Retry    uint
+	Data     interface{}
 }
 
 type RiotDTOSchedule struct {
-	RequestCh chan *Task
-	WorkerCh  chan *Task
-	ReqQueue  []*Task
+	requestCh   chan *Task
+	workerCh    chan *Task
+	reqQueue    []*Task
+	priReqQueue []*Task
 }
 
 var _ Scheduler = &RiotDTOSchedule{}
 
 func NewSchdule() *RiotDTOSchedule {
 	return &RiotDTOSchedule{
-		RequestCh: make(chan *Task),
-		WorkerCh:  make(chan *Task),
+		requestCh: make(chan *Task),
+		workerCh:  make(chan *Task),
 	}
-}
-
-func (s *RiotDTOSchedule) Count() int {
-	return len(s.ReqQueue)
 }
 
 func (s *RiotDTOSchedule) Push(reqs ...*Task) {
 	for _, req := range reqs {
-		s.RequestCh <- req
+		s.requestCh <- req
 	}
 }
 func (s *RiotDTOSchedule) Pull() *Task {
-	r := <-s.WorkerCh
+	r := <-s.workerCh
 	return r
 }
 
@@ -48,19 +46,31 @@ func (s *RiotDTOSchedule) Schedule() {
 		req *Task
 		ch  chan *Task
 	)
-	
+
 	for {
-		// reque 不空则pop出 req
-		if req == nil && len(s.ReqQueue) > 0 {
-			// pop req
-			req = s.ReqQueue[0]
-			s.ReqQueue = s.ReqQueue[1:]
-			ch = s.WorkerCh
+		//priority queue first
+		if req == nil && len(s.priReqQueue) > 0 {
+			req = s.priReqQueue[0]
+			s.priReqQueue = s.priReqQueue[1:]
+			ch = s.workerCh
 		}
+		// reque 不空则pop出 req
+		if req == nil && len(s.reqQueue) > 0 {
+			// pop req
+			req = s.reqQueue[0]
+			s.reqQueue = s.reqQueue[1:]
+			ch = s.workerCh
+		}
+
 		// check req
+		// schedule
 		select {
-		case r := <-s.RequestCh:
-			s.ReqQueue = append(s.ReqQueue, r)
+		case r := <-s.requestCh:
+			if r.Priority > 0 {
+				s.priReqQueue = append(s.priReqQueue, r)
+			} else {
+				s.reqQueue = append(s.reqQueue, r)
+			}
 		case ch <- req:
 			req = nil
 			ch = nil

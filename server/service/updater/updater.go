@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/fetcher"
@@ -27,7 +27,7 @@ type Updater struct {
 	rdb     *redis.Client
 	lock    *sync.Mutex
 	fetcher fetcher.Fetcher
-	
+
 	CurVersion string
 	matchVis   map[string]map[string]bool
 	stgy       *Strategy
@@ -39,7 +39,7 @@ func NewRiotUpdater(opts ...Option) *Updater {
 	for _, opt := range opts {
 		opt(stgy)
 	}
-	
+
 	return &Updater{
 		logger: global.GVA_LOG,
 		db:     global.GVA_DB,
@@ -83,11 +83,11 @@ func (u *Updater) UpdateChampions(version string) {
 		cham     *riotmodel.ChampionDTO
 		chamList *riotmodel.ChampionListDTO
 	)
-	
+
 	if vIdx, err = utils.ConvertVersionToIdx(version); version == "" || err != nil {
 		u.logger.Error("wrong version", zap.Error(err))
 	}
-	
+
 	// get champion chamList
 	url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
 	if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
@@ -110,13 +110,13 @@ func (u *Updater) UpdateChampions(version string) {
 		flag = true
 		u.logger.Error("marshal champion list failed", zap.Error(err))
 	}
-	
+
 	if err = u.rdb.HSet(ctx, "/championlist", vIdx, buff).Err(); err != nil {
 		flag = true
 		u.logger.Error("failed", zap.Error(err))
 	}
 	// update champion for each lang
-	
+
 	for _, langCode := range u.stgy.Lang {
 		lang := utils.ConvertLanguageCode(langCode)
 		key := fmt.Sprintf("/champions/%s", lang)
@@ -148,7 +148,7 @@ func (u *Updater) UpdateChampions(version string) {
 			}
 			cham = tmp.Data[chamID]
 			cmds = append(cmds, pipe.HSet(ctx, key, fmt.Sprintf("%s@%d", cham.ID, vIdx), cham))
-			
+
 		}
 		if _, err := pipe.Exec(ctx); err != nil {
 			flag = true
@@ -162,7 +162,7 @@ func (u *Updater) UpdateChampions(version string) {
 }
 
 func (u *Updater) UpdateItems(version string) {
-	
+
 	var (
 		buff     []byte
 		url      string
@@ -198,7 +198,7 @@ func (u *Updater) UpdateItems(version string) {
 			item.ID = id
 			cmds = append(cmds, pipe.HSet(ctx, key, fmt.Sprintf("%s@%d", id, vIdx), item))
 		}
-		
+
 		if _, err := pipe.Exec(ctx); err != nil {
 			flag = true
 			u.logger.Error("redis store items failed", zap.Error(err))
@@ -427,7 +427,7 @@ func (u *Updater) UpdatePerks() {
 // 		}
 // 		cnt += len(res)
 //
-// 		u.Schduler.RequestCh <- &scheduler.Task{
+// 		u.Schduler.requestCh <- &scheduler.Task{
 // 			// Key:    key,
 // 			// Brief:  key + ":" + strconv.Itoa(page),
 // 			// Buffer: res,
