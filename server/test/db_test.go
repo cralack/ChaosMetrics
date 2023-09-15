@@ -75,7 +75,7 @@ func Test_db_crud_func(t *testing.T) {
 
 func Test_match_store(t *testing.T) {
 	// load local json data
-	buff, err := os.ReadFile(path + "match.txt")
+	buff, err := os.ReadFile(path + "match.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,38 +86,37 @@ func Test_match_store(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// save data
-	if err := db.Save(match).Error; err != nil {
-		t.Log(err)
-	}
-	t.Log("all model store succeed")
-
-	// load data 1
-	var tar1 *riotmodel.MatchDTO
-	if err = db.Where("meta_match_id", "TW2_81882122").Preload(
-		clause.Associations).First(&tar1).Error; err != nil {
-		t.Log(err)
-	}
-	t.Log(tar1.Metadata.DataVersion)
-
-	// load data 2
-	tar2 := &riotmodel.MatchDTO{
-		Metadata: &riotmodel.MetadataDto{
-			MatchID: "TW2_81882122",
-		},
-	}
-	if err = db.Preload(clause.Associations).First(&tar2).Error; err != nil {
-		t.Log(err)
-	}
-
+	// no longer need to store this model
 	/*
-		Currently it looks like the model doesn't need to change or delete data
-	*/
+		// save data
+		if err := db.Save(match).Error; err != nil {
+			t.Log(err)
+		}
+		t.Log("all model store succeed")
+
+		// load data 1
+		var tar1 *riotmodel.MatchDTO
+		if err = db.Where("meta_match_id", "TW2_81882122").Preload(
+			clause.Associations).First(&tar1).Error; err != nil {
+			t.Log(err)
+		}
+		t.Log(tar1.Metadata.DataVersion)
+
+		// load data 2
+		tar2 := &riotmodel.MatchDTO{
+			Metadata: &riotmodel.MetadataDto{
+				MatchID: "TW2_81882122",
+			},
+		}
+		if err = db.Preload(clause.Associations).First(&tar2).Error; err != nil {
+			t.Log(err)
+											}*/
+
 }
 
 func Test_summoners_store(t *testing.T) {
 	// load json
-	buff, err := os.ReadFile(path + "summoners.txt")
+	buff, err := os.ReadFile(path + "summoners.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +133,7 @@ func Test_summoners_store(t *testing.T) {
 }
 
 func Test_summoner_entry_store(t *testing.T) {
-	buff, err := os.ReadFile(path + "challenger_league.txt")
+	buff, err := os.ReadFile(path + "challenger_league.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -151,7 +150,7 @@ func Test_summoner_entry_store(t *testing.T) {
 		}
 	}
 
-	buff, err = os.ReadFile(path + "summoner.txt")
+	buff, err = os.ReadFile(path + "summoner.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -211,7 +210,7 @@ func Test_isExist(t *testing.T) {
 // xgorm.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
 func Benchmark_db_store_1(b *testing.B) {
 	// load json
-	buff, err := os.ReadFile(path + "challenger_league.txt")
+	buff, err := os.ReadFile(path + "challenger_league.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -282,7 +281,7 @@ func Benchmark_db_store_1(b *testing.B) {
 // xgorm.Save([size]*riotmodel.LeagueEntryDTO) size=1k~10k store benchmark
 func Benchmark_db_store_2(b *testing.B) {
 	// load json
-	buff, err := os.ReadFile(path + "challenger_league.txt")
+	buff, err := os.ReadFile(path + "challenger_league.json")
 	if err != nil {
 		log.Fatal(err)
 	}

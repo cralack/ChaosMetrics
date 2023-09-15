@@ -7,18 +7,18 @@ import (
 	"log"
 	"os"
 	"testing"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/redis/go-redis/v9"
 )
 
 func Test_redis_crud(t *testing.T) {
 	// load json
-	buff, err := os.ReadFile(path + "challenger_league.txt")
+	buff, err := os.ReadFile(path + "challenger_league.json")
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	// parse to model
 	var league *riotmodel.LeagueListDTO
 	err = json.Unmarshal(buff, &league)

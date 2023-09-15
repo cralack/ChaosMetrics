@@ -14,14 +14,13 @@ import (
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
-	"gorm.io/gorm/clause"
 )
 
 func Test_parse_summoners(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://tw2.api.riotgames.com/lol/summoner/v4/summoners/by-name/Mudife"
 	// buff, err := f.Get(url)
-	buff, err := os.ReadFile(path + "summoners.txt")
+	buff, err := os.ReadFile(path + "summoners.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +88,7 @@ func Test_parse_champion_rotation(t *testing.T) {
 	buff, err := f.Get(url)
 
 	// load local json data
-	// buff, err := os.ReadFile(path + "championr_rotation.txt")
+	// buff, err := os.ReadFile(path + "championr_rotation.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +106,7 @@ func Test_parse_champion_mastery(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	// url := "https://tw2.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/F4fFtqehQLBj8U5sKBZF--k-7akbtb1IX790lRd4whPI4pXDAuVyfswHetg2lz_kMe2NJ0gUo5EIig/top"
 	// buff, err := f.Get(url)
-	buff, err := os.ReadFile(path + "championr_mastery.txt")
+	buff, err := os.ReadFile(path + "championr_mastery.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +136,7 @@ func Test_parse_match(t *testing.T) {
 	// buff, err := f.Get(url)
 
 	// load local json data
-	buff, err := os.ReadFile(path + "match.txt")
+	buff, err := os.ReadFile(path + "match.json")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -180,49 +179,52 @@ func Test_parse_match(t *testing.T) {
 		player.Kills, player.Deaths, player.Assists)
 	fmt.Println("Total Damage Dealt to Champions by First Blood Player:",
 		player.TotalDamageDealtToChampions)
+	// no longer need to store this model
+	/*
+		// gorm create
+		if err := db.Create(res).Error; err != nil {
+			logger.Debug("orm create match failed")
+		}
+		// gorm read
+		var tar *riotmodel.MatchDTO
+		if err = db.Where("meta_match_id = ?", "TW2_81882122").Preload(
+			clause.Associations).Find(&tar).Error; err != nil {
+			logger.Error("orm read match failed")
+		} else {
+			logger.Debug(fmt.Sprintf("res == tar:%v", len(res.Info.Participants) == len(tar.Info.Participants)))
+		}
+		// gorm soft delete
+								if err = db.Select(clause.Associations).Delete(tar).Error; err != nil {
+									logger.Error("orm soft delete match failed ")
+								}
+		// gorm hard delete
+								if err = db.Unscoped().Select(clause.Associations).Delete(tar).Error; err != nil {
+									logger.Error("orm hard delete match failed ")
+		// }
 
-	// gorm create
-	if err := db.Create(res).Error; err != nil {
-		logger.Debug("orm create match failed")
-	}
-	// gorm read
-	var tar *riotmodel.MatchDTO
-	if err = db.Where("meta_match_id = ?", "TW2_81882122").Preload(
-		clause.Associations).Find(&tar).Error; err != nil {
-		logger.Error("orm read match failed")
-	} else {
-		logger.Debug(fmt.Sprintf("res == tar:%v", len(res.Info.Participants) == len(tar.Info.Participants)))
-	}
-	// gorm soft delete
-	// if err = orm.Select(clause.Associations).Delete(tar).Error; err != nil {
-	// 	logger.Error("orm soft delete match failed ")
-	// }
-	// gorm hard delete
-	// if err = orm.Unscoped().Select(clause.Associations).Delete(tar).Error; err != nil {
-	// 	logger.Error("orm hard delete match failed ")
-	// }
+		// redis create
+		ctx := context.Background()
+		key := "/match/tw2"
+		if err := rdb.HSet(ctx, key, res.Metadata.MatchID, true).Err(); err != nil {
+			logger.Error("redis create match failed")
+		}
 
-	// redis create
-	ctx := context.Background()
-	key := "/match/tw2"
-	if err := rdb.HSet(ctx, key, res.Metadata.MatchID, true).Err(); err != nil {
-		logger.Error("redis create match failed")
-	}
+		// redis read
+		result := rdb.HGet(ctx, key, tar.Metadata.MatchID).Val()
+		if result != "1" {
+			logger.Error("redis read match failed")
+		}
+		keys := rdb.HKeys(ctx, key).Val()
+		kvmap := make(map[string]bool)
+		for _, k := range keys {
+			kvmap[k] = true
+		}
+		// redis delete
+		if err := rdb.HDel(ctx, key, tar.Metadata.MatchID).Err(); err != nil {
+			logger.Error("redis delete match failed")
+		}
+	*/
 
-	// redis read
-	result := rdb.HGet(ctx, key, tar.Metadata.MatchID).Val()
-	if result != "1" {
-		logger.Error("redis read match failed")
-	}
-	keys := rdb.HKeys(ctx, key).Val()
-	kvmap := make(map[string]bool)
-	for _, k := range keys {
-		kvmap[k] = true
-	}
-	// redis delete
-	if err := rdb.HDel(ctx, key, tar.Metadata.MatchID).Err(); err != nil {
-		logger.Error("redis delete match failed")
-	}
 }
 
 func Test_parse_match_list(t *testing.T) {
@@ -288,7 +290,7 @@ func Test_parse_matchLine(t *testing.T) {
 	// buff, err := f.Get(url)
 
 	// load local json data
-	buff, err := os.ReadFile(path + "match_timeline.txt")
+	buff, err := os.ReadFile(path + "match_timeline.json")
 	if err != nil {
 		t.Fatal(err)
 	}
