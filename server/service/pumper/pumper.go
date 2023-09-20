@@ -17,6 +17,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const testSize = 1
+
 type Pumper struct {
 	logger      *zap.Logger
 	db          *gorm.DB
@@ -43,6 +45,10 @@ func NewPumper(opts ...Option) *Pumper {
 	stgy := defaultStrategy
 	for _, opt := range opts {
 		opt(stgy)
+	}
+
+	if global.GVA_ENV == global.TEST_ENV {
+		stgy.MaxMatchCount = 1
 	}
 
 	return &Pumper{
@@ -102,11 +108,17 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 	}
 }
 
-func (p *Pumper) UpdateAll() {
-	exit := make(chan struct{})
+func (p *Pumper) StartEngine(exit chan struct{}) {
 	go p.Schedule()
+	// go p.loadResource()
+	// go p.watchResource()
 	go p.fetch()
 	go p.handleResult(exit)
+}
+
+func (p *Pumper) UpdateAll() {
+	exit := make(chan struct{})
+	p.StartEngine(exit)
 
 	p.UpdateEntries(exit)
 	p.UpdateSumoner(exit)
@@ -116,7 +128,6 @@ func (p *Pumper) UpdateAll() {
 // core func
 func (p *Pumper) fetch() {
 	var (
-		page         int
 		cnt          int
 		buff         []byte
 		err          error
@@ -176,6 +187,11 @@ func (p *Pumper) fetch() {
 				e.Tier = data.Tier
 				e.Loc = req.Loc
 			}
+			// shrink size if test
+			if global.GVA_ENV == global.TEST_ENV {
+				entries = entries[:testSize]
+			}
+
 			list = nil
 			p.logger.Info(fmt.Sprintf("all %d %s data fetch done",
 				len(entries), data.Tier))
@@ -192,10 +208,8 @@ func (p *Pumper) fetch() {
 			}
 
 		case "mortalEntry":
-			page = 0
-			for {
-				page++
-				data := req.Data.(*entryTask)
+			data := req.Data.(*entryTask)
+			for page := 1; ; page++ {
 				// api: /lol/league/v4/entries/{queue}/{tier}/{division}
 				if buff, err = p.fetcher.Get(fmt.Sprintf("%s?page=%s",
 					req.URL, strconv.Itoa(page))); err != nil {
@@ -216,21 +230,29 @@ func (p *Pumper) fetch() {
 				for _, e := range entries {
 					e.Loc = req.Loc
 				}
-				// send finish signal
-				if len(entries) == 0 {
-					p.logger.Info(fmt.Sprintf("all %s %s data fetch done at page %d",
-						data.Tier, data.Rank, page))
-					if data.Tier == endTier && data.Rank == endRank {
-						p.out <- &ParseResult{
-							Type:  "finish",
-							Brief: "entry",
-							Data:  nil,
-						}
-					}
-					break
+				// shrink size if test
+				if global.GVA_ENV == global.TEST_ENV {
+					entries = entries[:testSize]
 				}
+
 				p.handleEntries(entries, req.Loc)
 				p.cacheEntries(entries, req.Loc)
+
+				// test
+				if (global.GVA_ENV == global.TEST_ENV && page == testSize) || len(entries) == 0 {
+					p.logger.Info(fmt.Sprintf("all %s %s data fetch done at page %d",
+						data.Tier, data.Rank, page))
+					break
+				}
+			}
+
+			if data.Tier == endTier && data.Rank == endRank {
+				p.out <- &ParseResult{
+					Type:  "finish",
+					Brief: "entry",
+					Data:  nil,
+				}
+				continue
 			}
 
 		case "summoner":
@@ -252,7 +274,6 @@ func (p *Pumper) fetch() {
 			p.handleSummoner(req.Loc, sumn)
 
 		case "match":
-
 			data := req.Data.(*matchTask)
 			// get old & cur match list
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {

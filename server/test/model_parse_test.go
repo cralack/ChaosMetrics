@@ -194,13 +194,13 @@ func Test_parse_match(t *testing.T) {
 			logger.Debug(fmt.Sprintf("res == tar:%v", len(res.Info.Participants) == len(tar.Info.Participants)))
 		}
 		// gorm soft delete
-								if err = db.Select(clause.Associations).Delete(tar).Error; err != nil {
-									logger.Error("orm soft delete match failed ")
-								}
+		if err = db.Select(clause.Associations).Delete(tar).Error; err != nil {
+			logger.Error("orm soft delete match failed ")
+		}
 		// gorm hard delete
-								if err = db.Unscoped().Select(clause.Associations).Delete(tar).Error; err != nil {
-									logger.Error("orm hard delete match failed ")
-		// }
+		if err = db.Unscoped().Select(clause.Associations).Delete(tar).Error; err != nil {
+			logger.Error("orm hard delete match failed ")
+		}
 
 		// redis create
 		ctx := context.Background()

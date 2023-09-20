@@ -114,6 +114,18 @@ func Test_match_store(t *testing.T) {
 
 }
 
+func Test_purge_weak_player(t *testing.T) {
+	level := "EMERALD"
+	var entries []*riotmodel.LeagueEntryDTO
+	if err := db.Find(&entries).Where("tier = ?", level).Error; err != nil {
+		t.Log(err)
+	}
+	if err := db.Unscoped().Select(clause.Associations).Delete(entries).Error; err != nil {
+		logger.Error("orm hard delete match failed ")
+	}
+	t.Log("succeed")
+}
+
 func Test_summoners_store(t *testing.T) {
 	// load json
 	buff, err := os.ReadFile(path + "summoners.json")

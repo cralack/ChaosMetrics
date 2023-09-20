@@ -2,7 +2,7 @@ package test
 
 import (
 	"testing"
-	
+
 	"github.com/cralack/ChaosMetrics/server/service/updater"
 )
 
@@ -11,7 +11,7 @@ func Test_update_champion(t *testing.T) {
 		versions []string
 	)
 	u := updater.NewRiotUpdater()
-	
+
 	if u.CurVersion == "" {
 		versions = u.UpdateVersions()
 		u.CurVersion = versions[0]
@@ -22,7 +22,7 @@ func Test_update_champion(t *testing.T) {
 	for _, ver := range versions {
 		if ver[:2] == "13" {
 			u.UpdateItems(ver)
-			// u.UpdateChampions(ver)
+			u.UpdateChampions(ver)
 		} else {
 			break
 		}

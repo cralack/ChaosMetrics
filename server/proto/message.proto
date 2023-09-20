@@ -1,0 +1,32 @@
+syntax = "proto3";
+option go_package = "./message";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+service Messager {
+  rpc AddResource(TaskSpec) returns (NodeSpec) {
+    option (google.api.http) = {
+      post: "/pumper/resource"
+      body: "*"
+    };
+  }
+  rpc DeleteResource(TaskSpec) returns (google.protobuf.Empty){
+    option (google.api.http) = {
+      delete: "/pumper/resource"
+//      body: "*"
+    };
+  }
+}
+
+message TaskSpec {
+  string id = 1;
+  string name = 2;
+  string type =3;
+  string assigned_node = 4;
+  int64 creation_time = 5;
+}
+
+message NodeSpec {
+  string id = 1;
+  string Address = 2;
+}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/config"
 	"github.com/cralack/ChaosMetrics/server/global"
+	"go.uber.org/zap"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -52,7 +53,8 @@ func Viper() (*viper.Viper, error) {
 	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {
 		// handler func
-		fmt.Println("config file changed:", e.Name)
+		global.GVA_LOG.Info("config file changed:",
+			zap.String("filename", e.Name))
 		if err = v.Unmarshal(conf); err != nil {
 			panic(err)
 		}

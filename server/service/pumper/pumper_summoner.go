@@ -195,27 +195,27 @@ func (p *Pumper) summonerCounter(loc string) {
 	var (
 		total int
 		cur   int
-		delta int
+		pre   int
 		rate  float32
 	)
-	ticker := time.NewTicker(time.Second * 30)
-	checkTicker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(time.Second * 15)
+	checkTicker := time.NewTicker(time.Millisecond * 100)
 	total = len(p.entryMap[loc])
 	for {
 		select {
 		case <-checkTicker.C:
+			cur = len(p.sumnMap[loc])
 			if cur == total {
 				p.logger.Info("all ready fetch 100% summoners")
 				return
 			}
 		case <-ticker.C:
-			delta = len(p.sumnMap[loc]) - cur
-			cur = len(p.sumnMap[loc])
 			rate = float32(cur) / float32(total)
-			if delta > 0 {
+			if cur-pre > 0 {
 				p.logger.Info(fmt.Sprintf("fetch %s %05.02f%% (%04d/%04d) summoners",
 					loc, rate*100, cur, total))
 			}
+			pre = len(p.sumnMap[loc])
 		}
 	}
 }
