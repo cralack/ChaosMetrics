@@ -59,8 +59,7 @@ func NewPumper(opts ...Option) *Pumper {
 		fetcher: fetcher.NewBrowserFetcher(
 			fetcher.WithAPIToken(stgy.Token),
 		),
-		scheduler: scheduler.NewSchdule(),
-
+		scheduler:   scheduler.NewSchdule(),
 		entrieIdx:   make([]uint, 16),
 		summonerIdx: make([]uint, 16),
 		out:         make(chan *ParseResult),

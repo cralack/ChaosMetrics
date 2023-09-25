@@ -1,4 +1,4 @@
-env: dev  # 环境(test|dev|product)
+env: test  # 环境(test|dev|product)
 
 database:
   driver: mysql            # 连接驱动
@@ -56,8 +56,8 @@ server:
   grpc_listen_address: ":9090"
   http_listen_address: ":8080"
   id: "1"
-  registry_address: "192.168.0.105:2379"
+  registry_address: "localhost:2379"
   register_ttl: 60
   register_interval: 15
-  name: "go.micro.server.worker"
+  name: "pumper"
   client_timeout: 10

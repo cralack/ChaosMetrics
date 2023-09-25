@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
@@ -52,7 +52,7 @@ func ConverHostLoCode(loCode string) uint {
 		"tw2":  riotmodel.TW2,
 		"vn2":  riotmodel.VN2,
 	}
-	
+
 	return platformCodeMap[loCode]
 }
 
@@ -86,10 +86,19 @@ func ConvertPlatformToHost(loc uint) string {
 		"EUROPE":   "europe.api.riotgames.com",
 		"SEA":      "sea.api.riotgames.com",
 	}
-	
+
 	region := platformToRegion[loc]
 	host := regionToHost[region]
 	return "https://" + host
+}
+func ConvertRegionToRegCode(region string) uint {
+	regionCode := map[string]uint{
+		"AMERICA": riotmodel.LOC_AMERICAS,
+		"ASIA":    riotmodel.LOC_ASIA,
+		"EUROPE":  riotmodel.LOC_EUROPE,
+		"SEA":     riotmodel.LOC_SEA,
+	}
+	return regionCode[region]
 }
 
 func ConvertLanguageCode(lang uint) string {
@@ -123,7 +132,7 @@ func ConvertLanguageCode(lang uint) string {
 		riotmodel.LANG_zh_CN: "zh_CN",
 		riotmodel.LANG_zh_TW: "zh_TW",
 	}
-	
+
 	return langMap[lang]
 }
 
@@ -149,12 +158,12 @@ func ConvertVersionToIdx(version string) (uint, error) {
 			versionNums = append(versionNums, num)
 		}
 	}
-	
+
 	str := fmt.Sprintf("%02d%02d", versionNums[0], versionNums[1])
 	idx, err := strconv.Atoi(str)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return uint(idx), nil
 }
