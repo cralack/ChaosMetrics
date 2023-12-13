@@ -153,12 +153,12 @@ func RunHTTPServer(logger *zap.Logger, cfg *config.ServerConfig) {
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	if err := pb.RegisterGreeterGwFromEndpoint(ctx, mux, GRPCListenAddress, opts); err != nil {
+	if err := pb.RegisterGreeterGwFromEndpoint(ctx, mux, cfg.GRPCListenAddress, opts); err != nil {
 		logger.Fatal("register backend grpc server endpoint failed")
 	}
 
-	logger.Debug(fmt.Sprintf("grpc's http proxy listening on %v", HTTPListenAddress))
-	if err := http.ListenAndServe(HTTPListenAddress, mux); err != nil {
+	logger.Debug(fmt.Sprintf("grpc's http proxy listening on %v", cfg.HTTPListenAddress))
+	if err := http.ListenAndServe(cfg.HTTPListenAddress, mux); err != nil {
 		logger.Fatal("HTTPListenAndServe failed")
 	}
 
