@@ -27,12 +27,12 @@ var masterCmd = &cobra.Command{
 		return cmd.Help()
 	},
 }
+
 var rootCmd = &cobra.Command{
 	Use:     "chao",
 	Aliases: []string{"cm"},
 	Short:   "chaosmetrics提供的命令行工具",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		if err := cmd.Help(); err != nil {
 			global.GVA_LOG.Error("run root command help failed",
 				zap.Error(err))

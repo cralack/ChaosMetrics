@@ -109,6 +109,7 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 
 func (p *Pumper) StartEngine(exit chan struct{}) {
 	go p.Schedule()
+	// distrib part
 	// go p.loadResource()
 	// go p.watchResource()
 	go p.fetch()
@@ -316,7 +317,7 @@ func (p *Pumper) fetch() {
 					}
 				}
 			}
-			p.logger.Info(fmt.Sprintf("updating %s's match list @ %d,store %d matches",
+			p.logger.Debug(fmt.Sprintf("updating %s's match list @ %d,store %d matches",
 				summoner.Name, cnt, len(matches)))
 			if len(matches) == 0 {
 				continue

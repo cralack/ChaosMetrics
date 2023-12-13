@@ -98,6 +98,9 @@ func ConvertRegionToRegCode(region string) uint {
 		"EUROPE":  riotmodel.LOC_EUROPE,
 		"SEA":     riotmodel.LOC_SEA,
 	}
+	if region == "" {
+		return regionCode["AMERICA"]
+	}
 	return regionCode[region]
 }
 

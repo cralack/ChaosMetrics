@@ -11,7 +11,7 @@ import (
 func Test_pumper_update(t *testing.T) {
 	p := pumper.NewPumper(
 		pumper.WithLoc(riotmodel.NA1),
-		pumper.WithEndMark(riotmodel.CHALLENGER, 1),
+		pumper.WithEndMark(riotmodel.EMERALD, 1),
 	)
 	p.UpdateAll()
 

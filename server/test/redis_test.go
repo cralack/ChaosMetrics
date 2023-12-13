@@ -38,3 +38,12 @@ func Test_redis_crud(t *testing.T) {
 		t.Log(err)
 	}
 }
+
+func Test_redis(t *testing.T) {
+	buff := rdb.HGet(context.Background(), "/championlist", "1305").Val()
+	cList := make([]string, 0)
+	if err := json.Unmarshal([]byte(buff), &cList); err != nil {
+		t.Log(err)
+	}
+	t.Log(cList[0])
+}

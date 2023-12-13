@@ -3,7 +3,7 @@ package pumper
 import (
 	"fmt"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
@@ -33,7 +33,7 @@ var defaultStrategy = &Strategy{
 	// LifeTime: -1, // cache forever
 }
 
-//	Example:WithLoc(riotmodel.BR1,riotmodel.EUN1)
+// Example:WithLoc(riotmodel.BR1,riotmodel.EUN1)
 func WithLoc(locs ...uint) Option {
 	return func(stgy *Strategy) {
 		tmp := make([]uint, 0, 16)
@@ -48,8 +48,8 @@ func WithLoc(locs ...uint) Option {
 	}
 }
 
-//	Example:WithAreaLoc(riotmodel.LOC_ALL)
-//	Example:WithAreaLoc(riotmodel.LOC_AMERICAS,riotmodel.LOC_ASIA)
+// Example:WithAreaLoc(riotmodel.LOC_ALL)
+// Example:WithAreaLoc(riotmodel.LOC_AMERICAS,riotmodel.LOC_ASIA)
 func WithAreaLoc(areas ...uint) Option {
 	return func(stgy *Strategy) {
 		tmp := make([]uint, 0, 16)
@@ -77,8 +77,8 @@ func WithAreaLoc(areas ...uint) Option {
 			riotmodel.TW2,
 			riotmodel.VN2,
 		}
-		
-		for area := range areas {
+
+		for _, area := range areas {
 			if 4 < area {
 				global.GVA_LOG.Error("wrong param,area need < 4,using default option")
 				return
@@ -107,7 +107,7 @@ func WithAreaLoc(areas ...uint) Option {
 	}
 }
 
-//	Example:WithQues(riotmodel.RANKED_SOLO_5x5)
+// Example:WithQues(riotmodel.RANKED_SOLO_5x5)
 func WithQues(ques ...uint) Option {
 	return func(stgy *Strategy) {
 		tmp := make([]uint, 0, 3)
@@ -122,8 +122,8 @@ func WithQues(ques ...uint) Option {
 	}
 }
 
-//	Example:WithEndMark(riotmodel.DIAMOND,1)
-//	Example:WithEndMark(riotmodel.IRON,4)
+// Example:WithEndMark(riotmodel.DIAMOND,1)
+// Example:WithEndMark(riotmodel.IRON,4)
 func WithEndMark(tier, div uint) Option {
 	return func(stgy *Strategy) {
 		if riotmodel.IRON < tier || 4 < div || div < 1 {

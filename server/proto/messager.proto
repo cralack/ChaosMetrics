@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./message";
+option go_package = "./messager";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
@@ -21,12 +21,12 @@ service Messager {
 message TaskSpec {
   string id = 1;
   string name = 2;
-  string type =3;
+  string loc =3;
   string assigned_node = 4;
   int64 creation_time = 5;
 }
 
 message NodeSpec {
   string id = 1;
-  string Address = 2;
+  string address = 2;
 }
