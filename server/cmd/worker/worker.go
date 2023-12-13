@@ -43,16 +43,16 @@ var Cmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		global.GVA_LOG.Debug("workerid:",
 			zap.String("flag", workerID))
-		// global.GVA_LOG.Debug("podip:",
-		// 	zap.String("flag", podIP))
-		// global.GVA_LOG.Debug("HTTPListenAddress:",
-		// 	zap.String("flag", HTTPListenAddress))
-		// global.GVA_LOG.Debug("GRPCListenAddress:",
-		// 	zap.String("flag", GRPCListenAddress))
-		// global.GVA_LOG.Debug("PProfListenAddress:",
-		// 	zap.String("flag", PProfListenAddress))
-		// global.GVA_LOG.Debug("cluster:",
-		// 	zap.Bool("flag", cluster))
+		global.GVA_LOG.Debug("podip:",
+			zap.String("flag", podIP))
+		global.GVA_LOG.Debug("HTTPListenAddress:",
+			zap.String("flag", HTTPListenAddress))
+		global.GVA_LOG.Debug("GRPCListenAddress:",
+			zap.String("flag", GRPCListenAddress))
+		global.GVA_LOG.Debug("PProfListenAddress:",
+			zap.String("flag", PProfListenAddress))
+		global.GVA_LOG.Debug("cluster:",
+			zap.Bool("flag", cluster))
 		Run()
 	},
 }
@@ -78,19 +78,20 @@ func Run() {
 	// )
 	// load conf
 	conf := global.GVA_CONF.ServerConf
-	conf.Name += ".worker"
 	logger := global.GVA_LOG
+
+	conf.Name += ".worker"
 
 	area := utils.ConvertRegionToRegCode(region)
 	if workerID == "" {
 		if podIP != "" {
-			ip := utils.GetIDbyIP(podIP)
-			workerID = strconv.Itoa(int(ip))
+			workerID = strconv.Itoa(int(utils.GetIDbyIP(podIP)))
 		} else {
 			workerID = fmt.Sprintf("%4d", time.Now().UnixNano())
 		}
 	}
-	logger.Info(podIP)
+	logger.Debug(podIP)
+	logger.Debug(workerID)
 
 	// start pumper core
 	exit := make(chan struct{})
@@ -98,6 +99,7 @@ func Run() {
 		pumper.WithAreaLoc(area),
 	)
 	core.StartEngine(exit)
+	logger.Info("starting worker engine...")
 
 	go RunGRPCServer(logger, conf)
 	RunHTTPServer(logger, conf)
@@ -118,13 +120,13 @@ func RunGRPCServer(logger *zap.Logger, cfg *config.ServerConfig) {
 	// init grpc server
 	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))
 	service := micro.NewService(
-		micro.Server(gs.NewServer(server.Id(workerID))),
+		micro.Server(gs.NewServer(server.Id(workerID))), // worker ID
+		micro.Name(cfg.Name),                            // worker name
 		micro.Address(GRPCListenAddress),
 		micro.Registry(reg),
 		micro.RegisterTTL(cfg.RegisterTTL*time.Second),
 		micro.RegisterInterval(cfg.RegisterInterval*time.Second),
 		micro.WrapHandler(logWrapper(logger)),
-		micro.Name(cfg.Name),
 	)
 	if err := service.Client().Init(
 		client.RequestTimeout(cfg.ClientTimeOut * time.Second),
