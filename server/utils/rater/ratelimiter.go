@@ -27,7 +27,7 @@ func NewSlidingWindowLimiter(limit int, window, smallWindow time.Duration) (*Sli
 	if window%smallWindow != 0 {
 		return nil, errors.New("window cannot be split by integers")
 	}
-	
+
 	return &SlidingWindowLimiter{
 		limit:        limit,
 		window:       int64(window),
@@ -40,12 +40,12 @@ func NewSlidingWindowLimiter(limit int, window, smallWindow time.Duration) (*Sli
 func (l *SlidingWindowLimiter) TryAcquire() bool {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
-	
+
 	// 获取当前小窗口值
 	currentSmallWindow := time.Now().UnixNano() / l.smallWindow * l.smallWindow
 	// 获取起始小窗口值
 	startSmallWindow := currentSmallWindow - l.smallWindow*(l.smallWindows-1)
-	
+
 	// 计算当前窗口的请求总数
 	var count int
 	for smallWindow, counter := range l.counters {
@@ -55,7 +55,7 @@ func (l *SlidingWindowLimiter) TryAcquire() bool {
 			count += counter
 		}
 	}
-	
+
 	// 若到达窗口请求上限，请求失败
 	if count >= l.limit {
 		return false

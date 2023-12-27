@@ -45,7 +45,6 @@ func RunCommand() error {
 	{ // debug master part
 		cmd, _, err := rootCmd.Find(os.Args[1:])
 		if err != nil || cmd.Args == nil || global.GVA_ENV == global.TEST_ENV {
-			// Not found
 			arg := "master"
 			extraArg1 := "--id=4"
 			extraArg2 := "--http=:8084"
@@ -58,7 +57,6 @@ func RunCommand() error {
 	// 	// debug worker part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
 	// 	if err != nil || cmd.Args == nil || global.GVA_ENV == global.TEST_ENV {
-	// 		// Not found
 	// 		arg := "worker"
 	// 		args := append([]string{arg}, os.Args[1:]...)
 	// 		rootCmd.SetArgs(args)

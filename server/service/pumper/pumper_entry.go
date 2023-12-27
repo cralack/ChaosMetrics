@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/service/scheduler"
 	"github.com/cralack/ChaosMetrics/server/utils"
+	"github.com/cralack/ChaosMetrics/server/utils/scheduler"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )

@@ -75,7 +75,7 @@ func (m *Master) Campaign() {
 			m.updateWorkNodes()
 
 		// check leader every 30s
-		case <-time.After(15 * time.Second):
+		case <-time.After(30 * time.Second):
 			rsp, err2 := e.Leader(context.Background())
 			if err2 != nil {
 				m.logger.Info("get leader failed", zap.Error(err2))
