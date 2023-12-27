@@ -41,18 +41,6 @@ var Cmd = &cobra.Command{
 
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		global.GVA_LOG.Debug("workerid:",
-			zap.String("flag", workerID))
-		global.GVA_LOG.Debug("podip:",
-			zap.String("flag", podIP))
-		global.GVA_LOG.Debug("HTTPListenAddress:",
-			zap.String("flag", HTTPListenAddress))
-		global.GVA_LOG.Debug("GRPCListenAddress:",
-			zap.String("flag", GRPCListenAddress))
-		global.GVA_LOG.Debug("PProfListenAddress:",
-			zap.String("flag", PProfListenAddress))
-		global.GVA_LOG.Debug("cluster:",
-			zap.Bool("flag", cluster))
 		Run()
 	},
 }
@@ -73,9 +61,6 @@ func init() {
 }
 
 func Run() {
-	// var (
-	// 	err error
-	// )
 	// load conf
 	conf := global.GVA_CONF.ServerConf
 	logger := global.GVA_LOG
@@ -90,8 +75,6 @@ func Run() {
 			workerID = fmt.Sprintf("%4d", time.Now().UnixNano())
 		}
 	}
-	logger.Debug(podIP)
-	logger.Debug(workerID)
 
 	// start pumper core
 	exit := make(chan struct{})
@@ -101,8 +84,8 @@ func Run() {
 	core.StartEngine(exit)
 	logger.Info("starting worker engine...")
 
-	go RunGRPCServer(logger, conf)
-	RunHTTPServer(logger, conf)
+	go RunHTTPServer(logger)
+	RunGRPCServer(logger, conf)
 }
 
 type Greeter struct{}
@@ -115,7 +98,7 @@ func (g *Greeter) Hello(ctx context.Context, req *pb.Request, rsp *pb.Response) 
 	return nil
 }
 
-// RunGRPCServer and regestry to etcd
+// RunGRPCServer and regestry worker to etcd
 func RunGRPCServer(logger *zap.Logger, cfg *config.ServerConfig) {
 	// init grpc server
 	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))
@@ -128,12 +111,10 @@ func RunGRPCServer(logger *zap.Logger, cfg *config.ServerConfig) {
 		micro.RegisterInterval(cfg.RegisterInterval*time.Second),
 		micro.WrapHandler(logWrapper(logger)),
 	)
-	if err := service.Client().Init(
-		client.RequestTimeout(cfg.ClientTimeOut * time.Second),
-	); err != nil {
-		logger.Error("micro client init error",
-			zap.Error(err))
+	if err := service.Client().Init(client.RequestTimeout(cfg.ClientTimeOut * time.Second)); err != nil {
+		logger.Error("micro client init error", zap.Error(err))
 	}
+
 	service.Init()
 
 	if err := pb.RegisterGreeterHandler(service.Server(), new(Greeter)); err != nil {
@@ -146,22 +127,21 @@ func RunGRPCServer(logger *zap.Logger, cfg *config.ServerConfig) {
 	}
 }
 
-func RunHTTPServer(logger *zap.Logger, cfg *config.ServerConfig) {
+func RunHTTPServer(logger *zap.Logger) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	mux := runtime.NewServeMux()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	if err := pb.RegisterGreeterGwFromEndpoint(ctx, mux, cfg.GRPCListenAddress, opts); err != nil {
-		logger.Fatal("register backend grpc server endpoint failed")
+	if err := pb.RegisterGreeterGwFromEndpoint(ctx, mux, GRPCListenAddress, opts); err != nil {
+		logger.Fatal("register worker grpc http proxy failed")
 	}
 
-	logger.Debug(fmt.Sprintf("grpc's http proxy listening on %v", cfg.HTTPListenAddress))
-	if err := http.ListenAndServe(cfg.HTTPListenAddress, mux); err != nil {
+	logger.Debug(fmt.Sprintf("grpc's http proxy listening on %v", HTTPListenAddress))
+	if err := http.ListenAndServe(HTTPListenAddress, mux); err != nil {
 		logger.Fatal("HTTPListenAndServe failed")
 	}
-
 }
 
 func logWrapper(log *zap.Logger) server.HandlerWrapper {

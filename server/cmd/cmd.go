@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/cralack/ChaosMetrics/server/cmd/master"
 	"github.com/cralack/ChaosMetrics/server/cmd/worker"
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/spf13/cobra"
@@ -16,15 +17,6 @@ var versionCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		global.GVA_LOG.Info("3.14.15")
-	},
-}
-
-// matser entrance
-var masterCmd = &cobra.Command{
-	Use:   "master",
-	Short: "start a master cluster",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return cmd.Help()
 	},
 }
 
@@ -42,7 +34,7 @@ var rootCmd = &cobra.Command{
 
 func AddCommands(root *cobra.Command) {
 	root.AddCommand(
-		masterCmd,
+		master.Cmd,
 		worker.Cmd,
 		versionCmd,
 	)
@@ -50,11 +42,27 @@ func AddCommands(root *cobra.Command) {
 
 func RunCommand() error {
 	AddCommands(rootCmd)
-	cmd, _, err := rootCmd.Find(os.Args[1:])
-	if err != nil || cmd.Args == nil || global.GVA_ENV == global.TEST_ENV {
-		// Not found
-		args := append([]string{"worker"}, os.Args[1:]...)
-		rootCmd.SetArgs(args)
+	{ // debug master part
+		cmd, _, err := rootCmd.Find(os.Args[1:])
+		if err != nil || cmd.Args == nil || global.GVA_ENV == global.TEST_ENV {
+			// Not found
+			arg := "master"
+			extraArg1 := "--id=4"
+			extraArg2 := "--http=:8084"
+			extraArg3 := "--grpc=:9094"
+			args := append([]string{arg, extraArg1, extraArg2, extraArg3}, os.Args[1:]...)
+			rootCmd.SetArgs(args)
+		}
 	}
+	// {
+	// 	// debug worker part
+	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
+	// 	if err != nil || cmd.Args == nil || global.GVA_ENV == global.TEST_ENV {
+	// 		// Not found
+	// 		arg := "worker"
+	// 		args := append([]string{arg}, os.Args[1:]...)
+	// 		rootCmd.SetArgs(args)
+	// 	}
+	// }
 	return rootCmd.Execute()
 }

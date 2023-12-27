@@ -53,8 +53,8 @@ redis:
   conn_max_idletime: 1h # 连接数空闲时长
 
 server:
-  grpc_listen_address: ":9090"
-  http_listen_address: ":8080"
+#  grpc_listen_address: ":9090"
+#  http_listen_address: ":8080"
   id: "1"
   registry_address: "localhost:2379"
   register_ttl: 60

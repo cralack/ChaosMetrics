@@ -12,7 +12,6 @@ import (
 	"github.com/cralack/ChaosMetrics/server/config"
 	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/service/rater"
-
 	"go.uber.org/zap"
 )
 
