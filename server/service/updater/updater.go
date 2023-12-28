@@ -31,7 +31,6 @@ type Updater struct {
 	CurVersion string
 	matchVis   map[string]map[string]bool
 	stgy       *Strategy
-	// Conf     UpdateConfig
 }
 
 func NewRiotUpdater(opts ...Option) *Updater {
@@ -60,7 +59,9 @@ func (u *Updater) UpdateVersions() (version []string) {
 		err  error
 	)
 	url = "https://ddragon.leagueoflegends.com/api/versions.json"
-	if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
+	if buff, err = u.fetcher.Get(fetcher.NewTask(
+		fetcher.WithURL(url),
+	)); err != nil || buff == nil {
 		u.logger.Error("update version failed", zap.Error(err))
 	}
 	if err = json.Unmarshal(buff, &version); err != nil {
@@ -96,7 +97,9 @@ func (u *Updater) UpdateChampions(version string) {
 	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%dzh_CN", vIdx)).Val(); buffer == "" {
 		// get champion chamList
 		url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
-		if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
+		if buff, err = u.fetcher.Get(fetcher.NewTask(
+			fetcher.WithURL(url),
+		)); err != nil || buff == nil {
 			u.logger.Error("get champion list failed", zap.Error(err))
 		}
 		if err = json.Unmarshal(buff, &chamList); err != nil {
@@ -130,7 +133,9 @@ func (u *Updater) UpdateChampions(version string) {
 			// fetch buffer
 			url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion/%s.json",
 				version, lang, chamID)
-			if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
+			if buff, err = u.fetcher.Get(fetcher.NewTask(
+				fetcher.WithURL(url),
+			)); err != nil || buff == nil {
 				u.logger.Error(fmt.Sprintf("update %s@%s failed",
 					chamID, lang), zap.Error(err))
 				continue
@@ -189,7 +194,9 @@ func (u *Updater) UpdateItems(version string) {
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/%s/item.json",
 			version, lang)
-		if buff, err = u.fetcher.Get(url); err != nil {
+		if buff, err = u.fetcher.Get(fetcher.NewTask(
+			fetcher.WithURL(url),
+		)); err != nil {
 			flag = true
 			u.logger.Error("get item list failed", zap.Error(err))
 			continue
@@ -234,7 +241,9 @@ func (u *Updater) UpdatePerks() {
 		// fetch perk relation
 		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/runesReforged.json",
 			u.CurVersion, lang)
-		if buff, err = u.fetcher.Get(url); err != nil {
+		if buff, err = u.fetcher.Get(fetcher.NewTask(
+			fetcher.WithURL(url),
+		)); err != nil {
 			u.logger.Error("get  perks failed", zap.Error(err))
 			continue
 		}
@@ -255,7 +264,9 @@ func (u *Updater) UpdatePerks() {
 		}
 		url = fmt.Sprintf("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/%s/v1/perks.json",
 			strings.ToLower(lang))
-		if buff, err = u.fetcher.Get(url); err != nil {
+		if buff, err = u.fetcher.Get(fetcher.NewTask(
+			fetcher.WithURL(url),
+		)); err != nil {
 			u.logger.Error("get  perks failed", zap.Error(err))
 			continue
 		}

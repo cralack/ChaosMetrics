@@ -33,7 +33,7 @@ type Analyzer struct {
 
 	curVersion    string
 	analyzedCount []int64
-	stgy          *Strategy
+	options       *options
 	chamTemplate  map[string]*riotmodel.ChampionDTO // chamTemplate[championName]
 	itemMap       map[string]*riotmodel.ItemDTO     // itemMap[itemID@version]
 	analyzed      map[uint]*anres.Champion          // analyzed[chamId+verId+loc+mode]
@@ -41,7 +41,7 @@ type Analyzer struct {
 }
 
 func NewAnalyzer(opts ...Option) *Analyzer {
-	stgy := defaultStrategy
+	stgy := defaultOptions
 	for _, opt := range opts {
 		opt(stgy)
 	}
@@ -54,7 +54,7 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 		schd:          scheduler.NewSchdule(),
 		updt:          updater.NewRiotUpdater(),
 		analyzedCount: make([]int64, 16),
-		stgy:          stgy,
+		options:       stgy,
 		// matchMap:    make(map[string]map[string]*riotmodel.MatchDTO),
 		chamTemplate: make(map[string]*riotmodel.ChampionDTO),
 		itemMap:      make(map[string]*riotmodel.ItemDTO),
@@ -69,7 +69,7 @@ func (a *Analyzer) Analyze() {
 	go a.handleMatches(exit)
 
 	a.loadChampionTemplate()
-	for _, loc := range a.stgy.Loc {
+	for _, loc := range a.options.Loc {
 		a.loadMatch(loc)
 	}
 	<-exit
@@ -145,9 +145,9 @@ func (a *Analyzer) loadMatch(loCode uint) {
 	go a.counter(len(matches), loCode)
 
 	// chunk if oversize
-	if len(matches) > a.stgy.BatchSize {
+	if len(matches) > a.options.BatchSize {
 		totalSize := len(matches)
-		chunkSize := a.stgy.BatchSize
+		chunkSize := a.options.BatchSize
 		for i := 0; i < totalSize; i += chunkSize {
 			end := i + chunkSize
 			if end > totalSize {

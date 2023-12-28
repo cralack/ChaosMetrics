@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/cralack/ChaosMetrics/server/utils/scheduler"
 	"github.com/redis/go-redis/v9"
@@ -141,7 +142,10 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	sumName := req.Data.(*matchTask).sumn.Name
 	// fetch match
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
-	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
+	if buff, err = p.fetcher.Get(fetcher.NewTask(
+		fetcher.WithURL(url),
+		fetcher.WithToken(apiToken),
+	)); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match %s failed",
 			sumName, matchID), zap.Error(err))
 		if req.Retry < p.stgy.Retry {
@@ -163,7 +167,10 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	}
 	// fetch match timeline
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s/timeline", host, matchID)
-	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
+	if buff, err = p.fetcher.Get(fetcher.NewTask(
+		fetcher.WithURL(url),
+		fetcher.WithToken(apiToken),
+	)); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match timeline %s failed",
 			sumName, matchID), zap.Error(err))
 		if req.Retry < p.stgy.Retry {
@@ -232,7 +239,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	totalSize := len(matches)
 	chunkSize := 5
 	if totalSize < chunkSize {
-		p.out <- &ParseResult{
+		p.out <- &DBResult{
 			Type:  "match",
 			Brief: sName,
 			Data:  matches,
@@ -249,7 +256,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	}
 
 	for _, chunk := range chunks {
-		p.out <- &ParseResult{
+		p.out <- &DBResult{
 			Type:  "match",
 			Brief: sName,
 			Data:  chunk,

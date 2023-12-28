@@ -1,19 +1,20 @@
 package fetcher
 
 import (
-	"github.com/cralack/ChaosMetrics/server/config"
+	"github.com/cralack/ChaosMetrics/server/global"
 )
 
-type Option func(conf *config.FetcherConfig)
-
-func WithAPIToken(token string) Option {
-	return func(conf *config.FetcherConfig) {
-		conf.HeaderConfig.XRiotToken = token
-	}
+var defaultFetcher = &BrowserFetcher{
+	requireRateLimiter: false,
+	logger:             global.GVA_LOG,
+	timeout:            global.GVA_CONF.Fetcher.Timeout,
 }
 
-func WithRateLimiter(flag bool) Option {
-	return func(conf *config.FetcherConfig) {
-		conf.RequireRateLimiter = flag
+func WithRateLimiter(flag bool) func(*BrowserFetcher) {
+	return func(fetcher *BrowserFetcher) {
+		if !flag {
+			fetcher.requireRateLimiter = false
+			fetcher.rater = nil
+		}
 	}
 }

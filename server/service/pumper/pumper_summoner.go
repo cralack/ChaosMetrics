@@ -155,7 +155,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 
 	// check oversize && split
 	if len(summoners) < p.stgy.MaxSize {
-		p.out <- &ParseResult{
+		p.out <- &DBResult{
 			Type: "summoners",
 			Data: summoners,
 		}
@@ -167,7 +167,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 			if end > totalSize {
 				end = totalSize
 			}
-			p.out <- &ParseResult{
+			p.out <- &DBResult{
 				Type: "summoners",
 				Data: summoners[i:end],
 			}

@@ -18,6 +18,7 @@ import (
 )
 
 const testSize = 1
+const apiToken = ""
 
 type Pumper struct {
 	logger      *zap.Logger
@@ -29,13 +30,13 @@ type Pumper struct {
 	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
 	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
 	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
-	out         chan *ParseResult
+	out         chan *DBResult
 	entrieIdx   []uint
 	summonerIdx []uint
 	stgy        *Strategy
 }
 
-type ParseResult struct {
+type DBResult struct {
 	Type  string
 	Brief string
 	Data  interface{}
@@ -52,17 +53,15 @@ func NewPumper(opts ...Option) *Pumper {
 	}
 
 	return &Pumper{
-		logger: global.GVA_LOG,
-		db:     global.GVA_DB,
-		rdb:    global.GVA_RDB,
-		lock:   &sync.Mutex{},
-		fetcher: fetcher.NewBrowserFetcher(
-			fetcher.WithAPIToken(stgy.Token),
-		),
+		logger:      global.GVA_LOG,
+		db:          global.GVA_DB,
+		rdb:         global.GVA_RDB,
+		lock:        &sync.Mutex{},
+		fetcher:     fetcher.NewBrowserFetcher(),
 		scheduler:   scheduler.NewSchdule(),
 		entrieIdx:   make([]uint, 16),
 		summonerIdx: make([]uint, 16),
-		out:         make(chan *ParseResult),
+		out:         make(chan *DBResult),
 		entryMap:    make(map[string]map[string]*riotmodel.LeagueEntryDTO),
 		sumnMap:     make(map[string]map[string]*riotmodel.SummonerDTO),
 		matchMap:    make(map[string]map[string]bool),
@@ -152,7 +151,7 @@ func (p *Pumper) fetch() {
 		req := p.scheduler.Pull()
 		if req.Data == nil {
 			// send finish signal
-			p.out <- &ParseResult{
+			p.out <- &DBResult{
 				Type:  "finish",
 				Brief: req.Type,
 				Data:  nil,
@@ -165,7 +164,10 @@ func (p *Pumper) fetch() {
 		case "bestEntry":
 			data := req.Data.(*entryTask)
 			// api: /lol/league/v4/{BEST}leagues/by-queue/{queue}
-			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
+			if buff, err = p.fetcher.Get(fetcher.NewTask(
+				fetcher.WithURL(req.URL),
+				fetcher.WithToken(apiToken),
+			)); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
 					zap.Error(err))
 				// fetch again
@@ -198,7 +200,7 @@ func (p *Pumper) fetch() {
 			p.handleEntries(entries, req.Loc)
 			p.cacheEntries(entries, req.Loc)
 			if data.Tier == endTier && data.Rank == endRank {
-				p.out <- &ParseResult{
+				p.out <- &DBResult{
 					Type:  "finish",
 					Brief: "entry",
 					Data:  nil,
@@ -211,8 +213,11 @@ func (p *Pumper) fetch() {
 			data := req.Data.(*entryTask)
 			for page := 1; ; page++ {
 				// api: /lol/league/v4/entries/{queue}/{tier}/{division}
-				if buff, err = p.fetcher.Get(fmt.Sprintf("%s?page=%s",
-					req.URL, strconv.Itoa(page))); err != nil {
+				url := fmt.Sprintf("%s?page=%s", req.URL, strconv.Itoa(page))
+				if buff, err = p.fetcher.Get(fetcher.NewTask(
+					fetcher.WithURL(url),
+					fetcher.WithToken(apiToken),
+				)); err != nil {
 					p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
 						zap.Error(err))
 					if req.Retry < p.stgy.Retry {
@@ -247,7 +252,7 @@ func (p *Pumper) fetch() {
 			}
 
 			if data.Tier == endTier && data.Rank == endRank {
-				p.out <- &ParseResult{
+				p.out <- &DBResult{
 					Type:  "finish",
 					Brief: "entry",
 					Data:  nil,
@@ -257,7 +262,10 @@ func (p *Pumper) fetch() {
 
 		case "summoner":
 			data := req.Data.(*summonerTask)
-			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
+			if buff, err = p.fetcher.Get(fetcher.NewTask(
+				fetcher.WithURL(req.URL),
+				fetcher.WithToken(apiToken),
+			)); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
 				// fetch again
 				if req.Retry < p.stgy.Retry {
@@ -276,7 +284,10 @@ func (p *Pumper) fetch() {
 		case "match":
 			data := req.Data.(*matchTask)
 			// get old & cur match list
-			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
+			if buff, err = p.fetcher.Get(fetcher.NewTask(
+				fetcher.WithURL(req.URL),
+				fetcher.WithToken(apiToken),
+			)); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summoner %s's match list failed",
 					data.sumn.Name), zap.Error(err))
 				if req.Retry < p.stgy.Retry {

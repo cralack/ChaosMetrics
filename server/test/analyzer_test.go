@@ -5,10 +5,11 @@ import (
 	"sort"
 	"testing"
 	"time"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/service/analyzer"
+	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/utils"
 )
 
@@ -33,13 +34,13 @@ func Test_result_list(t *testing.T) {
 		sort.Slice(aramList, func(i, j int) bool {
 			return aramList[i].RankScore > aramList[j].RankScore
 		})
-		
+
 		for i := 0; i < len(aramList); i++ {
 			tmp = aramList[i]
 			fmt.Printf("%d.%s:winrate:%0.2f score:%0.2f\n\r", i+1, tmp.Title, tmp.WinRate, tmp.RankScore)
 		}
 	}
-	
+
 }
 
 func TestName(t *testing.T) {
@@ -51,7 +52,10 @@ func TestName(t *testing.T) {
 		startTime, endTime, 20)
 	url := fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
 		host, puuid, queryParams)
-	buff, err := f.Get(url)
+	buff, err := f.Get(fetcher.NewTask(
+		fetcher.WithURL(url),
+		fetcher.WithToken(apiToken),
+	))
 	if err != nil {
 		t.Log(err)
 	}

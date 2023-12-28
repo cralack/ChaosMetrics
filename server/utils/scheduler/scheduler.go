@@ -9,11 +9,13 @@ type Scheduler interface {
 type Task struct {
 	Type     string
 	Loc      string
-	ApiToken string
 	URL      string
 	Priority int
 	Retry    uint
+	Header   *Header
 	Data     interface{}
+}
+type Header struct {
 }
 
 type RiotDTOSchedule struct {

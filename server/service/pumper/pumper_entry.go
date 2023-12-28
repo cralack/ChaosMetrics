@@ -189,7 +189,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 
 	// send to DB handler
 	for _, chunk := range chunks {
-		p.out <- &ParseResult{
+		p.out <- &DBResult{
 			Type:  "entry",
 			Brief: chunk[0].Tier + " " + chunk[0].Rank,
 			Data:  chunk,
