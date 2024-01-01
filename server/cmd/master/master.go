@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cralack/ChaosMetrics/server/config"
 	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/config"
 	pb "github.com/cralack/ChaosMetrics/server/proto/greeter"
 	"github.com/cralack/ChaosMetrics/server/service/master"
 	"github.com/go-micro/plugins/v4/registry/etcd"

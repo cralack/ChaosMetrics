@@ -1,14 +1,14 @@
 package init
 
 import (
-	"github.com/cralack/ChaosMetrics/server/config"
 	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/config"
+	"github.com/cralack/ChaosMetrics/server/internal/pkg/xgorm"
+	"github.com/cralack/ChaosMetrics/server/internal/pkg/xredis"
+	"github.com/cralack/ChaosMetrics/server/internal/pkg/xviper"
+	"github.com/cralack/ChaosMetrics/server/internal/pkg/xzap"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/pkg/xgorm"
-	"github.com/cralack/ChaosMetrics/server/pkg/xredis"
-	"github.com/cralack/ChaosMetrics/server/pkg/xviper"
-	"github.com/cralack/ChaosMetrics/server/pkg/xzap"
 	"go.uber.org/zap"
 )
 

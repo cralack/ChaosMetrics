@@ -1,7 +1,7 @@
 package global
 
 import (
-	"github.com/cralack/ChaosMetrics/server/config"
+	"github.com/cralack/ChaosMetrics/server/internal/config"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/spf13/viper"
