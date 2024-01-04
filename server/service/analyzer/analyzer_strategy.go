@@ -22,7 +22,6 @@ var defaultOptions = &options{
 	// LifeTime: -1, // cache forever
 }
 
-// Example:WithLoc(riotmodel.BR1,riotmodel.EUN1)
 func WithLoc(locs ...uint) Option {
 	return func(stgy *options) {
 		tmp := make([]uint, 0, 16)

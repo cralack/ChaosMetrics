@@ -3,6 +3,7 @@ package master
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"go.etcd.io/etcd/client/v3/concurrency"
 	"go.uber.org/zap"
 )
+
+var electPath = "/resources/election"
 
 func (m *Master) Campaign() {
 	// create etcd client & session
@@ -24,13 +27,12 @@ func (m *Master) Campaign() {
 		}
 	}(s)
 
-	var pfx = "/resources/election"
-	e := concurrency.NewElection(s, pfx)
+	e := concurrency.NewElection(s, electPath)
 	leaderCh := make(chan error)
 
 	// if leader exist,goroutine blocking
 	// elseif current master elect succeed,leaderCh <- sig
-	go m.elect(e, leaderCh, "first time")
+	go m.elect(e, leaderCh)
 
 	// check leader
 	leaderChange := e.Observe(context.Background())
@@ -47,7 +49,7 @@ func (m *Master) Campaign() {
 		case err2 := <-leaderCh:
 			if err2 != nil {
 				m.logger.Error("leader elect failed", zap.Error(err2))
-				go m.elect(e, leaderCh, "leader change")
+				go m.elect(e, leaderCh)
 			} else {
 				m.logger.Info(m.ID + " start change to leader")
 				m.leaderID = m.ID
@@ -71,7 +73,8 @@ func (m *Master) Campaign() {
 
 		// handle worker changes
 		case resp := <-workerNodeChange:
-			m.logger.Info("watch worker change", zap.String("worker:", resp.Service.Name))
+			m.logger.Info("watch worker change", zap.String("worker:",
+				fmt.Sprintf("%s,action:%s", resp.Service.Name, resp.Action)))
 			m.updateWorkNodes()
 
 		// check leader every 30s
@@ -80,7 +83,7 @@ func (m *Master) Campaign() {
 			if err2 != nil {
 				m.logger.Info("get leader failed", zap.Error(err2))
 				if errors.Is(err2, concurrency.ErrElectionNoLeader) {
-					go m.elect(e, leaderCh, "tik tok")
+					go m.elect(e, leaderCh)
 				}
 			}
 
@@ -95,21 +98,20 @@ func (m *Master) Campaign() {
 }
 
 // blocking until elect succeed
-func (m *Master) elect(e *concurrency.Election, ch chan error, sig string) {
+func (m *Master) elect(e *concurrency.Election, ch chan error) {
 	err := e.Campaign(context.Background(), m.ID)
-	m.logger.Debug(sig)
 	ch <- err
 }
 
 func (m *Master) WatchWorker() chan *registry.Result {
-	watch, err := m.registry.Watch(registry.WatchService(ServiceName))
+	watcher, err := m.registry.Watch(registry.WatchService(ServiceName))
 	if err != nil {
 		m.logger.Panic("watch worker failed", zap.Error(err))
 	}
 	ch := make(chan *registry.Result)
 	go func() {
 		for {
-			res, err := watch.Next()
+			res, err := watcher.Next()
 			if err != nil {
 				m.logger.Error("watch worker service failed", zap.Error(err))
 				continue

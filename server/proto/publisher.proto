@@ -1,16 +1,16 @@
 syntax = "proto3";
-option go_package = "./messager";
+option go_package = "./publisher";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
-service Messager {
-  rpc AddResource(TaskSpec) returns (NodeSpec) {
+service Publisher {
+  rpc PushTask(TaskSpec) returns (NodeSpec) {
     option (google.api.http) = {
       post: "/pumper/resource"
       body: "*"
     };
   }
-  rpc DeleteResource(TaskSpec) returns (google.protobuf.Empty){
+  rpc PullTask(TaskSpec) returns (google.protobuf.Empty){
     option (google.api.http) = {
       delete: "/pumper/resource"
 //      body: "*"

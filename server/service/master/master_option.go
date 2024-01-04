@@ -11,6 +11,7 @@ type options struct {
 	registry    registry.Registry
 	registryURL string
 	GRPCAddress string
+	token       string
 }
 
 var defaultOptions = options{
@@ -40,5 +41,11 @@ func WithRegistry(registry registry.Registry) Option {
 func WithGRPCAddress(GRPCAddress string) Option {
 	return func(opts *options) {
 		opts.GRPCAddress = GRPCAddress
+	}
+}
+
+func WithApiToken(token string) Option {
+	return func(opts *options) {
+		opts.token = token
 	}
 }
