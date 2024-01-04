@@ -1,8 +1,8 @@
 package test
 
 import (
-	"github.com/cralack/ChaosMetrics/server/global"
 	_ "github.com/cralack/ChaosMetrics/server/init"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 
 	"github.com/go-sql-driver/mysql"
 )

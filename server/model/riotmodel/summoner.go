@@ -3,8 +3,8 @@ package riotmodel
 import (
 	"encoding/json"
 	"time"
-	
-	"github.com/cralack/ChaosMetrics/server/global"
+
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -13,7 +13,7 @@ import (
 type SummonerDTO struct {
 	gorm.Model
 	Matches string `gorm:"column:matches"`
-	
+
 	Loc            string    `gorm:"column:loc;type:varchar(100)" json:"loc"`
 	AccountID      string    `gorm:"column:account_id;type:varchar(100)" json:"accountId"`      // 加密的账号ID，最长为56个字符
 	ProfileIconID  int       `gorm:"column:profile_icon_id;type:smallint" json:"profileIconId"` // 与召唤师相关联的召唤师图标ID
@@ -31,7 +31,7 @@ func (s *SummonerDTO) TableName() string {
 
 func (s *SummonerDTO) UnmarshalJSON(data []byte) error {
 	var f map[string]interface{}
-	
+
 	err := json.Unmarshal(data, &f)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func (s *SummonerDTO) UnmarshalJSON(data []byte) error {
 				global.GVA_LOG.Error("parse failed", zap.Error(err))
 				return err
 			}
-		
+
 		case "accountId":
 			s.AccountID = v.(string)
 		case "profileIconId":
@@ -76,10 +76,10 @@ func (s *SummonerDTO) UnmarshalJSON(data []byte) error {
 			s.PUUID = v.(string)
 		case "summonerLevel":
 			s.SummonerLevel = int(v.(float64))
-			
+
 		}
 	}
-	
+
 	return nil
 }
 

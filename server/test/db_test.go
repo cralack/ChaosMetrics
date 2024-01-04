@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"go.uber.org/zap"
 	"gorm.io/gorm"

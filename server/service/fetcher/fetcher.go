@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/utils/rater"
 	"go.uber.org/zap"
 )

@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

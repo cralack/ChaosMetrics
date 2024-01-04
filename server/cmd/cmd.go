@@ -5,7 +5,7 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/cmd/master"
 	"github.com/cralack/ChaosMetrics/server/cmd/worker"
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

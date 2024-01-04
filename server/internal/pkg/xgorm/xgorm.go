@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"gorm.io/gorm/logger"
 
 	"go.uber.org/zap"

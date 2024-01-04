@@ -1,8 +1,8 @@
 package init
 
 import (
-	"github.com/cralack/ChaosMetrics/server/global"
 	"github.com/cralack/ChaosMetrics/server/internal/config"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/pkg/xgorm"
 	"github.com/cralack/ChaosMetrics/server/internal/pkg/xredis"
 	"github.com/cralack/ChaosMetrics/server/internal/pkg/xviper"

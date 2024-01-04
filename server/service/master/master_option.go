@@ -1,7 +1,7 @@
 package master
 
 import (
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"go-micro.dev/v4/registry"
 	"go.uber.org/zap"
 )

@@ -1,7 +1,7 @@
 package fetcher
 
 import (
-	"github.com/cralack/ChaosMetrics/server/global"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 )
 
 var defaultFetcher = &BrowserFetcher{
