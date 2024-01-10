@@ -113,7 +113,7 @@ func (a *Analyzer) loadItem(itemId int, version uint) (res *riotmodel.ItemDTO) {
 	return
 }
 
-func (a *Analyzer) loadMatch(loCode uint) {
+func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 	var (
 		err     error
 		matches []*riotmodel.MatchDB
@@ -252,7 +252,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 		// tar     []*anres.Champion
 		has     bool
 		verIdx  uint
-		modeIdx uint
+		modeIdx riotmodel.GAMEMODE
 		err     error
 	)
 	// get param
@@ -316,7 +316,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 			return
 		}
 		// match champion && version && loc && gamemode
-		tarId = uint(chamIdx)*1e8 + verIdx*1e4 + loCode*1e2 + modeIdx
+		tarId = uint(chamIdx)*1e8 + verIdx*1e4 + uint(loCode)*1e2 + uint(modeIdx)
 		if tmp, has = a.analyzed[tarId]; !has {
 			tmp = &anres.Champion{
 				Loc:      match.Loc,
@@ -356,7 +356,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	return
 }
 
-func (a *Analyzer) counter(total int, loc uint) {
+func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
 	var (
 		cur  int64
 		rate float32

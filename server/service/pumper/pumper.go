@@ -313,7 +313,7 @@ func (p *Pumper) fetch() {
 			// init val
 			matches = make([]*riotmodel.MatchDB, 0, p.stgy.MaxMatchCount)
 			loc := utils.ConverHostLoCode(req.Loc)
-			host := utils.ConvertPlatformToHost(loc)
+			region := utils.ConvertLocToRegion(loc)
 			// fetch match
 			for _, matchID := range curMatchList {
 				if _, has := p.matchMap[req.Loc][matchID]; has {
@@ -323,7 +323,7 @@ func (p *Pumper) fetch() {
 					continue
 				} else {
 					p.matchMap[req.Loc][matchID] = true
-					if tmp := p.FetchMatchByID(req, host, matchID); tmp != nil {
+					if tmp := p.FetchMatchByID(req, region, matchID); tmp != nil {
 						matches = append(matches, tmp)
 					}
 				}

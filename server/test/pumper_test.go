@@ -18,7 +18,7 @@ func Test_pumper_update(t *testing.T) {
 
 func Test_pumper_fetch_match_byId(t *testing.T) {
 	matchId := "TW2_99178853"
-	host := utils.ConvertPlatformToHost(riotmodel.TW2)
+	region := utils.ConvertLocToRegion(riotmodel.TW2)
 	p := pumper.NewPumper()
-	p.FetchMatchByID(nil, host, matchId)
+	p.FetchMatchByID(nil, region, matchId)
 }

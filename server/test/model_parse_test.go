@@ -242,11 +242,11 @@ func Test_parse_match_list(t *testing.T) {
 		list []string
 	)
 	puuid := "6RtCOQdb0rlWO0S714_nYds_xDw2-bwrB8IsVzJbAQi8uBfosVT5UyfayA9oirdE5pCFMEFB6TkAlA"
-	host := utils.ConvertPlatformToHost(loc)
+	region := utils.ConvertLocToRegion(loc)
 	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d", startTime, endTime, maxMatch)
-	url := fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s", host, puuid, queryParams)
+	url := fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s", region, puuid, queryParams)
 	if buff, err = f.Get(fetcher.NewTask(
 		fetcher.WithURL(url),
 		fetcher.WithToken(apiToken),
@@ -260,7 +260,7 @@ func Test_parse_match_list(t *testing.T) {
 	t.Log(list)
 	ques := make([]int, 0, 20)
 	for _, matchId := range list {
-		url := fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchId)
+		url := fmt.Sprintf("%s/lol/match/v5/matches/%s", region, matchId)
 		if buff, err = f.Get(fetcher.NewTask(
 			fetcher.WithURL(url),
 			fetcher.WithToken(apiToken),

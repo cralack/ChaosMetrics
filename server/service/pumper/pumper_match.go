@@ -91,7 +91,7 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 		count    int
 	)
 	loc, _ := utils.ConvertHostURL(loCode)
-	host := utils.ConvertPlatformToHost(loCode)
+	region := utils.ConvertLocToRegion(loCode)
 	p.loadMatch(loc)
 
 	// init query val
@@ -105,7 +105,7 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 		// ranker || no rank tier && len(match)<require
 		if _, has = p.entryMap[loc][sid]; has || !has && len(matchList) < p.stgy.MaxMatchCount {
 			url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
-				host, summoner.PUUID, queryParams)
+				region, summoner.PUUID, queryParams)
 			p.scheduler.Push(&scheduler.Task{
 				Type: "match",
 				Loc:  loc,
@@ -130,7 +130,7 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 	return
 }
 
-func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res *riotmodel.MatchDB) {
+func (p *Pumper) FetchMatchByID(req *scheduler.Task, region, matchID string) (res *riotmodel.MatchDB) {
 	var (
 		buff    []byte
 		url     string
@@ -141,7 +141,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 
 	sumName := req.Data.(*matchTask).sumn.Name
 	// fetch match
-	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
+	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", region, matchID)
 	if buff, err = p.fetcher.Get(fetcher.NewTask(
 		fetcher.WithURL(url),
 		fetcher.WithToken(apiToken),
@@ -166,7 +166,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		return
 	}
 	// fetch match timeline
-	url = fmt.Sprintf("%s/lol/match/v5/matches/%s/timeline", host, matchID)
+	url = fmt.Sprintf("%s/lol/match/v5/matches/%s/timeline", region, matchID)
 	if buff, err = p.fetcher.Get(fetcher.NewTask(
 		fetcher.WithURL(url),
 		fetcher.WithToken(apiToken),

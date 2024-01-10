@@ -56,7 +56,7 @@ func ConverHostLoCode(loCode string) riotmodel.LOCATION {
 	return platformCodeMap[loCode]
 }
 
-func ConvertPlatformToHost(loc riotmodel.LOCATION) string {
+func ConvertLocToRegion(loc riotmodel.LOCATION) string {
 	platformToRegion := map[riotmodel.LOCATION]string{
 		// The AMERICAS routing value serves NA, BR, LAN and LAS.
 		riotmodel.BR1: "AMERICAS",
