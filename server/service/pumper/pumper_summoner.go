@@ -80,14 +80,14 @@ func (p *Pumper) loadSummoner(loc string) {
 			mx = s.ID
 		}
 	}
-	loCode := utils.ConverHostLoCode(loc)
+	loCode := uint(utils.ConverHostLoCode(loc))
 	p.lock.Lock()
 	p.summonerIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
 	p.handleSummoner(loc, tmp...)
 }
 
-func (p *Pumper) createSummonerURL(loCode uint) {
+func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 	loc, host := utils.ConvertHostURL(loCode)
 	p.loadSummoner(loc)
 	go p.summonerCounter(loc)
@@ -95,7 +95,7 @@ func (p *Pumper) createSummonerURL(loCode uint) {
 	for sID, entry := range p.entryMap[loc] {
 		curTier, curRank := ConvertStrToRank(entry.Tier, entry.Rank)
 		if _, has := p.sumnMap[loc][sID]; has ||
-			(curTier > p.stgy.TestEndMark[0] || (curTier == p.stgy.TestEndMark[0] && curRank > p.stgy.TestEndMark[1])) {
+			(curTier > p.stgy.TestEndMark1 || (curTier == p.stgy.TestEndMark1 && curRank > p.stgy.TestEndMark2)) {
 			continue
 		}
 		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
@@ -142,7 +142,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	defer p.lock.Unlock()
 
 	for _, sumn := range summoners {
-		if s, has := p.sumnMap[loc][sumn.MetaSummonerID]; !has || s.ID < 1e9*loCode {
+		if s, has := p.sumnMap[loc][sumn.MetaSummonerID]; !has || s.ID < 1e9*uint(loCode) {
 			sumn.ID = p.summonerIdx[loCode]
 			p.summonerIdx[loCode]++
 		} else {

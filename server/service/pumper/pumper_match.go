@@ -82,7 +82,7 @@ func (p *Pumper) loadMatch(loc string) {
 	return
 }
 
-func (p *Pumper) createMatchListURL(loCode uint) {
+func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 	var (
 		url      string
 		sid      string
@@ -225,10 +225,10 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 		} else {
 			gameId = uint(id)
 		}
-		m.ID = gameId*1e2 + loCode
+		m.ID = gameId*1e2 + uint(loCode)
 		// m.Loc = loc
 		for i, par := range m.Participants {
-			par.ID = gameId*1e3 + uint(i)*1e2 + loCode
+			par.ID = gameId*1e3 + uint(i)*1e2 + uint(loCode)
 		}
 	}
 	if _, err := pipe.Exec(ctx); err != nil {

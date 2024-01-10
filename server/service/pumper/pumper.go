@@ -137,7 +137,7 @@ func (p *Pumper) fetch() {
 		endTier      string
 		endRank      string
 	)
-	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark[0], p.stgy.TestEndMark[1])
+	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark1, p.stgy.TestEndMark2)
 	// catch panic
 	defer func() {
 		if err := recover(); err != nil {
@@ -338,7 +338,7 @@ func (p *Pumper) fetch() {
 	}
 }
 
-func getQueueString(que uint) string {
+func getQueueString(que riotmodel.QUECODE) string {
 	switch que {
 	case riotmodel.RANKED_SOLO_5x5:
 		return "RANKED_SOLO_5x5"
@@ -351,7 +351,7 @@ func getQueueString(que uint) string {
 	}
 }
 
-func ConvertRankToStr(tier, div uint) (string, string) {
+func ConvertRankToStr(tier riotmodel.TIER, div uint) (string, string) {
 	var d string
 	switch div {
 	case 1:
@@ -389,8 +389,8 @@ func ConvertRankToStr(tier, div uint) (string, string) {
 	return "", ""
 }
 
-func ConvertStrToRank(tierStr, divStr string) (uint, uint) {
-	var tier uint
+func ConvertStrToRank(tierStr, divStr string) (riotmodel.TIER, uint) {
+	var tier riotmodel.TIER
 	var div uint
 
 	switch tierStr {

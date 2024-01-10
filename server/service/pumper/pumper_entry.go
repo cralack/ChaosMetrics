@@ -86,7 +86,7 @@ func (p *Pumper) loadEntrie(loc string) {
 		}
 	}
 
-	loCode := utils.ConverHostLoCode(loc)
+	loCode := uint(utils.ConverHostLoCode(loc))
 	p.lock.Lock()
 	p.entrieIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
@@ -94,10 +94,10 @@ func (p *Pumper) loadEntrie(loc string) {
 	p.handleEntries(tmp, loc)
 }
 
-func (p *Pumper) createEntriesURL(loc, que uint) {
+func (p *Pumper) createEntriesURL(loc riotmodel.LOCATION, que riotmodel.QUECODE) {
 	var (
 		url  string
-		tier uint
+		tier riotmodel.TIER
 		rank uint
 	)
 	locStr, host := utils.ConvertHostURL(loc)
@@ -106,7 +106,7 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 
 	// generate BEST URL task
 	for tier = riotmodel.CHALLENGER; tier <= riotmodel.MASTER; tier++ {
-		if tier > p.stgy.TestEndMark[0] || (tier == p.stgy.TestEndMark[0] && rank > p.stgy.TestEndMark[1]) {
+		if tier > p.stgy.TestEndMark1 || (tier == p.stgy.TestEndMark1 && rank > p.stgy.TestEndMark2) {
 			return
 		}
 		t, r := ConvertRankToStr(tier, 1)
@@ -125,7 +125,7 @@ func (p *Pumper) createEntriesURL(loc, que uint) {
 	// generate MORTAL URL task
 	for tier = riotmodel.DIAMOND; tier <= riotmodel.IRON; tier++ {
 		for rank = 1; rank <= 4; rank++ {
-			if tier > p.stgy.TestEndMark[0] || (tier == p.stgy.TestEndMark[0] && rank > p.stgy.TestEndMark[1]) {
+			if tier > p.stgy.TestEndMark1 || (tier == p.stgy.TestEndMark1 && rank > p.stgy.TestEndMark2) {
 				return
 			}
 			t, r := ConvertRankToStr(tier, rank)
