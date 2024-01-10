@@ -9,8 +9,8 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-func ConvertHostURL(loc uint) (loCode, hostURL string) {
-	platformCodeMap := map[uint]string{
+func ConvertHostURL(loc riotmodel.LOCATION) (loCode, hostURL string) {
+	platformCodeMap := map[riotmodel.LOCATION]string{
 		riotmodel.BR1:  "br1",
 		riotmodel.EUN1: "eun1",
 		riotmodel.EUW1: "euw1",
@@ -33,8 +33,8 @@ func ConvertHostURL(loc uint) (loCode, hostURL string) {
 	return loCode, "https://" + loCode + host
 }
 
-func ConverHostLoCode(loCode string) uint {
-	platformCodeMap := map[string]uint{
+func ConverHostLoCode(loCode string) riotmodel.LOCATION {
+	platformCodeMap := map[string]riotmodel.LOCATION{
 		"br1":  riotmodel.BR1,
 		"eun1": riotmodel.EUN1,
 		"euw1": riotmodel.EUW1,
@@ -56,8 +56,8 @@ func ConverHostLoCode(loCode string) uint {
 	return platformCodeMap[loCode]
 }
 
-func ConvertPlatformToHost(loc uint) string {
-	platformToRegion := map[uint]string{
+func ConvertPlatformToHost(loc riotmodel.LOCATION) string {
+	platformToRegion := map[riotmodel.LOCATION]string{
 		// The AMERICAS routing value serves NA, BR, LAN and LAS.
 		riotmodel.BR1: "AMERICAS",
 		riotmodel.LA1: "AMERICAS",
@@ -91,8 +91,9 @@ func ConvertPlatformToHost(loc uint) string {
 	host := regionToHost[region]
 	return "https://" + host
 }
-func ConvertRegionToRegCode(region string) uint {
-	regionCode := map[string]uint{
+
+func ConvertRegionToRegCode(region string) riotmodel.AREA {
+	regionCode := map[string]riotmodel.AREA{
 		"AMERICA": riotmodel.LOC_AMERICAS,
 		"ASIA":    riotmodel.LOC_ASIA,
 		"EUROPE":  riotmodel.LOC_EUROPE,
@@ -104,8 +105,8 @@ func ConvertRegionToRegCode(region string) uint {
 	return regionCode[region]
 }
 
-func ConvertLanguageCode(lang uint) string {
-	langMap := map[uint]string{
+func ConvertLanguageCode(lang riotmodel.LANG) string {
+	langMap := map[riotmodel.LANG]string{
 		riotmodel.LANG_cs_CZ: "cs_CZ",
 		riotmodel.LANG_el_GR: "el_GR",
 		riotmodel.LANG_pl_PL: "pl_PL",
