@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func Zap(env uint) (*zap.Logger, error) {
+func Zap(env global.Env) (*zap.Logger, error) {
 	if global.GVA_LOG != nil {
 		return global.GVA_LOG, nil
 	}

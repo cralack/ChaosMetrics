@@ -7,12 +7,12 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"go-micro.dev/v4/registry"
+
 	"go.etcd.io/etcd/client/v3/concurrency"
 	"go.uber.org/zap"
 )
-
-var electPath = "/resources/election"
 
 func (m *Master) Campaign() {
 	// create etcd client & session
@@ -27,7 +27,7 @@ func (m *Master) Campaign() {
 		}
 	}(s)
 
-	e := concurrency.NewElection(s, electPath)
+	e := concurrency.NewElection(s, global.ElectPath)
 	leaderCh := make(chan error)
 
 	// if leader exist,goroutine blocking
@@ -77,6 +77,9 @@ func (m *Master) Campaign() {
 				fmt.Sprintf("%s,action:%s", resp.Service.Name, resp.Action)))
 			m.updateWorkNodes()
 
+		case <-time.After(3 * time.Second):
+			m.AddTask(&SimpleAssigner{}, &TaskSpec{Name: "TEST"})
+
 		// check leader every 30s
 		case <-time.After(30 * time.Second):
 			rsp, err2 := e.Leader(context.Background())
@@ -103,8 +106,21 @@ func (m *Master) elect(e *concurrency.Election, ch chan error) {
 	ch <- err
 }
 
+func (m *Master) IsLeader() bool {
+	return atomic.LoadInt32(&m.ready) != 0
+}
+
+func (m *Master) BecomeLeader() error {
+	m.updateWorkNodes()
+	if err := m.loadTask(); err != nil {
+		return err
+	}
+	atomic.StoreInt32(&m.ready, 1)
+	return nil
+}
+
 func (m *Master) WatchWorker() chan *registry.Result {
-	watcher, err := m.registry.Watch(registry.WatchService(ServiceName))
+	watcher, err := m.registry.Watch(registry.WatchService(global.WorkerServiceName))
 	if err != nil {
 		m.logger.Panic("watch worker failed", zap.Error(err))
 	}
@@ -122,30 +138,18 @@ func (m *Master) WatchWorker() chan *registry.Result {
 	return ch
 }
 
-func (m *Master) IsLeader() bool {
-	return atomic.LoadInt32(&m.ready) != 0
-}
-
-func (m *Master) BecomeLeader() error {
-	m.updateWorkNodes()
-	atomic.StoreInt32(&m.ready, 1)
-	return nil
-}
-
 func (m *Master) updateWorkNodes() {
-	services, err := m.registry.GetService(ServiceName)
+	services, err := m.registry.GetService(global.WorkerServiceName)
 	if err != nil {
 		m.logger.Error("get worker list failed", zap.Error(err))
 	}
 	m.rlock.Lock()
 	defer m.rlock.Unlock()
 
-	nodes := make(map[string]*NodeSpec)
+	nodes := make(map[string]*registry.Node)
 	if len(services) > 0 {
 		for _, spec := range services[0].Nodes {
-			nodes[spec.Id] = &NodeSpec{
-				Node: spec,
-			}
+			nodes[spec.Id] = spec
 		}
 	}
 

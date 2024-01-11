@@ -14,16 +14,16 @@ import (
 
 type Fetcher interface {
 	rater.RateLimter
-	Get(task *Task) ([]byte, error)
+	Get(url string) ([]byte, error)
 }
 
 type BrowserFetcher struct {
 	requireRateLimiter bool
 	logger             *zap.Logger
 	timeout            time.Duration
-
-	rater rater.RateLimter
-	pass  chan struct{}
+	header             *Header
+	rater              rater.RateLimter
+	pass               chan struct{}
 }
 
 var _ Fetcher = &BrowserFetcher{}
@@ -55,23 +55,23 @@ func NewBrowserFetcher(opts ...func(*BrowserFetcher)) *BrowserFetcher {
 }
 
 // Get raw json from riot dev port
-func (f *BrowserFetcher) Get(task *Task) ([]byte, error) {
+func (f *BrowserFetcher) Get(url string) ([]byte, error) {
 	client := &http.Client{
 		Timeout: f.timeout * time.Second,
 	}
 	// set req url
 	req, err := http.NewRequestWithContext(
-		context.Background(), http.MethodGet, task.URL, nil)
+		context.Background(), http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	// set header
-	req.Header.Set("User-Agent", task.Header.UserAgent)
-	req.Header.Set("Accept-Language", task.Header.AcceptLanguage)
-	req.Header.Set("Accept-Charset", task.Header.AcceptCharset)
-	req.Header.Set("Origin", task.Header.Origin)
-	req.Header.Set("X-Riot-Token", task.Header.ApiToken)
+	req.Header.Set("User-Agent", f.header.UserAgent)
+	req.Header.Set("Accept-Language", f.header.AcceptLanguage)
+	req.Header.Set("Accept-Charset", f.header.AcceptCharset)
+	req.Header.Set("Origin", f.header.Origin)
+	req.Header.Set("X-Riot-Token", f.header.ApiToken)
 
 	// require pass signal(rate limiter)
 	if f.requireRateLimiter {

@@ -3,14 +3,18 @@ package master
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"go-micro.dev/v4/registry"
 )
 
-func workNodeDiff(old map[string]*NodeSpec, new map[string]*NodeSpec) (add []string, del []string, chg []string) {
+func workNodeDiff(old map[string]*registry.Node, new map[string]*registry.Node) (add []string, del []string, chg []string) {
 	for key, newNode := range new {
 		if oldNode, has := old[key]; has {
-			if !reflect.DeepEqual(oldNode.Node, newNode.Node) {
+			if !reflect.DeepEqual(oldNode, newNode) {
 				chg = append(chg, key)
 			}
 		} else { // !has
@@ -25,8 +29,8 @@ func workNodeDiff(old map[string]*NodeSpec, new map[string]*NodeSpec) (add []str
 	return
 }
 
-func getNodeID(assigned string) (string, error) {
-	nodeID := strings.Split(assigned, "|")
+func GetNodeID(name string) (string, error) {
+	nodeID := strings.Split(name, "|")
 	if len(nodeID) < 2 {
 		return "", errors.New("get node id failed")
 	}
@@ -34,17 +38,20 @@ func getNodeID(assigned string) (string, error) {
 	return id, nil
 }
 
-func encode(s *ResourceSpec) string {
-	b, _ := json.Marshal(s)
-	return string(b)
+func Encode(s *TaskSpec) string {
+	buff, _ := json.Marshal(s)
+	return string(buff)
 }
 
-func genMasterID(id string, ipv4 string, GRPCAddress string) string {
-	return "master" + id + "-" + ipv4 + GRPCAddress
+func Decode(ds []byte) (*TaskSpec, error) {
+	var tmp *TaskSpec
+	if err := json.Unmarshal(ds, &tmp); err != nil {
+		return nil, err
+	} else {
+		return tmp, nil
+	}
 }
 
-func decode(ds []byte) (*ResourceSpec, error) {
-	var s *ResourceSpec
-	err := json.Unmarshal(ds, &s)
-	return s, err
+func getTaskPath(name string) string {
+	return fmt.Sprintf("%s/%s", global.TaskPath, name)
 }

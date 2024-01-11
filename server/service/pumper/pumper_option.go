@@ -8,8 +8,9 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-type Strategy struct {
+type Options struct {
 	Token         string
+	registryURL   string
 	Loc           []riotmodel.LOCATION // 地区列表
 	Que           []riotmodel.QUECODE  // 队列类型列表
 	TestEndMark1  riotmodel.TIER       // 测试用终止标记
@@ -20,13 +21,14 @@ type Strategy struct {
 	LifeTime      time.Duration        // 缓存生命周期
 }
 
-type Option func(stgy *Strategy) // Strategy的配置选项
+type Option func(*Options) // Strategy的配置选项
 
-var defaultStrategy = &Strategy{
+var defaultStrategy = &Options{
 	Token:         "",
 	Loc:           []riotmodel.LOCATION{riotmodel.TW2},            // 默认地区为台湾
 	Que:           []riotmodel.QUECODE{riotmodel.RANKED_SOLO_5x5}, // 默认队列类型为排位赛5v5
 	TestEndMark1:  riotmodel.DIAMOND,                              // 默认终止标记为钻I
+	TestEndMark2:  1,                                              // 默认终止标记为钻I
 	MaxSize:       500,                                            // 默认任务切割尺寸为500
 	MaxMatchCount: 20,                                             // 默认读取最近20场比赛
 	Retry:         3,                                              // 默认单个任务重试次数3
@@ -34,9 +36,8 @@ var defaultStrategy = &Strategy{
 	// LifeTime: -1, // cache forever
 }
 
-// Example:WithLoc(riotmodel.BR1,riotmodel.EUN1)
 func WithLoc(locs ...riotmodel.LOCATION) Option {
-	return func(stgy *Strategy) {
+	return func(opts *Options) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
 			if 16 < loc {
@@ -45,14 +46,14 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 			}
 			tmp = append(tmp, loc)
 		}
-		stgy.Loc = tmp
+		opts.Loc = tmp
 	}
 }
 
-// Example:WithAreaLoc(riotmodel.LOC_ALL)
-// Example:WithAreaLoc(riotmodel.LOC_AMERICAS,riotmodel.LOC_ASIA)
+// WithAreaLoc (riotmodel.LOC_ALL)
+// WithAreaLoc (riotmodel.LOC_AMERICAS,riotmodel.LOC_ASIA)
 func WithAreaLoc(areas ...riotmodel.AREA) Option {
-	return func(stgy *Strategy) {
+	return func(opts *Options) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		america := []riotmodel.LOCATION{
 			riotmodel.BR1,
@@ -94,53 +95,59 @@ func WithAreaLoc(areas ...riotmodel.AREA) Option {
 			case riotmodel.LOC_SEA:
 				tmp = append(tmp, sea...)
 			case riotmodel.LOC_ALL:
-				stgy.Loc = make([]riotmodel.LOCATION, 0, 16)
-				stgy.Loc = append(stgy.Loc, america...)
-				stgy.Loc = append(stgy.Loc, asia...)
-				stgy.Loc = append(stgy.Loc, europe...)
-				stgy.Loc = append(stgy.Loc, sea...)
+				opts.Loc = make([]riotmodel.LOCATION, 0, 16)
+				opts.Loc = append(opts.Loc, america...)
+				opts.Loc = append(opts.Loc, asia...)
+				opts.Loc = append(opts.Loc, europe...)
+				opts.Loc = append(opts.Loc, sea...)
 				return
 			default:
 				panic(fmt.Sprintf("unknown location option: %d", area))
 			}
 		}
-		stgy.Loc = tmp
+		opts.Loc = tmp
 	}
 }
 
-// Example:WithQues(riotmodel.RANKED_SOLO_5x5)
-func WithQues(ques ...riotmodel.QUECODE) Option {
-	return func(stgy *Strategy) {
-		tmp := make([]riotmodel.QUECODE, 0, 3)
-		for _, que := range ques {
-			if 3 < que {
-				global.GVA_LOG.Error("wrong param,que need < 3,using default option")
-				return
-			}
-			tmp = append(tmp, que)
-		}
-		stgy.Que = tmp
-	}
-}
-
-// Example:WithEndMark(riotmodel.DIAMOND,1)
-// Example:WithEndMark(riotmodel.IRON,4)
+// WithEndMark (riotmodel.DIAMOND,1)
+// WithEndMark (riotmodel.IRON,4)
 func WithEndMark(tier riotmodel.TIER, div uint) Option {
-	return func(stgy *Strategy) {
+	return func(opts *Options) {
 		if riotmodel.IRON < tier || 4 < div || div < 1 {
 			global.GVA_LOG.Error("wrong param,end mark need DIAMON <= tier <= IRON" +
 				" && I <= div <= IV.using default option")
 			return
 		}
-		stgy.TestEndMark1 = tier
-		stgy.TestEndMark2 = div
+		opts.TestEndMark1 = tier
+		opts.TestEndMark2 = div
 	}
 }
 
 func WithToken(token string) Option {
-	return func(stgy *Strategy) {
+	return func(opts *Options) {
 		if token != "" {
-			stgy.Token = token
+			opts.Token = token
 		}
 	}
 }
+
+func WithRegistryURL(registryURL string) Option {
+	return func(opts *Options) {
+		opts.registryURL = registryURL
+	}
+}
+
+// WithQues (riotmodel.RANKED_SOLO_5x5)
+// func WithQues(ques ...riotmodel.QUECODE) Option {
+// 	return func(opts *Options) {
+// 		tmp := make([]riotmodel.QUECODE, 0, 3)
+// 		for _, que := range ques {
+// 			if 3 < que {
+// 				global.GVA_LOG.Error("wrong param,que need < 3,using default option")
+// 				return
+// 			}
+// 			tmp = append(tmp, que)
+// 		}
+// 		opts.Que = tmp
+// 	}
+// }

@@ -11,7 +11,6 @@ import (
 	"unsafe"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
@@ -86,10 +85,7 @@ func Test_parse_summoners(t *testing.T) {
 func Test_parse_champion_rotation(t *testing.T) {
 	// fetching remote JSON data (3~5 seconds per request)
 	url := "https://tw2.api.riotgames.com/lol/platform/v3/champion-rotations"
-	buff, err := f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	))
+	buff, err := f.Get(url)
 
 	// load local json data
 	// buff, err := os.ReadFile(path + "championr_rotation.json")
@@ -247,10 +243,7 @@ func Test_parse_match_list(t *testing.T) {
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d", startTime, endTime, maxMatch)
 	url := fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s", region, puuid, queryParams)
-	if buff, err = f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	)); err != nil {
+	if buff, err = f.Get(url); err != nil {
 		t.Log(err)
 	}
 
@@ -261,10 +254,7 @@ func Test_parse_match_list(t *testing.T) {
 	ques := make([]int, 0, 20)
 	for _, matchId := range list {
 		url := fmt.Sprintf("%s/lol/match/v5/matches/%s", region, matchId)
-		if buff, err = f.Get(fetcher.NewTask(
-			fetcher.WithURL(url),
-			fetcher.WithToken(apiToken),
-		)); err != nil {
+		if buff, err = f.Get(url); err != nil {
 			t.Log(err)
 		}
 		var match *riotmodel.MatchDTO
@@ -285,10 +275,7 @@ func Test_parse_matchs(t *testing.T) {
 	matchList := []string{"TW2_97186217", "TW2_97161015", "TW2_97131970", "TW2_97119501", "TW2_97106562", "TW2_78013194", "TW2_71558421", "TW2_59549103", "TW2_59539001", "TW2_59527321", "TW2_59516488", "TW2_59509451", "TW2_59502083", "TW2_42926206", "TW2_30891005", "TW2_30846799", "TW2_25739350", "TW2_25511607", "TW2_25501389", "TW2_25454450"}
 	for _, matchId := range matchList {
 		url := "https://sea.api.riotgames.com/lol/match/v5/matches/" + matchId
-		buff, err = f.Get(fetcher.NewTask(
-			fetcher.WithURL(url),
-			fetcher.WithToken(apiToken),
-		))
+		buff, err = f.Get(url)
 		if err != nil {
 			t.Log(err)
 		}
@@ -327,10 +314,7 @@ func Test_parse_league(t *testing.T) {
 	// MASTER
 	// url := "https://tw2.api.riotgames.com/lol/league/v4/masterleagues/by-queue/RANKED_SOLO_5x5"
 	url := "https://tw2.api.riotgames.com/lol/league/v4/masterleagues/by-queue/RANKED_FLEX_SR"
-	buff, err := f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	))
+	buff, err := f.Get(url)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -352,10 +336,7 @@ func Test_parse_league(t *testing.T) {
 
 func Test_parse_mortal(t *testing.T) {
 	url := "https://tw2.api.riotgames.com/lol/league/v4/entries/RANKED_SOLO_5x5/DIAMOND/I?page=1"
-	buff, err := f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	))
+	buff, err := f.Get(url)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -374,10 +355,7 @@ func Test_parse_champion(t *testing.T) {
 	championName := "Aatrox"
 	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion/%s.json",
 		version, lang, championName)
-	buff, err := f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	))
+	buff, err := f.Get(url)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -396,10 +374,7 @@ func Test_parse_champions(t *testing.T) {
 	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
 	version := "13.14.1"
 	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion.json", version, lang)
-	buff, err := f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	))
+	buff, err := f.Get(url)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -412,10 +387,7 @@ func Test_parse_champions(t *testing.T) {
 
 func Test_parse_version(t *testing.T) {
 	url := "https://ddragon.leagueoflegends.com/api/versions.json"
-	buff, err := f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	))
+	buff, err := f.Get(url)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -431,10 +403,7 @@ func Test_parse_version(t *testing.T) {
 func Test_parse_item_list(t *testing.T) {
 	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
 	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/13.14.1/data/%s/item.json", lang)
-	buff, err := f.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-		fetcher.WithToken(apiToken),
-	))
+	buff, err := f.Get(url)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -10,12 +10,11 @@ import (
 )
 
 var (
-	f        fetcher.Fetcher
-	path     string
-	apiToken string
-	db       *gorm.DB
-	rdb      *redis.Client
-	logger   *zap.Logger
+	f      fetcher.Fetcher
+	path   string
+	db     *gorm.DB
+	rdb    *redis.Client
+	logger *zap.Logger
 )
 
 func init() {
@@ -24,7 +23,6 @@ func init() {
 	db = global.GVA_DB
 	rdb = global.GVA_RDB
 	logger = global.GVA_LOG
-	apiToken = ""
 	// wipe gdb && rdb
 	// global.GVA_DB.Exec("DROP TABLE IF EXISTS analyzed_champions,entries,match_participants,matches,summoners")
 	// global.GVA_RDB.FlushDB(context.Background())

@@ -59,9 +59,7 @@ func (u *Updater) UpdateVersions() (version []string) {
 		err  error
 	)
 	url = "https://ddragon.leagueoflegends.com/api/versions.json"
-	if buff, err = u.fetcher.Get(fetcher.NewTask(
-		fetcher.WithURL(url),
-	)); err != nil || buff == nil {
+	if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
 		u.logger.Error("update version failed", zap.Error(err))
 	}
 	if err = json.Unmarshal(buff, &version); err != nil {
@@ -97,9 +95,7 @@ func (u *Updater) UpdateChampions(version string) {
 	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%dzh_CN", vIdx)).Val(); buffer == "" {
 		// get champion chamList
 		url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
-		if buff, err = u.fetcher.Get(fetcher.NewTask(
-			fetcher.WithURL(url),
-		)); err != nil || buff == nil {
+		if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
 			u.logger.Error("get champion list failed", zap.Error(err))
 		}
 		if err = json.Unmarshal(buff, &chamList); err != nil {
@@ -133,9 +129,7 @@ func (u *Updater) UpdateChampions(version string) {
 			// fetch buffer
 			url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion/%s.json",
 				version, lang, chamID)
-			if buff, err = u.fetcher.Get(fetcher.NewTask(
-				fetcher.WithURL(url),
-			)); err != nil || buff == nil {
+			if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
 				u.logger.Error(fmt.Sprintf("update %s@%s failed",
 					chamID, lang), zap.Error(err))
 				continue
@@ -187,6 +181,7 @@ func (u *Updater) UpdateItems(version string) {
 		u.logger.Error("wrong version")
 	}
 	vIdx, err = utils.ConvertVersionToIdx(version)
+
 	ctx := context.Background()
 	for _, langCode := range u.stgy.Lang {
 		lang := utils.ConvertLanguageCode(langCode)
@@ -194,9 +189,7 @@ func (u *Updater) UpdateItems(version string) {
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/%s/item.json",
 			version, lang)
-		if buff, err = u.fetcher.Get(fetcher.NewTask(
-			fetcher.WithURL(url),
-		)); err != nil {
+		if buff, err = u.fetcher.Get(url); err != nil {
 			flag = true
 			u.logger.Error("get item list failed", zap.Error(err))
 			continue
@@ -224,15 +217,20 @@ func (u *Updater) UpdateItems(version string) {
 	return
 }
 
-func (u *Updater) UpdatePerks() {
+func (u *Updater) UpdatePerks(version string) {
 	var (
 		buff        []byte
 		url         string
 		err         error
 		key         string
+		vIdx        uint
 		perks       []*riotmodel.Perk
 		perkDetails []*riotmodel.PerkDetail
 	)
+	if version == "" {
+		u.logger.Error("wrong version")
+	}
+	vIdx, err = utils.ConvertVersionToIdx(version)
 	ctx := context.Background()
 	for _, langCode := range u.stgy.Lang {
 		lang := utils.ConvertLanguageCode(langCode)
@@ -240,10 +238,8 @@ func (u *Updater) UpdatePerks() {
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		// fetch perk relation
 		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/runesReforged.json",
-			u.CurVersion, lang)
-		if buff, err = u.fetcher.Get(fetcher.NewTask(
-			fetcher.WithURL(url),
-		)); err != nil {
+			version, lang)
+		if buff, err = u.fetcher.Get(url); err != nil {
 			u.logger.Error("get  perks failed", zap.Error(err))
 			continue
 		}
@@ -253,20 +249,19 @@ func (u *Updater) UpdatePerks() {
 		}
 		// store perk relation
 		for _, p := range perks {
-			if err = u.rdb.HSet(ctx, key, p.ID, p).Err(); err != nil {
+			if err = u.rdb.HSet(ctx, key, fmt.Sprintf("%d@%d", p.ID, vIdx), p).Err(); err != nil {
 				u.logger.Error("save perks failed", zap.Error(err))
 				break
 			}
 		}
-		// fetch perk detail
+
+		// fetch perk detail (third-party data)
 		if lang == "en_US" {
 			lang = "default"
 		}
-		url = fmt.Sprintf("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/%s/v1/perks.json",
-			strings.ToLower(lang))
-		if buff, err = u.fetcher.Get(fetcher.NewTask(
-			fetcher.WithURL(url),
-		)); err != nil {
+		url = fmt.Sprintf("https://raw.communitydragon.org/%s/plugins/rcp-be-lol-game-data/global/%s/v1/perks.json",
+			version[:len(version)-2], strings.ToLower(lang))
+		if buff, err = u.fetcher.Get(url); err != nil {
 			u.logger.Error("get  perks failed", zap.Error(err))
 			continue
 		}
@@ -275,7 +270,7 @@ func (u *Updater) UpdatePerks() {
 			continue
 		}
 		for _, p := range perkDetails {
-			if err = u.rdb.HSet(ctx, key, p.ID, p).Err(); err != nil {
+			if err = u.rdb.HSet(ctx, key, fmt.Sprintf("%d@%d", p.ID, vIdx), p).Err(); err != nil {
 				u.logger.Error("save perks failed", zap.Error(err))
 				break
 			}

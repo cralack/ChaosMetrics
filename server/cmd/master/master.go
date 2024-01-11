@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/config"
@@ -31,7 +29,6 @@ var masterId string
 var HTTPListenAddress string
 var GRPCListenAddress string
 var PProfListenAddress string
-var token string
 
 var Cmd = &cobra.Command{
 	Use:   "master",
@@ -43,18 +40,12 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.Flags().StringVar(
-		&masterId, "id", "", "set master id")
-	Cmd.Flags().StringVar(
-		&podIP, "podip", "192.168.123.197", "set pod IP")
-	Cmd.Flags().StringVar(
-		&HTTPListenAddress, "http", ":8080", "set HTTP listen address")
-	Cmd.Flags().StringVar(
-		&GRPCListenAddress, "grpc", ":9090", "set GRPC listen address")
-	Cmd.Flags().StringVar(
-		&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
-	Cmd.Flags().StringVar(
-		&PProfListenAddress, "token", "", "set riot API token")
+	Cmd.Flags().StringVar(&masterId, "id", "", "set master id")
+	Cmd.Flags().StringVar(&podIP, "podip", "192.168.123.197", "set pod IP")
+	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8080", "set HTTP listen address")
+	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9090", "set GRPC listen address")
+	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
+	Cmd.Flags().StringVar(&PProfListenAddress, "token", "", "set riot API token")
 }
 
 func Run() {
@@ -62,27 +53,12 @@ func Run() {
 	logger := global.GVA_LOG
 	reg := etcd.NewRegistry(registry.Addrs(conf.RegistryAddress))
 
-	conf.Name += ".master"
-
-	if token == "" {
-		workDir := global.GVA_CONF.DirTree.WorkDir
-		filename := "api_key"
-		path := filepath.Join(workDir, filename)
-		buff, err := os.ReadFile(path)
-		if err != nil {
-			logger.Error("get api key failed",
-				zap.Error(err))
-		}
-		token = string(buff)
-	}
-
 	m, err := master.New(
 		masterId,
 		master.WithLogger(logger.Named("master")),
 		master.WithregistryURL(conf.RegistryAddress),
 		master.WithGRPCAddress(GRPCListenAddress),
 		master.WithRegistry(reg),
-		master.WithApiToken(token),
 	)
 	if err != nil {
 		logger.Error("start a master service failed", zap.Error(err))
@@ -110,7 +86,7 @@ func RunGRPCServer(logger *zap.Logger, cfg *config.ServerConfig) {
 	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))
 	service := micro.NewService(
 		micro.Server(gs.NewServer(server.Id(masterId))),
-		micro.Name(cfg.Name),
+		micro.Name(global.MasterServiceName),
 		micro.Address(GRPCListenAddress),
 		micro.Registry(reg),
 		micro.RegisterTTL(cfg.RegisterTTL*time.Second),

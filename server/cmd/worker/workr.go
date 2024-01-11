@@ -12,6 +12,7 @@ import (
 	pb "github.com/cralack/ChaosMetrics/server/proto/greeter"
 	"github.com/cralack/ChaosMetrics/server/service/pumper"
 	"github.com/cralack/ChaosMetrics/server/utils"
+
 	etcdReg "github.com/go-micro/plugins/v4/registry/etcd"
 	gs "github.com/go-micro/plugins/v4/server/grpc"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -25,20 +26,20 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var cluster bool
 var workerID string
 var podIP string
-var region string
 var HTTPListenAddress string
 var GRPCListenAddress string
 var PProfListenAddress string
+var cluster bool
+var region string
+var token string
 
 var Cmd = &cobra.Command{
 	Use:   "worker",
 	Short: "start a pumper worker service",
 	Args:  cobra.NoArgs,
 	PreRun: func(cmd *cobra.Command, args []string) {
-
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		Run()
@@ -46,26 +47,20 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.Flags().StringVar(
-		&workerID, "id", "", "set worker id")
-	Cmd.Flags().StringVar(
-		&podIP, "podip", "192.168.123.197", "set pod IP")
-	Cmd.Flags().StringVar(
-		&HTTPListenAddress, "http", ":8080", "set HTTP listen address")
-	Cmd.Flags().StringVar(
-		&GRPCListenAddress, "grpc", ":9090", "set GRPC listen address")
-	Cmd.Flags().StringVar(
-		&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
-	Cmd.Flags().BoolVar(
-		&cluster, "cluster", true, "run mode")
+	Cmd.Flags().StringVar(&workerID, "id", "", "set worker id")
+	Cmd.Flags().StringVar(&podIP, "podip", "192.168.123.197", "set pod IP")
+	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8080", "set HTTP listen address")
+	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9090", "set GRPC listen address")
+	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
+	Cmd.Flags().StringVar(&region, "region", "AMERICAS", "set worker region")
+	Cmd.Flags().StringVar(&token, "token", "", "set worker token")
+	Cmd.Flags().BoolVar(&cluster, "cluster", true, "run mode")
 }
 
 func Run() {
 	// load conf
 	conf := global.GVA_CONF.ServerConf
 	logger := global.GVA_LOG
-
-	conf.Name += ".worker"
 
 	area := utils.ConvertRegionToRegCode(region)
 	if workerID == "" {
@@ -78,9 +73,17 @@ func Run() {
 
 	// start pumper core
 	exit := make(chan struct{})
-	core := pumper.NewPumper(
+	id := global.WorkerServiceName + "-" + workerID
+	core, err := pumper.NewPumper(
+		id,
 		pumper.WithAreaLoc(area),
+		pumper.WithRegistryURL(conf.RegistryAddress),
+		pumper.WithToken(token),
 	)
+	if err != nil {
+		logger.Panic("init worker failed", zap.Error(err))
+		return
+	}
 	core.StartEngine(exit)
 	logger.Info("starting worker engine...")
 
@@ -104,7 +107,7 @@ func RunGRPCServer(logger *zap.Logger, cfg *config.ServerConfig) {
 	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))
 	service := micro.NewService(
 		micro.Server(gs.NewServer(server.Id(workerID))), // worker ID
-		micro.Name(cfg.Name),                            // worker name
+		micro.Name(global.WorkerServiceName),            // worker name
 		micro.Address(GRPCListenAddress),
 		micro.Registry(reg),
 		micro.RegisterTTL(cfg.RegisterTTL*time.Second),

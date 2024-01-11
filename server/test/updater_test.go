@@ -18,12 +18,11 @@ func Test_update_champion(t *testing.T) {
 	if u.CurVersion == "" {
 		versions = u.UpdateVersions()
 	}
-	u.UpdatePerks()
-	// u.UpdateItems(versions[18])
-	// u.UpdateChampions(versions[18])
+
 	for _, ver := range versions {
-		if ver[:2] == "13" {
+		if ver[:2] >= "13" {
 			logger.Info(ver)
+			u.UpdatePerks(ver)
 			u.UpdateItems(ver)
 			u.UpdateChampions(ver)
 		} else {

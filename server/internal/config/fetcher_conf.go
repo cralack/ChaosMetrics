@@ -12,7 +12,6 @@ type FetcherConfig struct {
 		AcceptLanguage string `mapstructure:"accept_language" yaml:"accept_language"` // 接受的语言
 		AcceptCharset  string `mapstructure:"accept_charset" yaml:"accept_charset"`   // 接受的字符集
 		Origin         string `mapstructure:"origin" yaml:"origin"`                   // 请求来源
-		// XRiotToken     string `mapstructure:"x_riot_token" yaml:"x_riot_token"`       // Riot API的密钥
 	} `mapstructure:"header" yaml:"header"`
 
 	// Fetcher的速率限制配置

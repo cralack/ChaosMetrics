@@ -2,17 +2,13 @@ package master
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/cralack/ChaosMetrics/server/utils"
-	clientv3 "go.etcd.io/etcd/client/v3"
-
 	"go-micro.dev/v4/registry"
-)
-
-const (
-	ServiceName = "pumper.worker"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type Master struct {
@@ -20,32 +16,21 @@ type Master struct {
 	ID        string
 	Loc       string
 	leaderID  string
-	workNodes map[string]*NodeSpec
-	resources map[string]*ResourceSpec
+	workNodes map[string]*registry.Node
+	tasks     map[string]*TaskSpec
 	rlock     *sync.Mutex
 	IDGen     *snowflake.Node
 	etcdCli   *clientv3.Client
+	// Service   micro.Service
 
 	options
 }
 
-type ResourceSpec struct {
-	ID           string
-	Name         string
-	Loc          string
-	AssignedNode string
-	CreationTime int64
-}
-
-type NodeSpec struct {
-	Node *registry.Node
-}
-
 func New(id string, opts ...Option) (*Master, error) {
 	m := &Master{
-		workNodes: make(map[string]*NodeSpec),
-		resources: make(map[string]*ResourceSpec),
-		rlock:     &sync.Mutex{},
+		workNodes: make(map[string]*registry.Node),
+		// resources: make(map[string]*ResourceSpec),
+		rlock: &sync.Mutex{},
 	}
 	options := defaultOptions
 	for _, opt := range opts {
@@ -53,13 +38,24 @@ func New(id string, opts ...Option) (*Master, error) {
 	}
 	m.options = options
 
-	ipv4, err := utils.GetLocalIP()
-	if err != nil {
-		return nil, err
-	}
-	m.ID = fmt.Sprintf("master_%s@%s%s", id, ipv4, m.GRPCAddress)
-	m.logger.Debug("master id:" + m.ID)
+	// init masterID
 
+	if ipv4, err := utils.GetLocalIP(); err != nil {
+		return nil, err
+	} else {
+		m.ID = fmt.Sprintf("master_%s@%s%s", id, ipv4, m.GRPCAddress)
+		m.logger.Debug("master id:" + m.ID)
+	}
+
+	// init snowflake
+	machineId, _ := strconv.Atoi(id)
+	if node, err := snowflake.NewNode(int64(machineId)); err != nil {
+		return nil, err
+	} else {
+		m.IDGen = node
+	}
+
+	// init master's etcd client
 	if cli, err2 := clientv3.New(clientv3.Config{
 		Endpoints: []string{m.registryURL},
 	}); err2 != nil {
@@ -73,6 +69,6 @@ func New(id string, opts ...Option) (*Master, error) {
 }
 
 func (m *Master) Run() {
-	// start core func
+	// start elect func
 	go m.Campaign()
 }

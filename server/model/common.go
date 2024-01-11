@@ -5,9 +5,9 @@ import (
 	"time"
 )
 
-type Storable interface {
-	TableName() string
-}
+// type Storable interface {
+// 	TableName() string
+// }
 
 type Image struct {
 	Full   string `json:"full" gorm:"column:full"`     // 大图文件名

@@ -3,6 +3,8 @@ package pumper
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime/debug"
 	"strconv"
 	"sync"
@@ -13,18 +15,20 @@ import (
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/cralack/ChaosMetrics/server/utils/scheduler"
 	"github.com/redis/go-redis/v9"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 const testSize = 1
-const apiToken = ""
 
 type Pumper struct {
+	id          string
 	logger      *zap.Logger
 	db          *gorm.DB
 	rdb         *redis.Client
 	lock        *sync.Mutex
+	etcdcli     *clientv3.Client
 	fetcher     fetcher.Fetcher
 	scheduler   scheduler.Scheduler
 	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
@@ -33,7 +37,7 @@ type Pumper struct {
 	out         chan *DBResult
 	entrieIdx   []uint
 	summonerIdx []uint
-	stgy        *Strategy
+	stgy        *Options
 }
 
 type DBResult struct {
@@ -42,10 +46,30 @@ type DBResult struct {
 	Data  interface{}
 }
 
-func NewPumper(opts ...Option) *Pumper {
+func NewPumper(id string, opts ...Option) (*Pumper, error) {
 	stgy := defaultStrategy
 	for _, opt := range opts {
 		opt(stgy)
+	}
+
+	// get deault token
+	if stgy.Token == "" {
+		workDir := global.GVA_CONF.DirTree.WorkDir
+		filename := "api_key"
+		path := filepath.Join(workDir, filename)
+		buff, err := os.ReadFile(path)
+		if err != nil {
+			global.GVA_LOG.Error("get api key failed",
+				zap.Error(err))
+		}
+		stgy.Token = string(buff)
+	}
+
+	// setup etcd client
+	endpoints := []string{stgy.registryURL}
+	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
+	if err != nil {
+		return nil, err
 	}
 
 	if global.GVA_ENV == global.TEST_ENV {
@@ -53,11 +77,12 @@ func NewPumper(opts ...Option) *Pumper {
 	}
 
 	return &Pumper{
+		id:          id,
 		logger:      global.GVA_LOG,
 		db:          global.GVA_DB,
 		rdb:         global.GVA_RDB,
 		lock:        &sync.Mutex{},
-		fetcher:     fetcher.NewBrowserFetcher(),
+		fetcher:     fetcher.NewBrowserFetcher(fetcher.WithToken(stgy.Token)),
 		scheduler:   scheduler.NewSchdule(),
 		entrieIdx:   make([]uint, 16),
 		summonerIdx: make([]uint, 16),
@@ -65,9 +90,10 @@ func NewPumper(opts ...Option) *Pumper {
 		entryMap:    make(map[string]map[string]*riotmodel.LeagueEntryDTO),
 		sumnMap:     make(map[string]map[string]*riotmodel.SummonerDTO),
 		matchMap:    make(map[string]map[string]bool),
+		etcdcli:     cli,
 
 		stgy: stgy,
-	}
+	}, nil
 }
 
 func (p *Pumper) Schedule() {
@@ -108,16 +134,17 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 
 func (p *Pumper) StartEngine(exit chan struct{}) {
 	go p.Schedule()
-	// distrib part
-	// go p.loadResource()
-	// go p.watchResource()
+	// get task from etcd
+	go p.getTask()
+	go p.watchTasks()
+
 	go p.fetch()
 	go p.handleResult(exit)
 }
 
 func (p *Pumper) UpdateAll() {
 	exit := make(chan struct{})
-	p.StartEngine(exit)
+	// p.StartEngine(exit)
 
 	p.UpdateEntries(exit)
 	p.UpdateSumoner(exit)
@@ -164,10 +191,7 @@ func (p *Pumper) fetch() {
 		case "bestEntry":
 			data := req.Data.(*entryTask)
 			// api: /lol/league/v4/{BEST}leagues/by-queue/{queue}
-			if buff, err = p.fetcher.Get(fetcher.NewTask(
-				fetcher.WithURL(req.URL),
-				fetcher.WithToken(apiToken),
-			)); err != nil || buff == nil {
+			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
 					zap.Error(err))
 				// fetch again
@@ -214,10 +238,7 @@ func (p *Pumper) fetch() {
 			for page := 1; ; page++ {
 				// api: /lol/league/v4/entries/{queue}/{tier}/{division}
 				url := fmt.Sprintf("%s?page=%s", req.URL, strconv.Itoa(page))
-				if buff, err = p.fetcher.Get(fetcher.NewTask(
-					fetcher.WithURL(url),
-					fetcher.WithToken(apiToken),
-				)); err != nil {
+				if buff, err = p.fetcher.Get(url); err != nil {
 					p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
 						zap.Error(err))
 					if req.Retry < p.stgy.Retry {
@@ -262,10 +283,7 @@ func (p *Pumper) fetch() {
 
 		case "summoner":
 			data := req.Data.(*summonerTask)
-			if buff, err = p.fetcher.Get(fetcher.NewTask(
-				fetcher.WithURL(req.URL),
-				fetcher.WithToken(apiToken),
-			)); err != nil || buff == nil {
+			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
 				// fetch again
 				if req.Retry < p.stgy.Retry {
@@ -284,10 +302,7 @@ func (p *Pumper) fetch() {
 		case "match":
 			data := req.Data.(*matchTask)
 			// get old & cur match list
-			if buff, err = p.fetcher.Get(fetcher.NewTask(
-				fetcher.WithURL(req.URL),
-				fetcher.WithToken(apiToken),
-			)); err != nil || buff == nil {
+			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summoner %s's match list failed",
 					data.sumn.Name), zap.Error(err))
 				if req.Retry < p.stgy.Retry {
@@ -336,100 +351,4 @@ func (p *Pumper) fetch() {
 			p.handleMatches(matches, summoner.Name)
 		}
 	}
-}
-
-func getQueueString(que riotmodel.QUECODE) string {
-	switch que {
-	case riotmodel.RANKED_SOLO_5x5:
-		return "RANKED_SOLO_5x5"
-	case riotmodel.RANKED_FLEX_SR:
-		return "RANKED_FLEX_SR"
-	case riotmodel.RANKED_FLEX_TT:
-		return "RANKED_FLEX_TT"
-	default:
-		return ""
-	}
-}
-
-func ConvertRankToStr(tier riotmodel.TIER, div uint) (string, string) {
-	var d string
-	switch div {
-	case 1:
-		d = "I"
-	case 2:
-		d = "II"
-	case 3:
-		d = "III"
-	case 4:
-		d = "IV"
-	}
-	switch tier {
-	case riotmodel.CHALLENGER:
-		return "CHALLENGER", "I"
-	case riotmodel.GRANDMASTER:
-		return "GRANDMASTER", "I"
-	case riotmodel.MASTER:
-		return "MASTER", "I"
-	case riotmodel.DIAMOND:
-		return "DIAMOND", d
-	case riotmodel.EMERALD:
-		return "EMERALD", d
-	case riotmodel.PLATINUM:
-		return "PLATINUM", d
-	case riotmodel.GOLD:
-		return "GOLD", d
-	case riotmodel.SILVER:
-		return "SILVER", d
-	case riotmodel.BRONZE:
-		return "BRONZE", d
-	case riotmodel.IRON:
-		return "IRON", d
-	}
-
-	return "", ""
-}
-
-func ConvertStrToRank(tierStr, divStr string) (riotmodel.TIER, uint) {
-	var tier riotmodel.TIER
-	var div uint
-
-	switch tierStr {
-	case "CHALLENGER":
-		tier = riotmodel.CHALLENGER
-	case "GRANDMASTER":
-		tier = riotmodel.GRANDMASTER
-	case "MASTER":
-		tier = riotmodel.MASTER
-	case "DIAMOND":
-		tier = riotmodel.DIAMOND
-	case "EMERALD":
-		tier = riotmodel.EMERALD
-	case "PLATINUM":
-		tier = riotmodel.PLATINUM
-	case "GOLD":
-		tier = riotmodel.GOLD
-	case "SILVER":
-		tier = riotmodel.SILVER
-	case "BRONZE":
-		tier = riotmodel.BRONZE
-	case "IRON":
-		tier = riotmodel.IRON
-	default:
-		return 0, 0
-	}
-
-	switch divStr {
-	case "I":
-		div = 1
-	case "II":
-		div = 2
-	case "III":
-		div = 3
-	case "IV":
-		div = 4
-	default:
-		return 0, 0
-	}
-
-	return tier, div
 }
