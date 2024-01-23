@@ -16,7 +16,7 @@ var versionCmd = &cobra.Command{
 	Long:  "run version service.",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		global.GVA_LOG.Info("3.14.15")
+		global.GvaLog.Info("3.14.15")
 	},
 }
 
@@ -26,7 +26,7 @@ var rootCmd = &cobra.Command{
 	Short:   "chaosmetrics提供的命令行工具",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cmd.Help(); err != nil {
-			global.GVA_LOG.Error("run root command help failed",
+			global.GvaLog.Error("run root command help failed",
 				zap.Error(err))
 		}
 	},
@@ -56,7 +56,7 @@ func RunCommand() error {
 	{
 		// debug worker part
 		cmd, _, err := rootCmd.Find(os.Args[1:])
-		if err != nil || cmd.Args == nil || global.GVA_ENV == global.TEST_ENV {
+		if err != nil || cmd.Args == nil || global.GvaEnv == global.TestEnv {
 			arg := "worker"
 			extraArg1 := "--id=1"
 			args := append([]string{arg, extraArg1}, os.Args[1:]...)

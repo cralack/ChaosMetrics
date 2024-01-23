@@ -59,8 +59,8 @@ func init() {
 
 func Run() {
 	// load conf
-	conf := global.GVA_CONF.ServerConf
-	logger := global.GVA_LOG
+	conf := global.GvaConf.ServerConf
+	logger := global.GvaLog
 
 	area := utils.ConvertRegionToRegCode(region)
 	if workerID == "" {

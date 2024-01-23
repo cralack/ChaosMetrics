@@ -27,6 +27,10 @@ type TaskSpec struct {
 	Name         string
 	AssgnedNode  string
 	CreationTime int64
+
+	SumName string
+	Type    string
+	Loc     string
 }
 
 func (m *Master) AddTask(assigner Assigner, tasks ...*TaskSpec) {

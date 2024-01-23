@@ -16,36 +16,36 @@ var err error
 
 func init() {
 	// set runtime envs
-	global.GVA_CONF = config.New()
+	global.GvaConf = config.New()
 
 	// setup config service
-	global.GVA_VP, err = xviper.Viper()
+	global.GvaVp, err = xviper.Viper()
 	if err != nil {
 		panic(err)
 	}
 
 	// setup logger service
-	global.GVA_LOG, err = xzap.Zap(global.GVA_ENV)
+	global.GvaLog, err = xzap.Zap(global.GvaEnv)
 	if err != nil {
 		panic(err)
 	}
 
 	// setup orm service
-	global.GVA_DB, err = xgorm.GetDB()
+	global.GvaDb, err = xgorm.GetDB()
 	if err != nil {
 		panic(err)
 	}
 
 	// setup redis service
-	global.GVA_RDB, err = xredis.GetClient()
+	global.GvaRdb, err = xredis.GetClient()
 	if err != nil {
 		panic(err)
 	}
 
-	global.GVA_LOG.Debug("env pkg init succeed")
+	global.GvaLog.Debug("env pkg init succeed")
 
 	// if.need.AutoMigrate
-	if err := global.GVA_DB.AutoMigrate(
+	if err := global.GvaDb.AutoMigrate(
 		&riotmodel.LeagueEntryDTO{},
 		&riotmodel.SummonerDTO{},
 		// match
@@ -54,8 +54,8 @@ func init() {
 
 		&anres.Champion{},
 	); err != nil {
-		global.GVA_LOG.Error("init orm model failed", zap.Error(err))
+		global.GvaLog.Error("init orm model failed", zap.Error(err))
 	} else {
-		global.GVA_LOG.Debug("init orm model succeed")
+		global.GvaLog.Debug("init orm model succeed")
 	}
 }

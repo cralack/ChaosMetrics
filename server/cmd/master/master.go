@@ -49,8 +49,8 @@ func init() {
 }
 
 func Run() {
-	conf := global.GVA_CONF.ServerConf
-	logger := global.GVA_LOG
+	conf := global.GvaConf.ServerConf
+	logger := global.GvaLog
 	reg := etcd.NewRegistry(registry.Addrs(conf.RegistryAddress))
 
 	m, err := master.New(

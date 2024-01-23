@@ -255,7 +255,7 @@ func Benchmark_db_store_1(b *testing.B) {
 		}
 	}
 	// test
-	db := global.GVA_DB
+	db := global.GvaDb
 	for _, tt := range tests {
 		b.Run(fmt.Sprintf("%d entries", tt.n), func(b *testing.B) {
 			b.ResetTimer()
@@ -324,7 +324,7 @@ func Benchmark_db_store_2(b *testing.B) {
 		}
 	}
 	// test
-	db := global.GVA_DB
+	db := global.GvaDb
 	for _, tt := range tests {
 		b.Run(fmt.Sprintf("%d entries", tt.n), func(b *testing.B) {
 			b.ResetTimer()

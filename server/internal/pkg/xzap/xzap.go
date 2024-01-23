@@ -11,8 +11,8 @@ import (
 )
 
 func Zap(env global.Env) (*zap.Logger, error) {
-	if global.GVA_LOG != nil {
-		return global.GVA_LOG, nil
+	if global.GvaLog != nil {
+		return global.GvaLog, nil
 	}
 	// init val
 	var (
@@ -22,7 +22,7 @@ func Zap(env global.Env) (*zap.Logger, error) {
 	)
 	// diff logger level
 	switch env {
-	case global.PRODUCT_ENV:
+	case global.ProductEnv:
 		logConf = zap.NewProductionConfig()
 	default:
 		logConf = zap.NewDevelopmentConfig()
@@ -48,7 +48,7 @@ func Zap(env global.Env) (*zap.Logger, error) {
 
 	// init logger
 	switch env {
-	case global.PRODUCT_ENV:
+	case global.ProductEnv:
 		log = zap.New(
 			zapcore.NewTee(
 				consoleCore,

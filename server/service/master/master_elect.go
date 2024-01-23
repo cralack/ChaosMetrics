@@ -78,7 +78,12 @@ func (m *Master) Campaign() {
 			m.updateWorkNodes()
 
 		case <-time.After(3 * time.Second):
-			m.AddTask(&SimpleAssigner{}, &TaskSpec{Name: "TEST"})
+			m.AddTask(&SimpleAssigner{}, &TaskSpec{
+				Name:    "TEST",
+				SumName: "Mes",
+				Type:    "match",
+				Loc:     "tw2",
+			})
 
 		// check leader every 30s
 		case <-time.After(30 * time.Second):

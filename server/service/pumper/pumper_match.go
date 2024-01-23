@@ -106,7 +106,7 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 			url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
 				region, summoner.PUUID, queryParams)
 			p.scheduler.Push(&scheduler.Task{
-				Type: "match",
+				Type: matchTypeKey,
 				Loc:  loc,
 				URL:  url,
 				Data: &matchTask{
@@ -117,12 +117,9 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 		}
 	}
 
-	// task counter
-	// p.taskCounter(loc, count)
-
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
-		Type: "match",
+		Type: matchTypeKey,
 		Loc:  loc,
 		Data: nil,
 	})
@@ -233,7 +230,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	chunkSize := 5
 	if totalSize < chunkSize {
 		p.out <- &DBResult{
-			Type:  "match",
+			Type:  matchTypeKey,
 			Brief: sName,
 			Data:  matches,
 		}
@@ -250,10 +247,43 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 
 	for _, chunk := range chunks {
 		p.out <- &DBResult{
-			Type:  "match",
+			Type:  matchTypeKey,
 			Brief: sName,
 			Data:  chunk,
 		}
 	}
 	return
+}
+
+func (p *Pumper) FetchMatchByName(summonerName string, loc riotmodel.LOCATION) error {
+	var (
+		puuid  string
+		region string
+		url    string
+		locStr string
+		sumn   *riotmodel.SummonerDTO
+	)
+	locStr, _ = utils.ConvertHostURL(loc)
+	region = utils.ConvertLocToRegion(loc)
+	sumn = p.LoadSingleSummoner(summonerName, locStr)
+	puuid = sumn.PUUID
+	url = fmt.Sprintf("")
+	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
+	endTime := time.Now().Unix()                     // cur time unix
+	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
+		startTime, endTime, p.stgy.MaxMatchCount)
+
+	url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
+		region, puuid, queryParams)
+
+	p.scheduler.Push(&scheduler.Task{
+		Type: matchTypeKey,
+		Loc:  locStr,
+		URL:  url,
+		Data: &matchTask{
+			sumn: sumn,
+		},
+		Priority: true,
+	})
+	return nil
 }

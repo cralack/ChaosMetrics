@@ -16,8 +16,8 @@ import (
 
 func Viper() (*viper.Viper, error) {
 	// only init once
-	if global.GVA_VP != nil {
-		return global.GVA_VP, nil
+	if global.GvaVp != nil {
+		return global.GvaVp, nil
 	}
 	v := viper.New()
 
@@ -26,7 +26,7 @@ func Viper() (*viper.Viper, error) {
 	if err != nil {
 		panic(err)
 	}
-	conf := global.GVA_CONF
+	conf := global.GvaConf
 	workDir := curDir[:strings.Index(curDir, "server")+len("server")]
 	logDir := filepath.Join(workDir, "log")
 	testDir := filepath.Join(workDir, "test")
@@ -53,7 +53,7 @@ func Viper() (*viper.Viper, error) {
 	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {
 		// handler func
-		global.GVA_LOG.Info("config file changed:",
+		global.GvaLog.Info("config file changed:",
 			zap.String("filename", e.Name))
 		if err = v.Unmarshal(conf); err != nil {
 			panic(err)
@@ -65,11 +65,11 @@ func Viper() (*viper.Viper, error) {
 	}
 	switch conf.Env {
 	case "test":
-		global.GVA_ENV = global.TEST_ENV
+		global.GvaEnv = global.TestEnv
 	case "dev":
-		global.GVA_ENV = global.DEV_ENV
+		global.GvaEnv = global.DevEnv
 	case "product":
-		global.GVA_ENV = global.PRODUCT_ENV
+		global.GvaEnv = global.ProductEnv
 	}
 	return v, nil
 }

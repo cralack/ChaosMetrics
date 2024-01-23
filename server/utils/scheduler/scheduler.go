@@ -10,9 +10,8 @@ type Task struct {
 	Type     string
 	Loc      string
 	URL      string
-	Priority int
+	Priority bool
 	Retry    uint
-	Header   *Header
 	Data     interface{}
 }
 type Header struct {
@@ -34,9 +33,9 @@ func NewSchdule() *RiotDTOSchedule {
 	}
 }
 
-func (s *RiotDTOSchedule) Push(reqs ...*Task) {
-	for _, req := range reqs {
-		s.requestCh <- req
+func (s *RiotDTOSchedule) Push(tasks ...*Task) {
+	for _, task := range tasks {
+		s.requestCh <- task
 	}
 }
 func (s *RiotDTOSchedule) Pull() *Task {
@@ -69,7 +68,7 @@ func (s *RiotDTOSchedule) Schedule() {
 		// schedule
 		select {
 		case r := <-s.requestCh:
-			if r.Priority > 0 {
+			if r.Priority {
 				s.priReqQueue = append(s.priReqQueue, r)
 			} else {
 				s.reqQueue = append(s.reqQueue, r)

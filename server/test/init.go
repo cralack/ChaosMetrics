@@ -20,9 +20,9 @@ var (
 func init() {
 	f = fetcher.NewBrowserFetcher()
 	path = "./local_json/"
-	db = global.GVA_DB
-	rdb = global.GVA_RDB
-	logger = global.GVA_LOG
+	db = global.GvaDb
+	rdb = global.GvaRdb
+	logger = global.GvaLog
 	// wipe gdb && rdb
 	// global.GVA_DB.Exec("DROP TABLE IF EXISTS analyzed_champions,entries,match_participants,matches,summoners")
 	// global.GVA_RDB.FlushDB(context.Background())

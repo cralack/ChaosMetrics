@@ -28,7 +28,7 @@ func (p *Pumper) UpdateSumoner(exit chan struct{}) {
 	<-exit
 }
 
-func (p *Pumper) loadSummoner(loc string) {
+func (p *Pumper) loadSummoners(loc string) {
 	ctx := context.Background()
 	key := fmt.Sprintf("/summoner/%s", loc)
 	// init if local map doesn't exist
@@ -89,7 +89,7 @@ func (p *Pumper) loadSummoner(loc string) {
 
 func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 	loc, host := utils.ConvertHostURL(loCode)
-	p.loadSummoner(loc)
+	p.loadSummoners(loc)
 	go p.summonerCounter(loc)
 	// expand from entry
 	for sID, entry := range p.entryMap[loc] {
@@ -100,7 +100,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 		}
 		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
 		p.scheduler.Push(&scheduler.Task{
-			Type: "summoner",
+			Type: summonerTypeKey,
 			Loc:  loc,
 			URL:  url,
 			Data: &summonerTask{
@@ -113,7 +113,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 		if sumn.Name == "" {
 			url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
 			p.scheduler.Push(&scheduler.Task{
-				Type: "summoner",
+				Type: summonerTypeKey,
 				Loc:  loc,
 				URL:  url,
 				Data: &summonerTask{
@@ -124,7 +124,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 	}
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
-		Type: "summoner",
+		Type: summonerTypeKey,
 		Loc:  loc,
 		Data: nil,
 	})
@@ -156,7 +156,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	// check oversize && split
 	if len(summoners) < p.stgy.MaxSize {
 		p.out <- &DBResult{
-			Type: "summoners",
+			Type: summonerTypeKey,
 			Data: summoners,
 		}
 	} else {
@@ -168,7 +168,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 				end = totalSize
 			}
 			p.out <- &DBResult{
-				Type: "summoners",
+				Type: summonerTypeKey,
 				Data: summoners[i:end],
 			}
 		}
@@ -218,4 +218,38 @@ func (p *Pumper) summonerCounter(loc string) {
 			pre = len(p.sumnMap[loc])
 		}
 	}
+}
+
+func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDTO) {
+	has := false
+	if res, has = p.sumnMap[loc][name]; has {
+		return res
+	}
+	// redis read
+	// ctx := context.Background()
+	// key := fmt.Sprintf("/summoner/%s", loc)
+	// buff := p.rdb.HGet(ctx, key, name).Val()
+	// if err := json.Unmarshal([]byte(buff), &res); err == nil && len(buff) > 50 {
+	// 	return res
+	// }
+	// db read
+	res = &riotmodel.SummonerDTO{Name: name}
+	if err := p.db.Where("loc = ?", loc).Find(&res).Preload(
+		clause.Associations).Error; err == nil && res.AccountID != "" {
+		return res
+	}
+	// http read
+	url := fmt.Sprintf("https://%s.api.riotgames.com/lol/summoner/v4/summoners/by-name/%s", loc, name)
+	buffer, err := p.fetcher.Get(url)
+	if err != nil {
+		p.logger.Error("wrong name or loc")
+		return nil
+	}
+	if err = json.Unmarshal(buffer, &res); err == nil && res.AccountID != "" {
+		p.handleSummoner(loc, res)
+		return res
+	}
+
+	p.logger.Error("load single summoner failed")
+	return nil
 }

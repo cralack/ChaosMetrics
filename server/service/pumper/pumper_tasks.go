@@ -2,17 +2,18 @@ package pumper
 
 import (
 	"context"
-	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/service/master"
+	"github.com/cralack/ChaosMetrics/server/utils"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 )
 
 func (p *Pumper) getTask() {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // 设置超时
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second) // 设置超时
+	// defer cancel()
+	ctx := context.Background()
 
 	resp, err := p.etcdcli.Get(
 		ctx,
@@ -26,32 +27,25 @@ func (p *Pumper) getTask() {
 
 	for _, kv := range resp.Kvs {
 		// unmarshal task
-		t, err := master.Decode(kv.Value)
-		if err != nil || t == nil {
-			p.logger.Error("decode task failed", zap.Error(err))
+		task, err2 := master.Decode(kv.Value)
+		if err2 != nil || task == nil {
+			p.logger.Error("decode task failed", zap.Error(err2))
 			continue
 		}
 
 		// pop task to que
-		id, err := master.GetNodeID(t.AssgnedNode)
-		if err == nil && p.id == id {
-			// push task to pumper que
-
-			// delete task
-			key := global.TaskPath + "/" + t.Name
-			if resp2, err2 := p.etcdcli.Delete(ctx, key); err2 != nil || resp2.Deleted == 0 {
-				p.logger.Error("pop task out failed", zap.Error(err2))
-			} else {
-				p.logger.Debug("delete succeed", zap.Any("resp", resp2))
-			}
+		id, err3 := master.GetNodeID(task.AssgnedNode)
+		if err3 == nil && p.id == id {
+			// pop task to pumper que
+			p.handleTask(ctx, task)
 		}
-
 	}
 }
 
 func (p *Pumper) watchTasks() {
+	ctx := context.Background()
 	watcher := p.etcdcli.Watch(
-		context.Background(),
+		ctx,
 		global.TaskPath,
 		clientv3.WithPrefix(),
 	)
@@ -70,7 +64,33 @@ func (p *Pumper) watchTasks() {
 			switch event.Type {
 			case clientv3.EventTypePut:
 				// pop task
+				task, err := master.Decode(event.Kv.Value)
+				if err != nil {
+					p.logger.Error("decode task failed", zap.Error(err))
+					continue
+				}
+				p.handleTask(ctx, task)
 			}
 		}
+	}
+}
+
+func (p *Pumper) handleTask(ctx context.Context, task *master.TaskSpec) {
+	var err error
+	loc := utils.ConverHostLoCode(task.Loc)
+	switch task.Type {
+	case entryTypeKey:
+		err = p.FetchEntryByName(task.SumName, loc)
+	case matchTypeKey:
+		err = p.FetchMatchByName(task.SumName, loc)
+	}
+
+	if err == nil {
+		// key := global.TaskPath + "/" + task.Name
+		// if resp2, err2 := p.etcdcli.Delete(ctx, key); err2 != nil || resp2.Deleted == 0 {
+		// 	p.logger.Error("pop task out failed", zap.Error(err2))
+		// } else {
+		p.logger.Debug("delete succeed", zap.Any("resp", ""))
+		// }
 	}
 }

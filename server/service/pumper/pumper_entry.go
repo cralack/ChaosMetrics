@@ -3,6 +3,7 @@ package pumper
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -14,8 +15,9 @@ import (
 )
 
 type entryTask struct {
-	Tier string
-	Rank string
+	Tier  string
+	Rank  string
+	Queue string
 }
 
 func (p *Pumper) UpdateEntries(exit chan struct{}) {
@@ -113,12 +115,13 @@ func (p *Pumper) createEntriesURL(loc riotmodel.LOCATION, que riotmodel.QUECODE)
 		url = fmt.Sprintf("%s/lol/league/v4/%sleagues/by-queue/%s",
 			host, strings.ToLower(t), queStr)
 		p.scheduler.Push(&scheduler.Task{
-			Type: "bestEntry",
+			Type: bestEntryTypeKey,
 			Loc:  locStr,
 			URL:  url,
 			Data: &entryTask{
-				Tier: t,
-				Rank: r,
+				Tier:  t,
+				Rank:  r,
+				Queue: queStr,
 			},
 		})
 	}
@@ -132,12 +135,13 @@ func (p *Pumper) createEntriesURL(loc riotmodel.LOCATION, que riotmodel.QUECODE)
 			url = fmt.Sprintf("%s/lol/league/v4/entries/%s/%s/%s",
 				host, queStr, t, r)
 			p.scheduler.Push(&scheduler.Task{
-				Type: "mortalEntry",
+				Type: mortalEntryTypeKey,
 				Loc:  locStr,
 				URL:  url,
 				Data: &entryTask{
-					Tier: t,
-					Rank: r,
+					Tier:  t,
+					Rank:  r,
+					Queue: queStr,
 				},
 			})
 		}
@@ -210,4 +214,43 @@ func (p *Pumper) cacheEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {
 	if _, err := pipe.Exec(ctx); err != nil {
 		p.logger.Error("redis store entry failed", zap.Error(err))
 	}
+}
+
+func (p *Pumper) FetchEntryByName(summonerName string, loc riotmodel.LOCATION) error {
+	var (
+		sumId   string
+		url     string
+		locStr  string
+		host    string
+		buff    []byte
+		err     error
+		sumn    *riotmodel.SummonerDTO
+		entries []*riotmodel.LeagueEntryDTO
+	)
+	locStr, host = utils.ConvertHostURL(loc)
+	sumn = p.LoadSingleSummoner(summonerName, locStr)
+	sumId = sumn.MetaSummonerID
+
+	url = fmt.Sprintf("%s/lol/league/v4/entries/by-summoner/%s", host, sumId)
+	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 50 {
+		return errors.New("get summoner by name failed" + err.Error())
+	}
+	if err = json.Unmarshal(buff, &entries); err != nil {
+		return errors.New("unmarshal entry failed" + err.Error())
+	}
+
+	for _, entry := range entries {
+		p.scheduler.Push(&scheduler.Task{
+			Type:     entryTypeKey,
+			Loc:      locStr,
+			URL:      url,
+			Priority: true,
+			Data: &entryTask{
+				Tier:  entry.Tier,
+				Rank:  entry.Rank,
+				Queue: entry.QueType,
+			},
+		})
+	}
+	return nil
 }

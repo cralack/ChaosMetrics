@@ -15,13 +15,13 @@ type Header struct {
 
 var defaultFetcher = &BrowserFetcher{
 	requireRateLimiter: false,
-	logger:             global.GVA_LOG,
-	timeout:            global.GVA_CONF.Fetcher.Timeout,
+	logger:             global.GvaLog,
+	timeout:            global.GvaConf.Fetcher.Timeout,
 	header: &Header{
-		AcceptLanguage: global.GVA_CONF.Fetcher.HeaderConfig.AcceptLanguage,
-		AcceptCharset:  global.GVA_CONF.Fetcher.HeaderConfig.AcceptCharset,
-		Origin:         global.GVA_CONF.Fetcher.HeaderConfig.Origin,
-		UserAgent:      global.GVA_CONF.Fetcher.HeaderConfig.UserAgent,
+		AcceptLanguage: global.GvaConf.Fetcher.HeaderConfig.AcceptLanguage,
+		AcceptCharset:  global.GvaConf.Fetcher.HeaderConfig.AcceptCharset,
+		Origin:         global.GvaConf.Fetcher.HeaderConfig.Origin,
+		UserAgent:      global.GvaConf.Fetcher.HeaderConfig.UserAgent,
 	},
 }
 

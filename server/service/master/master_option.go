@@ -14,7 +14,7 @@ type options struct {
 }
 
 var defaultOptions = options{
-	logger: global.GVA_LOG,
+	logger: global.GvaLog,
 }
 
 type Option func(opts *options)

@@ -28,22 +28,22 @@ const (
 type LOCATION uint
 
 const (
-	BR1  LOCATION = iota // 巴西
-	EUN1                 // 欧洲东北
-	EUW1                 // 欧洲西部
-	JP1                  // 日本
-	KR1                  // 韩国
-	LA1                  // 拉丁美洲北部
-	LA2                  // 拉丁美洲南部
-	NA1                  // 北美洲
-	OC1                  // 大洋洲
-	PH2                  // 菲律宾
-	RU                   // 俄罗斯
-	SG2                  // 新加坡
-	TH2                  // 泰国
-	TR1                  // 土耳其
-	TW2                  // 台湾
-	VN2                  // 越南
+	BR1  LOCATION = iota + 1 // 巴西
+	EUN1                     // 欧洲东北
+	EUW1                     // 欧洲西部
+	JP1                      // 日本
+	KR1                      // 韩国
+	LA1                      // 拉丁美洲北部
+	LA2                      // 拉丁美洲南部
+	NA1                      // 北美洲
+	OC1                      // 大洋洲
+	PH2                      // 菲律宾
+	RU                       // 俄罗斯
+	SG2                      // 新加坡
+	TH2                      // 泰国
+	TR1                      // 土耳其
+	TW2                      // 台湾
+	VN2                      // 越南
 )
 
 type QUECODE uint

@@ -9,7 +9,7 @@ import (
 
 // basic pkg init test
 func Test_config(t *testing.T) {
-	conf := global.GVA_CONF
+	conf := global.GvaConf
 	logger.Debug(conf.Env)
 	logger.Debug(conf.DirTree.WorkDir)
 	logger.Debug(conf.Dbconf.Driver)

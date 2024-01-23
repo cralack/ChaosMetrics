@@ -12,18 +12,18 @@ import (
 type Env int
 
 const (
-	TEST_ENV Env = iota
-	DEV_ENV
-	PRODUCT_ENV
+	TestEnv Env = iota
+	DevEnv
+	ProductEnv
 )
 
 var (
-	GVA_ENV  Env
-	GVA_CONF *config.Root
-	GVA_DB   *gorm.DB
-	GVA_RDB  *redis.Client
-	GVA_VP   *viper.Viper
-	GVA_LOG  *zap.Logger
+	GvaEnv  Env
+	GvaConf *config.Root
+	GvaDb   *gorm.DB
+	GvaRdb  *redis.Client
+	GvaVp   *viper.Viper
+	GvaLog  *zap.Logger
 )
 
 const (

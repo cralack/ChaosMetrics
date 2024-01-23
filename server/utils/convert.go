@@ -94,10 +94,10 @@ func ConvertLocToRegion(loc riotmodel.LOCATION) string {
 
 func ConvertRegionToRegCode(region string) riotmodel.AREA {
 	regionCode := map[string]riotmodel.AREA{
-		"AMERICA": riotmodel.LOC_AMERICAS,
-		"ASIA":    riotmodel.LOC_ASIA,
-		"EUROPE":  riotmodel.LOC_EUROPE,
-		"SEA":     riotmodel.LOC_SEA,
+		"AMERICAS": riotmodel.LOC_AMERICAS,
+		"ASIA":     riotmodel.LOC_ASIA,
+		"EUROPE":   riotmodel.LOC_EUROPE,
+		"SEA":      riotmodel.LOC_SEA,
 	}
 	if region == "" {
 		return regionCode["AMERICA"]

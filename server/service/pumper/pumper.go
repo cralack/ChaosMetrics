@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strconv"
 	"sync"
 
@@ -21,6 +20,15 @@ import (
 )
 
 const testSize = 1
+
+const (
+	entryTypeKey       = "entry"
+	bestEntryTypeKey   = "best"
+	mortalEntryTypeKey = "mortal"
+	summonerTypeKey    = "sum"
+	matchTypeKey       = "match"
+	finishTypeKey      = "finish"
+)
 
 type Pumper struct {
 	id          string
@@ -52,14 +60,21 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		opt(stgy)
 	}
 
+	// test todo
+	stgy.Loc = append(stgy.Loc, riotmodel.TW2)
+	for _, l := range stgy.Loc {
+		loc, _ := utils.ConvertHostURL(l)
+		global.GvaLog.Debug(loc)
+	}
+
 	// get deault token
 	if stgy.Token == "" {
-		workDir := global.GVA_CONF.DirTree.WorkDir
+		workDir := global.GvaConf.DirTree.WorkDir
 		filename := "api_key"
 		path := filepath.Join(workDir, filename)
 		buff, err := os.ReadFile(path)
 		if err != nil {
-			global.GVA_LOG.Error("get api key failed",
+			global.GvaLog.Error("get api key failed",
 				zap.Error(err))
 		}
 		stgy.Token = string(buff)
@@ -72,15 +87,15 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		return nil, err
 	}
 
-	if global.GVA_ENV == global.TEST_ENV {
+	if global.GvaEnv == global.TestEnv {
 		stgy.MaxMatchCount = 1
 	}
 
 	return &Pumper{
 		id:          id,
-		logger:      global.GVA_LOG,
-		db:          global.GVA_DB,
-		rdb:         global.GVA_RDB,
+		logger:      global.GvaLog,
+		db:          global.GvaDb,
+		rdb:         global.GvaRdb,
 		lock:        &sync.Mutex{},
 		fetcher:     fetcher.NewBrowserFetcher(fetcher.WithToken(stgy.Token)),
 		scheduler:   scheduler.NewSchdule(),
@@ -103,24 +118,24 @@ func (p *Pumper) Schedule() {
 func (p *Pumper) handleResult(exit chan struct{}) {
 	for result := range p.out {
 		switch result.Type {
-		case "finish":
+		case finishTypeKey:
 			p.logger.Info(fmt.Sprintf("all %s result store done", result.Brief))
 			exit <- struct{}{}
 			continue
 
-		case "entry":
+		case entryTypeKey:
 			entries := result.Data.([]*riotmodel.LeagueEntryDTO)
 			if err := p.db.Save(entries).Error; err != nil {
 				p.logger.Error("riot entry store failed", zap.Error(err))
 			}
 
-		case "summoners":
+		case summonerTypeKey:
 			summoners := result.Data.([]*riotmodel.SummonerDTO)
 			if err := p.db.Save(summoners).Error; err != nil {
 				p.logger.Error("riot summoner model store failed", zap.Error(err))
 			}
 
-		case "match":
+		case matchTypeKey:
 			matches := result.Data.([]*riotmodel.MatchDB)
 			if len(matches) == 0 {
 				continue
@@ -133,6 +148,8 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 }
 
 func (p *Pumper) StartEngine(exit chan struct{}) {
+	go p.LoadAll()
+
 	go p.Schedule()
 	// get task from etcd
 	go p.getTask()
@@ -142,13 +159,22 @@ func (p *Pumper) StartEngine(exit chan struct{}) {
 	go p.handleResult(exit)
 }
 
+func (p *Pumper) LoadAll() {
+	for _, l := range p.stgy.Loc {
+		loc, _ := utils.ConvertHostURL(l)
+		p.loadSummoners(loc)
+		p.loadEntrie(loc)
+		p.loadMatch(loc)
+	}
+}
+
 func (p *Pumper) UpdateAll() {
 	exit := make(chan struct{})
 	// p.StartEngine(exit)
 
 	p.UpdateEntries(exit)
-	p.UpdateSumoner(exit)
-	p.UpdateMatch(exit)
+	// p.UpdateSumoner(exit)
+	// p.UpdateMatch(exit)
 }
 
 // core func
@@ -166,20 +192,20 @@ func (p *Pumper) fetch() {
 	)
 	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark1, p.stgy.TestEndMark2)
 	// catch panic
-	defer func() {
-		if err := recover(); err != nil {
-			p.logger.Panic("fetcher panic",
-				zap.Any("err", err),
-				zap.String("stack", string(debug.Stack())))
-		}
-	}()
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		p.logger.Panic("fetcher panic",
+	// 			zap.Any("err", err),
+	// 			zap.String("stack", string(debug.Stack())))
+	// 	}
+	// }()
 
 	for {
 		req := p.scheduler.Pull()
 		if req.Data == nil {
 			// send finish signal
 			p.out <- &DBResult{
-				Type:  "finish",
+				Type:  finishTypeKey,
 				Brief: req.Type,
 				Data:  nil,
 			}
@@ -188,7 +214,7 @@ func (p *Pumper) fetch() {
 
 		// fetch and parse
 		switch req.Type {
-		case "bestEntry":
+		case bestEntryTypeKey:
 			data := req.Data.(*entryTask)
 			// api: /lol/league/v4/{BEST}leagues/by-queue/{queue}
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
@@ -210,14 +236,16 @@ func (p *Pumper) fetch() {
 				continue
 			}
 			for _, e := range entries {
-				e.Tier = data.Tier
 				e.Loc = req.Loc
+				e.Tier = list.Tier
+				e.LeagueID = list.LeagueID
+				e.QueType = list.Queue
 			}
 			// shrink size if test
-			if global.GVA_ENV == global.TEST_ENV {
+			if global.GvaEnv == global.TestEnv {
 				entries = entries[:testSize]
 			}
-
+			// clear list
 			list = nil
 			p.logger.Info(fmt.Sprintf("all %d %s data fetch done",
 				len(entries), data.Tier))
@@ -225,7 +253,7 @@ func (p *Pumper) fetch() {
 			p.cacheEntries(entries, req.Loc)
 			if data.Tier == endTier && data.Rank == endRank {
 				p.out <- &DBResult{
-					Type:  "finish",
+					Type:  finishTypeKey,
 					Brief: "entry",
 					Data:  nil,
 				}
@@ -233,7 +261,7 @@ func (p *Pumper) fetch() {
 				continue
 			}
 
-		case "mortalEntry":
+		case mortalEntryTypeKey:
 			data := req.Data.(*entryTask)
 			for page := 1; ; page++ {
 				// api: /lol/league/v4/entries/{queue}/{tier}/{division}
@@ -257,7 +285,7 @@ func (p *Pumper) fetch() {
 					e.Loc = req.Loc
 				}
 				// shrink size if test
-				if global.GVA_ENV == global.TEST_ENV {
+				if global.GvaEnv == global.TestEnv {
 					entries = entries[:testSize]
 				}
 
@@ -265,7 +293,7 @@ func (p *Pumper) fetch() {
 				p.cacheEntries(entries, req.Loc)
 
 				// test
-				if (global.GVA_ENV == global.TEST_ENV && page == testSize) || len(entries) == 0 {
+				if (global.GvaEnv == global.TestEnv && page == testSize) || len(entries) == 0 {
 					p.logger.Info(fmt.Sprintf("all %s %s data fetch done at page %d",
 						data.Tier, data.Rank, page))
 					break
@@ -274,14 +302,14 @@ func (p *Pumper) fetch() {
 
 			if data.Tier == endTier && data.Rank == endRank {
 				p.out <- &DBResult{
-					Type:  "finish",
+					Type:  finishTypeKey,
 					Brief: "entry",
 					Data:  nil,
 				}
 				continue
 			}
 
-		case "summoner":
+		case summonerTypeKey:
 			data := req.Data.(*summonerTask)
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
@@ -299,7 +327,7 @@ func (p *Pumper) fetch() {
 			}
 			p.handleSummoner(req.Loc, sumn)
 
-		case "match":
+		case matchTypeKey:
 			data := req.Data.(*matchTask)
 			// get old & cur match list
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
