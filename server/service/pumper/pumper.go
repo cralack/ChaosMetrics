@@ -8,7 +8,6 @@ import (
 	"runtime/debug"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -263,9 +262,6 @@ func (p *Pumper) fetch() {
 				if buff, err = p.fetcher.Get(url); err != nil {
 					p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
 						zap.Error(err))
-					if err.Error() == "428 Too Many Requests" {
-						time.Sleep(time.Second * 3)
-					}
 					if req.Retry < p.stgy.Retry {
 						req.Retry++
 						p.scheduler.Push(req)
