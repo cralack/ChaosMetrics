@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# require
+#apt install -y protobuf-compiler
+
+# golang protoc plugin
+#go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+#go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+# go-micro plugin
+#go install github.com/go-micro/generator/cmd/protoc-gen-micro@latest
+
+# grpc-gateway plugin
+#go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+#go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
+
 # delete all pb go file
 find . -type f -name "*pb*.go" -delete
 

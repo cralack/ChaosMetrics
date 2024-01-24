@@ -53,7 +53,7 @@ func Viper() (*viper.Viper, error) {
 	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {
 		// handler func
-		global.GvaLog.Info("config file changed:",
+		global.GvaLog.Debug("config file changed:",
 			zap.String("filename", e.Name))
 		if err = v.Unmarshal(conf); err != nil {
 			panic(err)

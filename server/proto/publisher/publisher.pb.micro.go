@@ -5,9 +5,9 @@ package publisher
 
 import (
 	fmt "fmt"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	proto "google.golang.org/protobuf/proto"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	math "math"
 )
 
@@ -52,7 +52,7 @@ func NewPublisherEndpoints() []*api.Endpoint {
 
 type PublisherService interface {
 	PushTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*NodeSpec, error)
-	PullTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*emptypb.Empty, error)
+	PullTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*empty.Empty, error)
 }
 
 type publisherService struct {
@@ -77,9 +77,9 @@ func (c *publisherService) PushTask(ctx context.Context, in *TaskSpec, opts ...c
 	return out, nil
 }
 
-func (c *publisherService) PullTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*emptypb.Empty, error) {
+func (c *publisherService) PullTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*empty.Empty, error) {
 	req := c.c.NewRequest(c.name, "Publisher.PullTask", in)
-	out := new(emptypb.Empty)
+	out := new(empty.Empty)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -91,13 +91,13 @@ func (c *publisherService) PullTask(ctx context.Context, in *TaskSpec, opts ...c
 
 type PublisherHandler interface {
 	PushTask(context.Context, *TaskSpec, *NodeSpec) error
-	PullTask(context.Context, *TaskSpec, *emptypb.Empty) error
+	PullTask(context.Context, *TaskSpec, *empty.Empty) error
 }
 
 func RegisterPublisherHandler(s server.Server, hdlr PublisherHandler, opts ...server.HandlerOption) error {
 	type publisher interface {
 		PushTask(ctx context.Context, in *TaskSpec, out *NodeSpec) error
-		PullTask(ctx context.Context, in *TaskSpec, out *emptypb.Empty) error
+		PullTask(ctx context.Context, in *TaskSpec, out *empty.Empty) error
 	}
 	type Publisher struct {
 		publisher
@@ -126,6 +126,6 @@ func (h *publisherHandler) PushTask(ctx context.Context, in *TaskSpec, out *Node
 	return h.PublisherHandler.PushTask(ctx, in, out)
 }
 
-func (h *publisherHandler) PullTask(ctx context.Context, in *TaskSpec, out *emptypb.Empty) error {
+func (h *publisherHandler) PullTask(ctx context.Context, in *TaskSpec, out *empty.Empty) error {
 	return h.PublisherHandler.PullTask(ctx, in, out)
 }

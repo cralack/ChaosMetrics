@@ -60,13 +60,6 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		opt(stgy)
 	}
 
-	// test todo
-	stgy.Loc = append(stgy.Loc, riotmodel.TW2)
-	for _, l := range stgy.Loc {
-		loc, _ := utils.ConvertHostURL(l)
-		global.GvaLog.Debug(loc)
-	}
-
 	// get deault token
 	if stgy.Token == "" {
 		workDir := global.GvaConf.DirTree.WorkDir
@@ -148,8 +141,7 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 }
 
 func (p *Pumper) StartEngine(exit chan struct{}) {
-	go p.LoadAll()
-
+	// go p.LoadAll()
 	go p.Schedule()
 	// get task from etcd
 	go p.getTask()
@@ -173,8 +165,8 @@ func (p *Pumper) UpdateAll() {
 	// p.StartEngine(exit)
 
 	p.UpdateEntries(exit)
-	// p.UpdateSumoner(exit)
-	// p.UpdateMatch(exit)
+	p.UpdateSumoner(exit)
+	p.UpdateMatch(exit)
 }
 
 // core func
