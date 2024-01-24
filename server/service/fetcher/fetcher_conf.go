@@ -14,7 +14,7 @@ type Header struct {
 }
 
 var defaultFetcher = &BrowserFetcher{
-	requireRateLimiter: false,
+	requireRateLimiter: true,
 	logger:             global.GvaLog,
 	timeout:            global.GvaConf.Fetcher.Timeout,
 	header: &Header{

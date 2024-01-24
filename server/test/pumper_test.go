@@ -12,11 +12,11 @@ func Test_pumper_update(t *testing.T) {
 	p, _ := pumper.NewPumper(
 		"1",
 		pumper.WithLoc(riotmodel.NA1),
-		pumper.WithEndMark(riotmodel.DIAMOND, 1),
+		pumper.WithEndMark(riotmodel.EMERALD, 1),
 	)
 	exit := make(chan struct{})
 	p.StartEngine(exit)
-	p.UpdateAll()
+	p.UpdateAll(exit)
 	<-exit
 }
 

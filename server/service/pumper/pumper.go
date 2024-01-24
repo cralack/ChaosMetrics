@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -160,8 +162,8 @@ func (p *Pumper) LoadAll() {
 	}
 }
 
-func (p *Pumper) UpdateAll() {
-	exit := make(chan struct{})
+func (p *Pumper) UpdateAll(exit chan struct{}) {
+	// exit := make(chan struct{})
 	// p.StartEngine(exit)
 
 	p.UpdateEntries(exit)
@@ -184,13 +186,13 @@ func (p *Pumper) fetch() {
 	)
 	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark1, p.stgy.TestEndMark2)
 	// catch panic
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		p.logger.Panic("fetcher panic",
-	// 			zap.Any("err", err),
-	// 			zap.String("stack", string(debug.Stack())))
-	// 	}
-	// }()
+	defer func() {
+		if err := recover(); err != nil {
+			p.logger.Panic("fetcher panic",
+				zap.Any("err", err),
+				zap.String("stack", string(debug.Stack())))
+		}
+	}()
 
 	for {
 		req := p.scheduler.Pull()
@@ -261,6 +263,9 @@ func (p *Pumper) fetch() {
 				if buff, err = p.fetcher.Get(url); err != nil {
 					p.logger.Error(fmt.Sprintf("fetch %s %s failed", data.Tier, data.Rank),
 						zap.Error(err))
+					if err.Error() == "428 Too Many Requests" {
+						time.Sleep(time.Second * 3)
+					}
 					if req.Retry < p.stgy.Retry {
 						req.Retry++
 						p.scheduler.Push(req)

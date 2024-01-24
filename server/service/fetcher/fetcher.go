@@ -38,7 +38,7 @@ func NewBrowserFetcher(opts ...func(*BrowserFetcher)) *BrowserFetcher {
 
 	if f.requireRateLimiter {
 		if limiter, err := rater.NewSlidingWindowLimiter(
-			conf.RateLimiterConfig.Each2Min-2,
+			conf.RateLimiterConfig.Each2Min,
 			time.Minute*2,
 			time.Second/time.Duration(conf.RateLimiterConfig.EachSec),
 		); err != nil {

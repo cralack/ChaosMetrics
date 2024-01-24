@@ -22,7 +22,7 @@ type SummonerDTO struct {
 	MetaSummonerID string    `gorm:"column:meta_summoner_id;index;type:varchar(100)" json:"id"` // 加密的召唤师ID，最长为63个字符
 	PUUID          string    `gorm:"column:puuid;type:varchar(100)" json:"puuid"`               // 加密的PUUID，长度为78个字符
 	SummonerLevel  int       `gorm:"column:summoner_level;type:smallint" json:"summonerLevel"`  // 召唤师等级
-	TournamentID   string    `gorm:"column:tournament_id;type:varchar(100)"`                    // 锦标赛ID
+	// TournamentID   string    `gorm:"column:tournament_id;type:varchar(100)"`                    // 锦标赛ID
 }
 
 func (s *SummonerDTO) TableName() string {

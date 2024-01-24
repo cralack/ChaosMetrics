@@ -23,7 +23,6 @@ func (p *Pumper) UpdateMatch(exit chan struct{}) {
 	for _, loc := range p.stgy.Loc {
 		go p.createMatchListURL(loc)
 	}
-	// go p.fetchMatch()
 	<-exit
 }
 

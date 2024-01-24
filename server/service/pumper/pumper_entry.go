@@ -27,8 +27,6 @@ func (p *Pumper) UpdateEntries(exit chan struct{}) {
 			go p.createEntriesURL(loc, que)
 		}
 	}
-	// go Watch_ETCD
-	// go p.fetchEntry()
 	// blocking until handle final
 	<-exit
 }
@@ -194,7 +192,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 	// send to DB handler
 	for _, chunk := range chunks {
 		p.out <- &DBResult{
-			Type:  "entry",
+			Type:  entryTypeKey,
 			Brief: chunk[0].Tier + " " + chunk[0].Rank,
 			Data:  chunk,
 		}

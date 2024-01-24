@@ -33,10 +33,9 @@ fetcher:
     accept_language: zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7  # 接受的语言
     accept_charset: application/x-www-form-urlencoded; charset=UTF-8  # 接受的字符集
     origin: https://developer.riotgames.com  # 请求来源
-    x_riot_token:  # Riot API 的密钥
   rate_limiter:
     each_sec: 20  # 每秒允许的 API 请求次数限制
-    each_2min: 100  # 每两分钟允许的 API 请求次数限制
+    each_2min: 98  # 每两分钟允许的 API 请求次数限制
 
 redis:
   host: localhost # ip地址

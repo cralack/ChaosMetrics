@@ -24,7 +24,6 @@ func (p *Pumper) UpdateSumoner(exit chan struct{}) {
 		// Generate URLs
 		go p.createSummonerURL(loc)
 	}
-	// go p.fetchSummoner()
 	<-exit
 }
 
