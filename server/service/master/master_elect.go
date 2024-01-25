@@ -38,6 +38,7 @@ func (m *Master) Campaign() {
 	leaderChange := e.Observe(context.Background())
 	select {
 	case resp := <-leaderChange:
+		m.leaderID = string(resp.Kvs[0].Value)
 		m.logger.Info("leader change",
 			zap.String("leader:", string(resp.Kvs[0].Value)))
 	}
@@ -76,15 +77,6 @@ func (m *Master) Campaign() {
 			m.logger.Info("watch worker change", zap.String("worker:",
 				fmt.Sprintf("%s,action:%s", resp.Service.Name, resp.Action)))
 			m.updateWorkNodes()
-
-		// test case
-		case <-time.After(3 * time.Second):
-			m.AddTask(&SimpleAssigner{}, &TaskSpec{
-				Name:    "TEST",
-				SumName: "Solarbacca",
-				Type:    "match",
-				Loc:     "na1",
-			})
 
 		// check leader every 30s
 		case <-time.After(30 * time.Second):

@@ -8,6 +8,7 @@ package publisher
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -26,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PublisherClient interface {
-	PushTask(ctx context.Context, in *TaskSpec, opts ...grpc.CallOption) (*NodeSpec, error)
+	PushTask(ctx context.Context, in *TaskSpec, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type publisherClient struct {
@@ -37,8 +38,8 @@ func NewPublisherClient(cc grpc.ClientConnInterface) PublisherClient {
 	return &publisherClient{cc}
 }
 
-func (c *publisherClient) PushTask(ctx context.Context, in *TaskSpec, opts ...grpc.CallOption) (*NodeSpec, error) {
-	out := new(NodeSpec)
+func (c *publisherClient) PushTask(ctx context.Context, in *TaskSpec, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, Publisher_PushTask_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -50,7 +51,7 @@ func (c *publisherClient) PushTask(ctx context.Context, in *TaskSpec, opts ...gr
 // All implementations must embed UnimplementedPublisherServer
 // for forward compatibility
 type PublisherServer interface {
-	PushTask(context.Context, *TaskSpec) (*NodeSpec, error)
+	PushTask(context.Context, *TaskSpec) (*empty.Empty, error)
 	mustEmbedUnimplementedPublisherServer()
 }
 
@@ -58,7 +59,7 @@ type PublisherServer interface {
 type UnimplementedPublisherServer struct {
 }
 
-func (UnimplementedPublisherServer) PushTask(context.Context, *TaskSpec) (*NodeSpec, error) {
+func (UnimplementedPublisherServer) PushTask(context.Context, *TaskSpec) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PushTask not implemented")
 }
 func (UnimplementedPublisherServer) mustEmbedUnimplementedPublisherServer() {}

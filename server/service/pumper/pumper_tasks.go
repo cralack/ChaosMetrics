@@ -32,13 +32,8 @@ func (p *Pumper) getTask() {
 			p.logger.Error("decode task failed", zap.Error(err2))
 			continue
 		}
-
-		// pop task to que
-		id, err3 := master.GetNodeID(task.AssgnedNode)
-		if err3 == nil && p.id == id {
-			// pop task to pumper que
-			p.handleTask(ctx, task)
-		}
+		// pop task to pumper que
+		p.handleTask(ctx, task)
 	}
 }
 
@@ -65,7 +60,7 @@ func (p *Pumper) watchTasks() {
 			case clientv3.EventTypePut:
 				// pop task
 				task, err := master.Decode(event.Kv.Value)
-				if err != nil {
+				if err != nil || task == nil {
 					p.logger.Error("decode task failed", zap.Error(err))
 					continue
 				}
@@ -76,7 +71,14 @@ func (p *Pumper) watchTasks() {
 }
 
 func (p *Pumper) handleTask(ctx context.Context, task *master.TaskSpec) {
-	var err error
+	var (
+		err error
+		id  string
+	)
+	id, err = master.GetNodeID(task.AssgnedNode)
+	if err != nil || p.id != id {
+		return
+	}
 	loc := utils.ConverHostLoCode(task.Loc)
 	switch task.Type {
 	case entryTypeKey:
@@ -86,6 +88,7 @@ func (p *Pumper) handleTask(ctx context.Context, task *master.TaskSpec) {
 	}
 
 	if err == nil {
+		// such as: /tasks/TEST
 		key := global.TaskPath + "/" + task.Name
 		if resp2, err2 := p.etcdcli.Delete(ctx, key); err2 != nil || resp2.Deleted == 0 {
 			p.logger.Error("pop task out failed", zap.Error(err2))

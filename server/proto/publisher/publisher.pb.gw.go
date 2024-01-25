@@ -71,7 +71,7 @@ func RegisterPublisherGwServer(ctx context.Context, mux *runtime.ServeMux, serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/.Publisher/PushTask", runtime.WithHTTPPathPattern("/pumper/resource"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/.Publisher/PushTask", runtime.WithHTTPPathPattern("/publisher/task"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -135,7 +135,7 @@ func RegisterPublisherGwClient(ctx context.Context, mux *runtime.ServeMux, clien
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/.Publisher/PushTask", runtime.WithHTTPPathPattern("/pumper/resource"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/.Publisher/PushTask", runtime.WithHTTPPathPattern("/publisher/task"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -155,7 +155,7 @@ func RegisterPublisherGwClient(ctx context.Context, mux *runtime.ServeMux, clien
 }
 
 var (
-	pattern_Publisher_PushTask_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"pumper", "resource"}, ""))
+	pattern_Publisher_PushTask_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"publisher", "task"}, ""))
 )
 
 var (

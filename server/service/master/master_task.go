@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"go-micro.dev/v4/registry"
+	"github.com/cralack/ChaosMetrics/server/proto/publisher"
+	"github.com/golang/protobuf/ptypes/empty"
+	"go-micro.dev/v4/client"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 )
@@ -63,11 +65,6 @@ func (m *Master) loadTask() error {
 	for _, kv := range resp.Kvs {
 		if t, err2 := Decode(kv.Value); err2 == nil && t != nil {
 			tasks[t.Name] = t
-			timeStamp := time.Unix(
-				t.CreationTime/int64(time.Second),
-				t.CreationTime%int64(time.Second),
-			)
-			m.logger.Debug(timeStamp.String())
 		}
 	}
 
@@ -78,32 +75,29 @@ func (m *Master) loadTask() error {
 	m.logger.Info("leader init load task", zap.Int("lenth", len(m.tasks)))
 
 	for _, t := range m.tasks {
-		if t.AssgnedNode != "" {
-			id, err := GetNodeID(t.AssgnedNode)
-			if err != nil {
-				m.logger.Error("get node ID faild", zap.Error(err))
-			}
-			if node, has := m.workNodes[id]; has {
-				m.logger.Debug(node.Id)
-			}
-		}
+		m.AddTask(&SimpleAssigner{}, t)
 	}
 	return nil
 }
 
-type Assigner interface {
-	Assign(workNodes map[string]*registry.Node) (*registry.Node, error)
-}
+var _ publisher.PublisherHandler = &Master{}
 
-type SimpleAssigner struct{}
-
-var _ Assigner = &SimpleAssigner{}
-
-func (s *SimpleAssigner) Assign(workNodes map[string]*registry.Node) (*registry.Node, error) {
-	for _, n := range workNodes {
-		return n, nil
+func (m *Master) PushTask(ctx context.Context, ptask *publisher.TaskSpec, out *empty.Empty) error {
+	if !m.IsLeader() && m.leaderID != "" && m.leaderID != m.ID {
+		addr := getLeaderAddr(m.leaderID)
+		_, err := m.forwardCli.PushTask(ctx, ptask, client.WithAddress(addr))
+		m.logger.Error("forward failed", zap.Error(err))
+		return err
 	}
-	return nil, errors.New("no worker available")
-}
+	m.rlock.Lock()
+	defer m.rlock.Unlock()
 
-// assign by area
+	task := &TaskSpec{
+		Name:    ptask.Name,
+		SumName: ptask.Sumname,
+		Type:    ptask.Type,
+		Loc:     ptask.Loc,
+	}
+	m.AddTask(&SimpleAssigner{}, task)
+	return nil
+}

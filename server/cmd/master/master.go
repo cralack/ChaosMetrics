@@ -43,7 +43,7 @@ func Run() {
 	conf.HTTPListenAddress = HTTPListenAddress
 
 	m, err := master.New(
-		masterId,
+		conf.Name+"-"+conf.ID,
 		master.WithLogger(logger.Named(global.MasterServiceName)),
 		master.WithregistryURL(conf.RegistryAddress),
 		master.WithGRPCAddress(conf.GRPCListenAddress),
@@ -55,6 +55,6 @@ func Run() {
 
 	m.Run()
 
-	go register.RunHTTPServer(logger, conf)
-	register.RunGRPCServer(logger, conf)
+	go register.RunHTTPServer(logger, conf, m)
+	register.RunGRPCServer(logger, conf, m)
 }

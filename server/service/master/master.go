@@ -6,22 +6,23 @@ import (
 	"sync"
 
 	"github.com/bwmarrin/snowflake"
+	"github.com/cralack/ChaosMetrics/server/proto/publisher"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"go-micro.dev/v4/registry"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type Master struct {
-	ready     int32
-	ID        string
-	Loc       string
-	leaderID  string
-	workNodes map[string]*registry.Node
-	tasks     map[string]*TaskSpec
-	rlock     *sync.Mutex
-	IDGen     *snowflake.Node
-	etcdCli   *clientv3.Client
-	// Service   micro.Service
+	ready      int32
+	ID         string
+	Loc        string
+	leaderID   string
+	workNodes  map[string]*registry.Node
+	tasks      map[string]*TaskSpec
+	rlock      *sync.Mutex
+	IDGen      *snowflake.Node
+	etcdCli    *clientv3.Client
+	forwardCli publisher.PublisherService
 
 	options
 }
@@ -43,7 +44,7 @@ func New(id string, opts ...Option) (*Master, error) {
 	if ipv4, err := utils.GetLocalIP(); err != nil {
 		return nil, err
 	} else {
-		m.ID = fmt.Sprintf("master_%s@%s%s", id, ipv4, m.GRPCAddress)
+		m.ID = fmt.Sprintf("%s@%s%s", id, ipv4, m.GRPCAddress)
 		m.logger.Debug("master id:" + m.ID)
 	}
 
@@ -71,4 +72,9 @@ func New(id string, opts ...Option) (*Master, error) {
 func (m *Master) Run() {
 	// start elect func
 	go m.Campaign()
+}
+
+func (m *Master) SetForwardCli(cli publisher.PublisherService) {
+	m.forwardCli = cli
+
 }

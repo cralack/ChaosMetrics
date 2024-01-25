@@ -55,3 +55,11 @@ func Decode(ds []byte) (*TaskSpec, error) {
 func getTaskPath(name string) string {
 	return fmt.Sprintf("%s/%s", global.TaskPath, name)
 }
+
+func getLeaderAddr(str string) string {
+	s := strings.Split(str, "@")
+	if len(s) < 2 {
+		return ""
+	}
+	return s[1]
+}

@@ -65,7 +65,7 @@ func Run() {
 	// start pumper core
 	exit := make(chan struct{})
 	core, err := pumper.NewPumper(
-		conf.ID,
+		conf.Name+"-"+conf.ID,
 		pumper.WithAreaLoc(area),
 		pumper.WithRegistryURL(conf.RegistryAddress),
 		pumper.WithToken(token),
