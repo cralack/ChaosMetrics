@@ -40,7 +40,7 @@ func AddCommands(root *cobra.Command) {
 	)
 }
 
-func RunCommand() error {
+func RunCmd() error {
 	AddCommands(rootCmd)
 	{ // debug master part
 		cmd, _, err := rootCmd.Find(os.Args[1:])

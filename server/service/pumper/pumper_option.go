@@ -40,8 +40,8 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 	return func(opts *Options) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
-			if 16 < loc {
-				global.GvaLog.Error("wrong param,loc need < 16,using default option")
+			if riotmodel.VN2 < loc {
+				global.GvaLog.Error("wrong param,loc need < VN2,using default option")
 				return
 			}
 			tmp = append(tmp, loc)
@@ -81,7 +81,7 @@ func WithAreaLoc(areas ...riotmodel.AREA) Option {
 		}
 
 		for _, area := range areas {
-			if 4 < area {
+			if riotmodel.LOC_SEA < area {
 				global.GvaLog.Error("wrong param,area need < 4,using default option")
 				return
 			}
