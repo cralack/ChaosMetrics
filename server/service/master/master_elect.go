@@ -77,12 +77,13 @@ func (m *Master) Campaign() {
 				fmt.Sprintf("%s,action:%s", resp.Service.Name, resp.Action)))
 			m.updateWorkNodes()
 
+		// test case
 		case <-time.After(3 * time.Second):
 			m.AddTask(&SimpleAssigner{}, &TaskSpec{
 				Name:    "TEST",
-				SumName: "Mes",
+				SumName: "Solarbacca",
 				Type:    "match",
-				Loc:     "tw2",
+				Loc:     "na1",
 			})
 
 		// check leader every 30s

@@ -60,6 +60,16 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 	for _, opt := range opts {
 		opt(stgy)
 	}
+	// init
+	entryMap := make(map[string]map[string]*riotmodel.LeagueEntryDTO)
+	sumnMap := make(map[string]map[string]*riotmodel.SummonerDTO)
+	matchMap := make(map[string]map[string]bool)
+	for _, l := range stgy.Loc {
+		loc, _ := utils.ConvertHostURL(l)
+		entryMap[loc] = make(map[string]*riotmodel.LeagueEntryDTO)
+		sumnMap[loc] = make(map[string]*riotmodel.SummonerDTO)
+		matchMap[loc] = make(map[string]bool)
+	}
 
 	// get deault token
 	if stgy.Token == "" {
@@ -96,9 +106,9 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		entrieIdx:   make([]uint, 16),
 		summonerIdx: make([]uint, 16),
 		out:         make(chan *DBResult),
-		entryMap:    make(map[string]map[string]*riotmodel.LeagueEntryDTO),
-		sumnMap:     make(map[string]map[string]*riotmodel.SummonerDTO),
-		matchMap:    make(map[string]map[string]bool),
+		entryMap:    entryMap,
+		sumnMap:     sumnMap,
+		matchMap:    matchMap,
 		etcdcli:     cli,
 
 		stgy: stgy,

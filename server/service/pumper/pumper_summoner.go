@@ -232,8 +232,8 @@ func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDT
 	// 	return res
 	// }
 	// db read
-	res = &riotmodel.SummonerDTO{Name: name}
-	if err := p.db.Where("loc = ?", loc).Find(&res).Preload(
+	// var res *riotmodel.SummonerDTO
+	if err := p.db.Where("loc = ?", loc).Where("name = ?", name).First(&res).Preload(
 		clause.Associations).Error; err == nil && res.AccountID != "" {
 		return res
 	}

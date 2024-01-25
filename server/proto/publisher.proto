@@ -1,7 +1,7 @@
 syntax = "proto3";
 option go_package = "./publisher";
 import "google/api/annotations.proto";
-import "google/protobuf/empty.proto";
+//import "google/protobuf/empty.proto";
 
 service Publisher {
   rpc PushTask(TaskSpec) returns (NodeSpec) {
@@ -10,12 +10,12 @@ service Publisher {
       body: "*"
     };
   }
-  rpc PullTask(TaskSpec) returns (google.protobuf.Empty){
-    option (google.api.http) = {
-      delete: "/pumper/resource"
+//  rpc PullTask(TaskSpec) returns (google.protobuf.Empty){
+//    option (google.api.http) = {
+//      delete: "/pumper/resource"
 //      body: "*"
-    };
-  }
+//    };
+//  }
 }
 
 message TaskSpec {
@@ -24,6 +24,8 @@ message TaskSpec {
   string loc =3;
   string assigned_node = 4;
   int64 creation_time = 5;
+  string sumname =6;
+  string type=7;
 }
 
 message NodeSpec {

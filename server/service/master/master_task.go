@@ -51,7 +51,6 @@ func (m *Master) AddTask(assigner Assigner, tasks ...*TaskSpec) {
 			m.logger.Error("put etcd failed", zap.Error(err))
 			continue
 		}
-
 	}
 }
 
@@ -106,3 +105,5 @@ func (s *SimpleAssigner) Assign(workNodes map[string]*registry.Node) (*registry.
 	}
 	return nil, errors.New("no worker available")
 }
+
+// assign by area

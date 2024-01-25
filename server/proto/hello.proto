@@ -1,21 +1,14 @@
 syntax = "proto3";
 option go_package = "./greeter";// output path
 import "google/api/annotations.proto";// http proxy
+import "google/protobuf/empty.proto";
 
+// register to etcd
 service Greeter {
-  rpc Hello(Request) returns (Response) {
+  rpc Hello(google.protobuf.Empty) returns (google.protobuf.Empty) {
     // http proxy
     option (google.api.http) = {
       post: "/greeter/hello"
-      body: "*"
     };
   }
-}
-
-message Request {
-  string name = 1;
-}
-
-message Response {
-  string greeting = 2;
 }

@@ -86,11 +86,11 @@ func (p *Pumper) handleTask(ctx context.Context, task *master.TaskSpec) {
 	}
 
 	if err == nil {
-		// key := global.TaskPath + "/" + task.Name
-		// if resp2, err2 := p.etcdcli.Delete(ctx, key); err2 != nil || resp2.Deleted == 0 {
-		// 	p.logger.Error("pop task out failed", zap.Error(err2))
-		// } else {
-		p.logger.Debug("delete succeed", zap.Any("resp", ""))
-		// }
+		key := global.TaskPath + "/" + task.Name
+		if resp2, err2 := p.etcdcli.Delete(ctx, key); err2 != nil || resp2.Deleted == 0 {
+			p.logger.Error("pop task out failed", zap.Error(err2))
+		} else {
+			p.logger.Debug("delete succeed", zap.Any("resp", ""))
+		}
 	}
 }
