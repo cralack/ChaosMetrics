@@ -17,5 +17,5 @@ jobs:
         uses: fastify/github-action-merge-dependabot@v3.9.1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          target: minor
+          target: minor # only merge minor version
           merge-method: rebase
