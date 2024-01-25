@@ -7,8 +7,8 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/service/pumper"
-	"github.com/cralack/ChaosMetrics/server/service/register"
 	"github.com/cralack/ChaosMetrics/server/utils"
+	"github.com/cralack/ChaosMetrics/server/utils/register"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

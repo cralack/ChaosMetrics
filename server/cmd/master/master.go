@@ -3,7 +3,7 @@ package master
 import (
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/service/master"
-	"github.com/cralack/ChaosMetrics/server/service/register"
+	"github.com/cralack/ChaosMetrics/server/utils/register"
 	"github.com/go-micro/plugins/v4/registry/etcd"
 	"github.com/spf13/cobra"
 	"go-micro.dev/v4/registry"

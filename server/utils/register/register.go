@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/config"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	pb "github.com/cralack/ChaosMetrics/server/proto/greeter"
 	etcdReg "github.com/go-micro/plugins/v4/registry/etcd"
 	gs "github.com/go-micro/plugins/v4/server/grpc"
@@ -26,6 +27,9 @@ type Greeter struct{}
 func (g *Greeter) Hello(ctx context.Context, in *empty.Empty, out *empty.Empty) error {
 	_, cancel := context.WithCancel(ctx)
 	defer cancel()
+	if in == out {
+		global.GvaLog.Debug("in == out")
+	}
 
 	return nil
 }
