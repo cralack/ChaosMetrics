@@ -94,7 +94,7 @@ func (u *Updater) UpdateChampions(version string) {
 	// get chamlist from rdb or riot
 	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%dzh_CN", vIdx)).Val(); buffer == "" {
 		// get champion chamList
-		url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
+		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
 		if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
 			u.logger.Error("get champion list failed", zap.Error(err))
 		}
@@ -127,7 +127,7 @@ func (u *Updater) UpdateChampions(version string) {
 			}
 
 			// fetch buffer
-			url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion/%s.json",
+			url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion/%s.json",
 				version, lang, chamID)
 			if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
 				u.logger.Error(fmt.Sprintf("update %s@%s failed",
@@ -187,7 +187,7 @@ func (u *Updater) UpdateItems(version string) {
 		lang := utils.ConvertLanguageCode(langCode)
 		key := fmt.Sprintf("/items/%s", lang)
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
-		url = fmt.Sprintf("http://ddragon.leagueoflegends.com/cdn/%s/data/%s/item.json",
+		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/item.json",
 			version, lang)
 		if buff, err = u.fetcher.Get(url); err != nil {
 			flag = true
