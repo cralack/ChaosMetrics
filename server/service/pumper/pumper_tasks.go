@@ -11,8 +11,6 @@ import (
 )
 
 func (p *Pumper) getTask() {
-	// ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second) // 设置超时
-	// defer cancel()
 	ctx := context.Background()
 
 	resp, err := p.etcdcli.Get(

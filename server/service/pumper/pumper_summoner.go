@@ -225,12 +225,7 @@ func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDT
 		return res
 	}
 	// redis read
-	// ctx := context.Background()
-	// key := fmt.Sprintf("/summoner/%s", loc)
-	// buff := p.rdb.HGet(ctx, key, name).Val()
-	// if err := json.Unmarshal([]byte(buff), &res); err == nil && len(buff) > 50 {
-	// 	return res
-	// }
+
 	// db read
 	// var res *riotmodel.SummonerDTO
 	if err := p.db.Where("loc = ?", loc).Where("name = ?", name).First(&res).Preload(

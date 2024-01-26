@@ -138,16 +138,16 @@ func WithRegistryURL(registryURL string) Option {
 }
 
 // WithQues (riotmodel.RANKED_SOLO_5x5)
-// func WithQues(ques ...riotmodel.QUECODE) Option {
-// 	return func(opts *Options) {
-// 		tmp := make([]riotmodel.QUECODE, 0, 3)
-// 		for _, que := range ques {
-// 			if 3 < que {
-// 				global.GVA_LOG.Error("wrong param,que need < 3,using default option")
-// 				return
-// 			}
-// 			tmp = append(tmp, que)
-// 		}
-// 		opts.Que = tmp
-// 	}
-// }
+func WithQues(ques ...riotmodel.QUECODE) Option {
+	return func(opts *Options) {
+		tmp := make([]riotmodel.QUECODE, 0, 3)
+		for _, que := range ques {
+			if 3 < que {
+				global.GvaLog.Error("wrong param,que need < 3,using default option")
+				return
+			}
+			tmp = append(tmp, que)
+		}
+		opts.Que = tmp
+	}
+}

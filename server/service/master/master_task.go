@@ -13,17 +13,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type Command int
-
-const (
-	MSGADD Command = iota
-	MSGDEL
-)
-
-type Message struct {
-	Cmd Command
-}
-
 type TaskSpec struct {
 	ID           string
 	Name         string
@@ -83,6 +72,9 @@ func (m *Master) loadTask() error {
 var _ publisher.PublisherHandler = &Master{}
 
 func (m *Master) PushTask(ctx context.Context, ptask *publisher.TaskSpec, out *empty.Empty) error {
+	// mark 'out' as unused
+	_ = out
+
 	if !m.IsLeader() && m.leaderID != "" && m.leaderID != m.ID {
 		addr := getLeaderAddr(m.leaderID)
 		_, err := m.forwardCli.PushTask(ctx, ptask, client.WithAddress(addr))

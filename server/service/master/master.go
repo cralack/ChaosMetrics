@@ -30,8 +30,7 @@ type Master struct {
 func New(id string, opts ...Option) (*Master, error) {
 	m := &Master{
 		workNodes: make(map[string]*registry.Node),
-		// resources: make(map[string]*ResourceSpec),
-		rlock: &sync.Mutex{},
+		rlock:     &sync.Mutex{},
 	}
 	options := defaultOptions
 	for _, opt := range opts {

@@ -85,33 +85,6 @@ func Test_match_store(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// no longer need to store this model
-	/*
-		// save data
-		if err := db.Save(match).Error; err != nil {
-			t.Log(err)
-		}
-		t.Log("all model store succeed")
-
-		// load data 1
-		var tar1 *riotmodel.MatchDTO
-		if err = db.Where("meta_match_id", "TW2_81882122").Preload(
-			clause.Associations).First(&tar1).Error; err != nil {
-			t.Log(err)
-		}
-		t.Log(tar1.Metadata.DataVersion)
-
-		// load data 2
-		tar2 := &riotmodel.MatchDTO{
-			Metadata: &riotmodel.MetadataDto{
-				MatchID: "TW2_81882122",
-			},
-		}
-		if err = db.Preload(clause.Associations).First(&tar2).Error; err != nil {
-			t.Log(err)
-											}*/
-
 }
 
 func Test_purge_weak_player(t *testing.T) {
@@ -171,8 +144,6 @@ func Test_summoner_entry_store(t *testing.T) {
 	if err != nil {
 		t.Log("解析失败：", err)
 	}
-	// entry.Summoner = summoner
-	// summoner.Entry = entry
 	db.Create(entry)
 
 	var tar *riotmodel.LeagueEntryDTO

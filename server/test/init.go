@@ -24,8 +24,8 @@ func init() {
 	rdb = global.GvaRdb
 	logger = global.GvaLog
 	// wipe gdb && rdb
-	// global.GVA_DB.Exec("DROP TABLE IF EXISTS analyzed_champions,entries,match_participants,matches,summoners")
-	// global.GVA_RDB.FlushDB(context.Background())
+	// global.GvaDb.Exec("DROP TABLE IF EXISTS analyzed_champions,entries,match_participants,matches,summoners")
+	// global.GvaRdb.FlushDB(context.Background())
 	// AutoMigrate
 	// if err := db.AutoMigrate(
 	// 	&riotmodel.LeagueEntryDTO{},

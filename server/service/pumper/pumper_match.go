@@ -215,7 +215,6 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 			gameId = uint(id)
 		}
 		m.ID = gameId*1e2 + uint(loCode)
-		// m.Loc = loc
 		for i, par := range m.Participants {
 			par.ID = gameId*1e3 + uint(i)*1e2 + uint(loCode)
 		}

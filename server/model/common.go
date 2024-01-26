@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-// type Storable interface {
-// 	TableName() string
-// }
-
 type Image struct {
 	Full   string `json:"full" gorm:"column:full"`     // 大图文件名
 	Sprite string `json:"sprite" gorm:"column:sprite"` // 小图文件名

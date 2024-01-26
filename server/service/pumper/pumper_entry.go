@@ -144,7 +144,6 @@ func (p *Pumper) createEntriesURL(loc riotmodel.LOCATION, que riotmodel.QUECODE)
 			})
 		}
 	}
-
 }
 
 func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {

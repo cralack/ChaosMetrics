@@ -179,52 +179,6 @@ func Test_parse_match(t *testing.T) {
 		player.Kills, player.Deaths, player.Assists)
 	fmt.Println("Total Damage Dealt to Champions by First Blood Player:",
 		player.TotalDamageDealtToChampions)
-	// no longer need to store this model
-	/*
-		// gorm create
-		if err := db.Create(res).Error; err != nil {
-			logger.Debug("orm create match failed")
-		}
-		// gorm read
-		var tar *riotmodel.MatchDTO
-		if err = db.Where("meta_match_id = ?", "TW2_81882122").Preload(
-			clause.Associations).Find(&tar).Error; err != nil {
-			logger.Error("orm read match failed")
-		} else {
-			logger.Debug(fmt.Sprintf("res == tar:%v", len(res.Info.Participants) == len(tar.Info.Participants)))
-		}
-		// gorm soft delete
-		if err = db.Select(clause.Associations).Delete(tar).Error; err != nil {
-			logger.Error("orm soft delete match failed ")
-		}
-		// gorm hard delete
-		if err = db.Unscoped().Select(clause.Associations).Delete(tar).Error; err != nil {
-			logger.Error("orm hard delete match failed ")
-		}
-
-		// redis create
-		ctx := context.Background()
-		key := "/match/tw2"
-		if err := rdb.HSet(ctx, key, res.Metadata.MatchID, true).Err(); err != nil {
-			logger.Error("redis create match failed")
-		}
-
-		// redis read
-		result := rdb.HGet(ctx, key, tar.Metadata.MatchID).Val()
-		if result != "1" {
-			logger.Error("redis read match failed")
-		}
-		keys := rdb.HKeys(ctx, key).Val()
-		kvmap := make(map[string]bool)
-		for _, k := range keys {
-			kvmap[k] = true
-		}
-		// redis delete
-		if err := rdb.HDel(ctx, key, tar.Metadata.MatchID).Err(); err != nil {
-			logger.Error("redis delete match failed")
-		}
-	*/
-
 }
 
 func Test_parse_match_list(t *testing.T) {

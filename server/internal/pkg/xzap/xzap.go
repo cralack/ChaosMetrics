@@ -61,13 +61,14 @@ func Zap(env global.Env) (*zap.Logger, error) {
 				consoleCore,
 			),
 			zap.AddCaller(),
-			// zap.AddStacktrace(logConf.Level),
 		)
 	}
 
 	zap.ReplaceGlobals(log)
 
-	log.Sync()
+	defer func(log *zap.Logger) {
+		_ = log.Sync()
+	}(log)
 
 	if err != nil {
 		panic(err)
