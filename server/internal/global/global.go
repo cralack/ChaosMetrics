@@ -18,12 +18,12 @@ const (
 )
 
 var (
-	GvaEnv  Env
-	GvaConf *config.Root
-	GvaDb   *gorm.DB
-	GvaRdb  *redis.Client
-	GvaVp   *viper.Viper
-	GvaLog  *zap.Logger
+	ChaEnv    Env
+	ChaConf   *config.Root
+	ChaDB     *gorm.DB
+	ChaRDB    *redis.Client
+	ChaViper  *viper.Viper
+	ChaLogger *zap.Logger
 )
 
 const (

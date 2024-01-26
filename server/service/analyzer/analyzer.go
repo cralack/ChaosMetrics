@@ -47,9 +47,9 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 	}
 
 	return &Analyzer{
-		logger:        global.GvaLog,
-		db:            global.GvaDb,
-		rdb:           global.GvaRdb,
+		logger:        global.ChaLogger,
+		db:            global.ChaDB,
+		rdb:           global.ChaRDB,
 		lock:          &sync.Mutex{},
 		schd:          scheduler.NewSchdule(),
 		updt:          updater.NewRiotUpdater(),

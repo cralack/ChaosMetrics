@@ -20,12 +20,12 @@ var (
 func init() {
 	f = fetcher.NewBrowserFetcher()
 	path = "./local_json/"
-	db = global.GvaDb
-	rdb = global.GvaRdb
-	logger = global.GvaLog
+	db = global.ChaDB
+	rdb = global.ChaRDB
+	logger = global.ChaLogger
 	// wipe gdb && rdb
-	// global.GvaDb.Exec("DROP TABLE IF EXISTS analyzed_champions,entries,match_participants,matches,summoners")
-	// global.GvaRdb.FlushDB(context.Background())
+	// global.ChaDB.Exec("DROP TABLE IF EXISTS analyzed_champions,entries,match_participants,matches,summoners")
+	// global.ChaRDB.FlushDB(context.Background())
 	// AutoMigrate
 	// if err := db.AutoMigrate(
 	// 	&riotmodel.LeagueEntryDTO{},

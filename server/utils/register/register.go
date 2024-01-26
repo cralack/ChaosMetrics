@@ -32,7 +32,7 @@ func (g *Greeter) Hello(ctx context.Context, in *empty.Empty, out *empty.Empty) 
 	_, cancel := context.WithCancel(ctx)
 	defer cancel()
 	if in == out {
-		global.GvaLog.Debug("in == out")
+		global.ChaLogger.Debug("in == out")
 	}
 
 	return nil

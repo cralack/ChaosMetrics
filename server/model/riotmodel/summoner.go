@@ -47,12 +47,12 @@ func (s *SummonerDTO) UnmarshalJSON(data []byte) error {
 			}
 		case "CreatedAt":
 			if s.CreatedAt, err = model.ConvertTime(v, time.RFC3339); err != nil {
-				global.GvaLog.Error("parse failed", zap.Error(err))
+				global.ChaLogger.Error("parse failed", zap.Error(err))
 				return err
 			}
 		case "UpdatedAt":
 			if s.UpdatedAt, err = model.ConvertTime(v, time.RFC3339); err != nil {
-				global.GvaLog.Error("parse failed", zap.Error(err))
+				global.ChaLogger.Error("parse failed", zap.Error(err))
 				return err
 			}
 
@@ -65,7 +65,7 @@ func (s *SummonerDTO) UnmarshalJSON(data []byte) error {
 			if revisionDateMillis, ok := v.(float64); ok {
 				s.RevisionDate = time.Unix(int64(revisionDateMillis)/1000, 0).UTC()
 			} else if s.RevisionDate, err = model.ConvertTime(v, time.RFC3339); err != nil {
-				global.GvaLog.Error("parse failed", zap.Error(err))
+				global.ChaLogger.Error("parse failed", zap.Error(err))
 				return err
 			}
 		case "name":

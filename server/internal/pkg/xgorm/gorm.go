@@ -14,14 +14,14 @@ import (
 )
 
 func GetDB() (*gorm.DB, error) {
-	if global.GvaDb != nil {
-		return global.GvaDb, nil
+	if global.ChaDB != nil {
+		return global.ChaDB, nil
 	}
 	// check dsn
-	if global.GvaConf.Dbconf.DSN == "" {
+	if global.ChaConf.Dbconf.DSN == "" {
 		err := GetDBConfig()
 		if err != nil {
-			global.GvaLog.Error("get xgorm config failed",
+			global.ChaLogger.Error("get xgorm config failed",
 				zap.Error(err))
 		}
 	}
@@ -32,10 +32,10 @@ func GetDB() (*gorm.DB, error) {
 		err      error
 	)
 	// diff logger for gom
-	if global.GvaEnv == global.ProductEnv {
+	if global.ChaEnv == global.ProductEnv {
 		gormConf = &gorm.Config{
 			Logger: &ZapLogger{
-				logger: global.GvaLog,
+				logger: global.ChaLogger,
 				level:  logger.Warn,
 			},
 		}
@@ -54,7 +54,7 @@ func GetDB() (*gorm.DB, error) {
 	}
 	// get gorm con
 	db, err = gorm.Open(
-		mysql.Open(global.GvaConf.Dbconf.DSN),
+		mysql.Open(global.ChaConf.Dbconf.DSN),
 		gormConf,
 	)
 	if err != nil || db == nil {

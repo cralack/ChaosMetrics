@@ -27,7 +27,7 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
 			if 16 < loc {
-				global.GvaLog.Error("wrong param,loc need < 16,using default option")
+				global.ChaLogger.Error("wrong param,loc need < 16,using default option")
 				return
 			}
 			tmp = append(tmp, loc)

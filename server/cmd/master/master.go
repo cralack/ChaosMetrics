@@ -35,8 +35,8 @@ func init() {
 }
 
 func Run() {
-	conf := global.GvaConf.ServerConf
-	logger := global.GvaLog
+	conf := global.ChaConf.ServerConf
+	logger := global.ChaLogger
 	conf.ID = masterId
 	conf.Name = global.MasterServiceName
 	conf.GRPCListenAddress = GRPCListenAddress

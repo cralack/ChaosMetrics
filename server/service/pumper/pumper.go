@@ -73,12 +73,12 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 
 	// get deault token
 	if stgy.Token == "" {
-		workDir := global.GvaConf.DirTree.WorkDir
+		workDir := global.ChaConf.DirTree.WorkDir
 		filename := "api_key"
 		path := filepath.Join(workDir, filename)
 		buff, err := os.ReadFile(path)
 		if err != nil {
-			global.GvaLog.Error("get api key failed",
+			global.ChaLogger.Error("get api key failed",
 				zap.Error(err))
 		}
 		stgy.Token = string(buff)
@@ -91,15 +91,15 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		return nil, err
 	}
 
-	if global.GvaEnv == global.TestEnv {
+	if global.ChaEnv == global.TestEnv {
 		stgy.MaxMatchCount = 1
 	}
 
 	return &Pumper{
 		id:          id,
-		logger:      global.GvaLog,
-		db:          global.GvaDb,
-		rdb:         global.GvaRdb,
+		logger:      global.ChaLogger,
+		db:          global.ChaDB,
+		rdb:         global.ChaRDB,
 		lock:        &sync.Mutex{},
 		fetcher:     fetcher.NewBrowserFetcher(fetcher.WithToken(stgy.Token)),
 		scheduler:   scheduler.NewSchdule(),
@@ -245,7 +245,7 @@ func (p *Pumper) fetch() {
 				e.QueType = list.Queue
 			}
 			// shrink size if test
-			if global.GvaEnv == global.TestEnv {
+			if global.ChaEnv == global.TestEnv {
 				entries = entries[:testSize]
 			}
 			// clear list
@@ -288,7 +288,7 @@ func (p *Pumper) fetch() {
 					e.Loc = req.Loc
 				}
 				// shrink size if test
-				if global.GvaEnv == global.TestEnv {
+				if global.ChaEnv == global.TestEnv {
 					entries = entries[:testSize]
 				}
 
@@ -296,7 +296,7 @@ func (p *Pumper) fetch() {
 				p.cacheEntries(entries, req.Loc)
 
 				// test
-				if (global.GvaEnv == global.TestEnv && page == testSize) || len(entries) == 0 {
+				if (global.ChaEnv == global.TestEnv && page == testSize) || len(entries) == 0 {
 					p.logger.Info(fmt.Sprintf("all %s %s data fetch done at page %d",
 						data.Tier, data.Rank, page))
 					break

@@ -189,7 +189,7 @@ func Test_isExist(t *testing.T) {
 }
 
 // may need setup gorm's logger silent before test
-// server/pkg/xgorm/xgorm.go:38
+// server/pkg/xgorm/gorm.go:38
 // xgorm.Save([size]*riotmodel.LeagueEntryDTO) size=1~10k store benchmark
 func Benchmark_db_store_1(b *testing.B) {
 	// load json
@@ -226,7 +226,7 @@ func Benchmark_db_store_1(b *testing.B) {
 		}
 	}
 	// test
-	db := global.GvaDb
+	db := global.ChaDB
 	for _, tt := range tests {
 		b.Run(fmt.Sprintf("%d entries", tt.n), func(b *testing.B) {
 			b.ResetTimer()
@@ -295,7 +295,7 @@ func Benchmark_db_store_2(b *testing.B) {
 		}
 	}
 	// test
-	db := global.GvaDb
+	db := global.ChaDB
 	for _, tt := range tests {
 		b.Run(fmt.Sprintf("%d entries", tt.n), func(b *testing.B) {
 			b.ResetTimer()

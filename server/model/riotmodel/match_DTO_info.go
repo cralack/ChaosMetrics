@@ -93,7 +93,7 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 			}
 			if gameCreationMillis, ok := v.(string); ok {
 				if p.GameCreation, err = time.Parse(layout, gameCreationMillis); err != nil {
-					global.GvaLog.Error("parse failed", zap.Error(err))
+					global.ChaLogger.Error("parse failed", zap.Error(err))
 					return err
 				}
 			}
@@ -105,7 +105,7 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 			}
 			if gameEndTimestampMillis, ok := v.(string); ok {
 				if p.GameEndTimestamp, err = time.Parse(layout, gameEndTimestampMillis); err != nil {
-					global.GvaLog.Error("parse failed", zap.Error(err))
+					global.ChaLogger.Error("parse failed", zap.Error(err))
 					return err
 				}
 			}
@@ -121,7 +121,7 @@ func (p *InfoDto) UnmarshalJSON(data []byte) error {
 			}
 			if gameStartTimestampMillis, ok := v.(string); ok {
 				if p.GameStartTimestamp, err = time.Parse(layout, gameStartTimestampMillis); err != nil {
-					global.GvaLog.Error("parse failed", zap.Error(err))
+					global.ChaLogger.Error("parse failed", zap.Error(err))
 					return err
 				}
 			}

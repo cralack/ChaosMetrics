@@ -41,7 +41,7 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
 			if riotmodel.VN2 < loc {
-				global.GvaLog.Error("wrong param,loc need < VN2,using default option")
+				global.ChaLogger.Error("wrong param,loc need < VN2,using default option")
 				return
 			}
 			tmp = append(tmp, loc)
@@ -82,7 +82,7 @@ func WithAreaLoc(areas ...riotmodel.AREA) Option {
 
 		for _, area := range areas {
 			if riotmodel.LOC_SEA < area {
-				global.GvaLog.Error("wrong param,area need < 4,using default option")
+				global.ChaLogger.Error("wrong param,area need < 4,using default option")
 				return
 			}
 			switch area {
@@ -114,7 +114,7 @@ func WithAreaLoc(areas ...riotmodel.AREA) Option {
 func WithEndMark(tier riotmodel.TIER, div uint) Option {
 	return func(opts *Options) {
 		if riotmodel.IRON < tier || 4 < div || div < 1 {
-			global.GvaLog.Error("wrong param,end mark need DIAMON <= tier <= IRON" +
+			global.ChaLogger.Error("wrong param,end mark need DIAMON <= tier <= IRON" +
 				" && I <= div <= IV.using default option")
 			return
 		}
@@ -143,7 +143,7 @@ func WithQues(ques ...riotmodel.QUECODE) Option {
 		tmp := make([]riotmodel.QUECODE, 0, 3)
 		for _, que := range ques {
 			if 3 < que {
-				global.GvaLog.Error("wrong param,que need < 3,using default option")
+				global.ChaLogger.Error("wrong param,que need < 3,using default option")
 				return
 			}
 			tmp = append(tmp, que)

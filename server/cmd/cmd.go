@@ -8,13 +8,19 @@ import (
 	"go.uber.org/zap"
 )
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "run version service.",
-	Long:  "run version service.",
+var envCmd = &cobra.Command{
+	Use:   "env",
+	Short: "get current env",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		global.GvaLog.Info("3.14.15")
+		switch global.ChaEnv {
+		case global.TestEnv:
+			global.ChaLogger.Info("enviroment:TEST")
+		case global.ProductEnv:
+			global.ChaLogger.Info("enviroment:PRODUCT")
+		case global.DevEnv:
+			global.ChaLogger.Info("enviroment:DEV")
+		}
 	},
 }
 
@@ -24,7 +30,7 @@ var rootCmd = &cobra.Command{
 	Short:   "chaosmetrics提供的命令行工具",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cmd.Help(); err != nil {
-			global.GvaLog.Error("run root command help failed",
+			global.ChaLogger.Error("run root command help failed",
 				zap.Error(err))
 		}
 	},
@@ -34,7 +40,7 @@ func AddCommands(root *cobra.Command) {
 	root.AddCommand(
 		master.Cmd,
 		worker.Cmd,
-		versionCmd,
+		envCmd,
 	)
 }
 
@@ -42,7 +48,7 @@ func RunCmd() error {
 	AddCommands(rootCmd)
 	// { // debug master part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
-	// 	if err != nil || cmd.Args == nil || global.GvaEnv == global.TestEnv {
+	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
 	// 		arg := "master"
 	// 		extraArg1 := "--id=4"
 	// 		extraArg2 := "--http=:8084"
@@ -54,7 +60,7 @@ func RunCmd() error {
 	// {
 	// 	// debug worker part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
-	// 	if err != nil || cmd.Args == nil || global.GvaEnv == global.TestEnv {
+	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
 	// 		arg := "worker"
 	// 		extraArg1 := "--id=1"
 	// 		args := append([]string{arg, extraArg1}, os.Args[1:]...)

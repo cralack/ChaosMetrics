@@ -11,7 +11,7 @@ import (
 )
 
 func GetDBConfig() error {
-	dbConf := global.GvaConf.Dbconf
+	dbConf := global.ChaConf.Dbconf
 	port := strconv.Itoa(dbConf.Port)
 	timeout, err := time.ParseDuration(dbConf.Timeout)
 	if err != nil {
@@ -45,6 +45,6 @@ func GetDBConfig() error {
 	}
 	dbConf.DSN = driverConf.FormatDSN()
 
-	global.GvaConf.Dbconf = dbConf
+	global.ChaConf.Dbconf = dbConf
 	return nil
 }

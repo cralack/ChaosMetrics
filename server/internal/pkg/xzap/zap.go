@@ -11,8 +11,8 @@ import (
 )
 
 func Zap(env global.Env) (*zap.Logger, error) {
-	if global.GvaLog != nil {
-		return global.GvaLog, nil
+	if global.ChaLogger != nil {
+		return global.ChaLogger, nil
 	}
 	// init val
 	var (

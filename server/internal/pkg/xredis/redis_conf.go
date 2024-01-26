@@ -9,7 +9,7 @@ import (
 )
 
 func GetRedisConf() (*redis.Options, error) {
-	conf := global.GvaConf.RedisConf
+	conf := global.ChaConf.RedisConf
 	if conf.Host == "" || conf.Port == 0 {
 		return nil, errors.New("get redis conf failed")
 	}

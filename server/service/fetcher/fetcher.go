@@ -29,7 +29,7 @@ type BrowserFetcher struct {
 var _ Fetcher = &BrowserFetcher{}
 
 func NewBrowserFetcher(opts ...func(*BrowserFetcher)) *BrowserFetcher {
-	conf := global.GvaConf.Fetcher
+	conf := global.ChaConf.Fetcher
 	f := defaultFetcher
 
 	for _, opt := range opts {
@@ -42,7 +42,7 @@ func NewBrowserFetcher(opts ...func(*BrowserFetcher)) *BrowserFetcher {
 			time.Minute*2,
 			time.Second/time.Duration(conf.RateLimiterConfig.EachSec),
 		); err != nil {
-			global.GvaLog.Error("rate limiter init failed", zap.Error(err))
+			global.ChaLogger.Error("rate limiter init failed", zap.Error(err))
 			return nil
 		} else {
 			pass := make(chan struct{})

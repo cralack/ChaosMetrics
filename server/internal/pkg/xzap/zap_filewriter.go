@@ -11,8 +11,8 @@ import (
 )
 
 func newFileWriter() zapcore.WriteSyncer {
-	logConf := global.GvaConf.LogConf
-	logDir := global.GvaConf.DirTree.LogDir
+	logConf := global.ChaConf.LogConf
+	logDir := global.ChaConf.DirTree.LogDir
 	today := time.Now().Format("20060102") // 格式化为年月日，如20230626
 	filename := fmt.Sprintf("%s/log_%s.log", logDir, today)
 	writer := zapcore.AddSync(

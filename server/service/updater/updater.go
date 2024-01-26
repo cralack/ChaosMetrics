@@ -40,9 +40,9 @@ func NewRiotUpdater(opts ...Option) *Updater {
 	}
 
 	return &Updater{
-		logger: global.GvaLog,
-		db:     global.GvaDb,
-		rdb:    global.GvaRdb,
+		logger: global.ChaLogger,
+		db:     global.ChaDB,
+		rdb:    global.ChaRDB,
 		lock:   &sync.Mutex{},
 		fetcher: fetcher.NewBrowserFetcher(
 			fetcher.WithRateLimiter(false),

@@ -46,8 +46,8 @@ func init() {
 
 func Run() {
 	// load conf
-	conf := global.GvaConf.ServerConf
-	logger := global.GvaLog
+	conf := global.ChaConf.ServerConf
+	logger := global.ChaLogger
 	conf.Name = global.WorkerServiceName
 	conf.ID = workerID
 	conf.GRPCListenAddress = GRPCListenAddress
