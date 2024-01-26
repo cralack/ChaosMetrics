@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/cralack/ChaosMetrics/server/middleware"
+	"github.com/cralack/ChaosMetrics/server/app/middleware"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

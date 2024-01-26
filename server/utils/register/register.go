@@ -8,9 +8,9 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/internal/config"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/internal/service/master"
 	pb "github.com/cralack/ChaosMetrics/server/proto/greeter"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
-	"github.com/cralack/ChaosMetrics/server/service/master"
 	grpccli "github.com/go-micro/plugins/v4/client/grpc"
 
 	etcdReg "github.com/go-micro/plugins/v4/registry/etcd"

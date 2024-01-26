@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cralack/ChaosMetrics/server/service/updater"
+	"github.com/cralack/ChaosMetrics/server/internal/service/updater"
 )
 
 func Test_update_champion(t *testing.T) {

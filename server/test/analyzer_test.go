@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cralack/ChaosMetrics/server/internal/service/analyzer"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/service/analyzer"
 	"github.com/cralack/ChaosMetrics/server/utils"
 )
 

@@ -10,8 +10,8 @@ import (
 	"sync"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/internal/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/cralack/ChaosMetrics/server/utils/scheduler"
 	"github.com/redis/go-redis/v9"

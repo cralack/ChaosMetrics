@@ -1,12 +1,12 @@
-package router
+package engine
 
 import (
+	"github.com/cralack/ChaosMetrics/server/app/middleware"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"github.com/cralack/ChaosMetrics/server/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-func NewRouter() *gin.Engine {
+func New() *gin.Engine {
 	switch global.ChaEnv {
 
 	}

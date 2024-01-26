@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"github.com/cralack/ChaosMetrics/server/service/master"
+	"github.com/cralack/ChaosMetrics/server/internal/service/master"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"

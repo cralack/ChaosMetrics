@@ -3,8 +3,8 @@ package test
 import (
 	"testing"
 
+	"github.com/cralack/ChaosMetrics/server/internal/service/pumper"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/service/pumper"
 	"github.com/cralack/ChaosMetrics/server/utils"
 )
 
