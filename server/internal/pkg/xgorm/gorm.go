@@ -35,7 +35,8 @@ func GetDB() (*gorm.DB, error) {
 	if global.GvaEnv == global.ProductEnv {
 		gormConf = &gorm.Config{
 			Logger: &ZapLogger{
-				global.GvaLog,
+				logger: global.GvaLog,
+				level:  logger.Warn,
 			},
 		}
 	} else {

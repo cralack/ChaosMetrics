@@ -42,7 +42,7 @@ func Zap(env global.Env) (*zap.Logger, error) {
 	// init log file core
 	fileCore := zapcore.NewCore(
 		zapcore.NewJSONEncoder(logConf.EncoderConfig),
-		getFileWriter(),
+		newFileWriter(),
 		logConf.Level,
 	)
 

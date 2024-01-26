@@ -10,7 +10,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-func getFileWriter() zapcore.WriteSyncer {
+func newFileWriter() zapcore.WriteSyncer {
 	logConf := global.GvaConf.LogConf
 	logDir := global.GvaConf.DirTree.LogDir
 	today := time.Now().Format("20060102") // 格式化为年月日，如20230626
