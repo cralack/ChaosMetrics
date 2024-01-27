@@ -20,8 +20,8 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/items/item": {
-            "post": {
-                "description": "获得item@ersion in lang详情",
+            "get": {
+                "description": "请求一个物品详情 @version,lang",
                 "consumes": [
                     "application/json"
                 ],
@@ -31,16 +31,29 @@ const docTemplate = `{
                 "tags": [
                     "item"
                 ],
-                "summary": "获得item",
+                "summary": "请求一个物品详情",
                 "parameters": [
                     {
-                        "description": "query with param",
-                        "name": "itemQueryParam",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/item.itemQueryParam"
-                        }
+                        "type": "string",
+                        "default": "2010",
+                        "example": "2010",
+                        "description": "The ID of the item",
+                        "name": "itemid",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "zh_CN",
+                        "description": "Language",
+                        "name": "lang",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "13.8.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -55,25 +68,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "item.itemQueryParam": {
-            "type": "object",
-            "required": [
-                "itemid",
-                "lang",
-                "version"
-            ],
-            "properties": {
-                "itemid": {
-                    "type": "string"
-                },
-                "lang": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
         "model.Image": {
             "type": "object",
             "properties": {

@@ -10,6 +10,6 @@ func InitItemRouter(r *gin.Engine) {
 	api := itemApi{}
 	itemApi := r.Group("/items")
 	{
-		itemApi.POST("/item", api.QueryApi)
+		itemApi.GET("/item", api.QueryApi)
 	}
 }

@@ -6,21 +6,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// itemQueryParam represents the query parameters for an item request
+// @Description Query parameters for requesting item details
 type itemQueryParam struct {
-	ItemID  string `json:"itemid" binding:"required"`
-	Lang    string `json:"lang" binding:"required"`
-	Version string `json:"version" binding:"required"`
+	ItemID  string `form:"itemid" default:"2010" binding:"required"`    // The ID of the item
+	Lang    string `form:"lang" default:"zh_CN" binding:"required"`     // Language
+	Version string `form:"version" default:"13.8.1" binding:"required"` // Version
 }
 
 // QueryApi godoc
-// @Summary		获得item
-// @Description	获得item@ersion in lang详情
-// @Accept			application/json
-// @Produce		application/json
-// @Tags			item
-// @Param			itemQueryParam	body		itemQueryParam	true	"query with param"
-// @Success		200				{object}	riotmodel.ItemDTO
-// @Router			/items/item [post]
+//
+//	@Summary		请求一个物品详情
+//	@Description	请求一个物品详情 @version,lang
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Tags			item
+//	@Param			itemQueryParam	query		itemQueryParam	true	"Query parameters for item"
+//	@Success		200				{object}	riotmodel.ItemDTO
+//	@Router			/items/item [get]
 func (i *itemApi) QueryApi(ctx *gin.Context) {
 	var (
 		param   itemQueryParam
@@ -29,7 +32,7 @@ func (i *itemApi) QueryApi(ctx *gin.Context) {
 	)
 	itemService := item.NewItemService()
 
-	if err := ctx.ShouldBindJSON(&param); err != nil {
+	if err := ctx.ShouldBindQuery(&param); err != nil {
 		ctx.JSON(400, gin.H{
 			"msg": "wrong param",
 		})
@@ -38,7 +41,7 @@ func (i *itemApi) QueryApi(ctx *gin.Context) {
 
 	if itemDTO, err = itemService.QueryItem(param.ItemID, param.Version, param.Lang); err != nil {
 		ctx.JSON(400, gin.H{
-			"msg": "can not find item by" + err.Error(),
+			"msg": "can not find item by " + err.Error(),
 		})
 		return
 	} else {

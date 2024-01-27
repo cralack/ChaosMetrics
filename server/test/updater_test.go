@@ -18,7 +18,7 @@ func Test_update_champion(t *testing.T) {
 	if u.CurVersion == "" {
 		versions = u.UpdateVersions()
 	}
-
+	t.Log(len(versions))
 	for _, ver := range versions {
 		if ver[:2] >= "13" {
 			logger.Info(ver)

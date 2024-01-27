@@ -64,6 +64,23 @@ func (u *Updater) UpdateVersions() (version []string) {
 	if err = json.Unmarshal(buff, &version); err != nil {
 		u.logger.Error("unmarshal json to version failed", zap.Error(err))
 	}
+
+	for i, v := range version {
+		if v == "3.6.14" {
+			version = version[:i+1]
+			break
+		}
+	}
+	// store to redis
+	key := "/version"
+	buff, _ = json.Marshal(version)
+	if err = u.rdb.HSet(context.Background(), key, "versions", buff).Err(); err != nil {
+		u.logger.Error("update total version to redis failed", zap.Error(err))
+	}
+	if err = u.rdb.HSet(context.Background(), key, "cur", version[0]).Err(); err != nil {
+		u.logger.Error("update cur version to redis failed", zap.Error(err))
+	}
+
 	if u.CurVersion == "" {
 		u.CurVersion = version[0]
 	}
@@ -91,7 +108,7 @@ func (u *Updater) UpdateChampions(version string) {
 	cList = make([]string, 0, 300)
 
 	// get chamlist from rdb or riot
-	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%dzh_CN", vIdx)).Val(); buffer == "" {
+	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%d", vIdx)).Val(); buffer == "" {
 		// get champion chamList
 		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
 		if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
@@ -109,6 +126,14 @@ func (u *Updater) UpdateChampions(version string) {
 
 	} else {
 		err = json.Unmarshal([]byte(buffer), &cList)
+	}
+
+	// store champion list
+	if buff, err = json.Marshal(cList); err != nil {
+		u.logger.Error("marshal champion list failed", zap.Error(err))
+	}
+	if err = u.rdb.HSet(ctx, "/championlist", fmt.Sprintf("%d", vIdx), buff).Err(); err != nil {
+		u.logger.Error("failed", zap.Error(err))
 	}
 
 	// update champion for each lang
@@ -152,15 +177,8 @@ func (u *Updater) UpdateChampions(version string) {
 		if _, err = pipe.Exec(ctx); err != nil {
 			u.logger.Error("redis store champions failed", zap.Error(err))
 		} else {
-			// champion data's save status
-			if buff, err = json.Marshal(cList); err != nil {
-				u.logger.Error("marshal champion list failed", zap.Error(err))
-			}
-			if err = u.rdb.HSet(ctx, "/championlist", fmt.Sprintf("%d%s", vIdx, lang), buff).Err(); err != nil {
-				u.logger.Error("failed", zap.Error(err))
-			} else {
-				u.logger.Info(fmt.Sprintf("%d@%s's champion(%d/%d) store done", vIdx, lang, cnt, len(cList)))
-			}
+			u.logger.Info(fmt.Sprintf("%d@%s's champion(%d/%d) store done", vIdx, lang, cnt, len(cList)))
+
 		}
 	}
 	return

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"github.com/cralack/ChaosMetrics/server/internal/service/updater"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/utils"
@@ -24,12 +23,12 @@ import (
 const anaKey = "anamatch"
 
 type Analyzer struct {
-	logger *zap.Logger
-	db     *gorm.DB
-	rdb    *redis.Client
-	lock   *sync.Mutex
-	schd   scheduler.Scheduler
-	updt   *updater.Updater
+	logger    *zap.Logger
+	db        *gorm.DB
+	rdb       *redis.Client
+	lock      *sync.Mutex
+	scheduler scheduler.Scheduler
+	Exit      chan struct{}
 
 	curVersion    string
 	analyzedCount []int64
@@ -51,28 +50,27 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 		db:            global.ChaDB,
 		rdb:           global.ChaRDB,
 		lock:          &sync.Mutex{},
-		schd:          scheduler.NewSchdule(),
-		updt:          updater.NewRiotUpdater(),
+		scheduler:     scheduler.NewSchdule(),
+		Exit:          make(chan struct{}),
+		curVersion:    global.ChaRDB.HGet(context.Background(), "/version", "cur").Val(),
 		analyzedCount: make([]int64, 16),
 		options:       stgy,
-		// matchMap:    make(map[string]map[string]*riotmodel.MatchDTO),
-		chamTemplate: make(map[string]*riotmodel.ChampionDTO),
-		itemMap:      make(map[string]*riotmodel.ItemDTO),
-		analyzed:     make(map[uint]*anres.Champion),
-		shoesList:    make(map[uint]map[int]struct{}),
+		chamTemplate:  make(map[string]*riotmodel.ChampionDTO),
+		itemMap:       make(map[string]*riotmodel.ItemDTO),
+		analyzed:      make(map[uint]*anres.Champion),
+		shoesList:     make(map[uint]map[int]struct{}),
 	}
 }
 
 func (a *Analyzer) Analyze() {
-	exit := make(chan struct{})
-	go a.schd.Schedule()
-	go a.handleMatches(exit)
+	go a.scheduler.Schedule()
+	go a.handleMatches()
 
 	a.loadChampionTemplate()
 	for _, loc := range a.options.Loc {
 		a.loadMatch(loc)
 	}
-	<-exit
+	<-a.Exit
 	defer a.store()
 	// matchId := "TW2_81882122"
 	// a.AnalyzeSingleMatch(matchId)
@@ -97,7 +95,7 @@ func (a *Analyzer) loadItem(itemId int, version uint) (res *riotmodel.ItemDTO) {
 		return nil
 	}
 	if itemId == 1001 {
-		if _, has := a.shoesList[version]; !has {
+		if _, has = a.shoesList[version]; !has {
 			a.shoesList[version] = make(map[int]struct{})
 		}
 		shoesL := res.Into
@@ -131,11 +129,12 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 
 	// count analyzed
 	var totalCount int64
-	if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
-		true).Count(&totalCount).Error; err != nil {
-		a.logger.Error("count analyzed failed", zap.Error(err))
-		return
-	}
+	totalCount = int64(len(matches))
+	// if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
+	// 	true).Count(&totalCount).Error; err != nil {
+	// 	a.logger.Error("count analyzed failed", zap.Error(err))
+	// 	return
+	// }
 
 	a.lock.Lock()
 	a.analyzedCount[loCode] += totalCount
@@ -158,7 +157,7 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 			// if err := a.db.Preload("Participants").Find(&tmp).Error; err != nil {
 			// 	a.logger.Error("load participant failed", zap.Error(err))
 			// }
-			a.schd.Push(&scheduler.Task{
+			a.scheduler.Push(&scheduler.Task{
 				Type: anaKey,
 				Loc:  loc,
 				Data: tmp,
@@ -168,14 +167,14 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 		// if err := a.db.Preload("Participants").Find(&matches).Error; err != nil {
 		// 	a.logger.Error("load participant failed", zap.Error(err))
 		// }
-		a.schd.Push(&scheduler.Task{
+		a.scheduler.Push(&scheduler.Task{
 			Type: anaKey,
 			Loc:  loc,
 			Data: matches,
 		})
 	}
 
-	a.schd.Push(&scheduler.Task{
+	a.scheduler.Push(&scheduler.Task{
 		Type: "finish",
 		Data: nil,
 	})
@@ -188,11 +187,12 @@ func (a *Analyzer) loadChampionTemplate() {
 		err           error
 		ctx           context.Context
 		vIdx          uint
+		values        []interface{}
 		championNames []string
 		keys          []string
 	)
-	curVersion := "13.16.1"
-	if vIdx, err = utils.ConvertVersionToIdx(curVersion); err != nil {
+
+	if vIdx, err = utils.ConvertVersionToIdx(a.curVersion); err != nil {
 		a.logger.Error("wrong version", zap.Error(err))
 	}
 	ctx = context.Background()
@@ -208,7 +208,7 @@ func (a *Analyzer) loadChampionTemplate() {
 		keys[i] = fmt.Sprintf("%s@%d", k, vIdx)
 	}
 	// get champions by name list
-	values, err := a.rdb.HMGet(ctx, key, keys...).Result()
+	values, err = a.rdb.HMGet(ctx, key, keys...).Result()
 	if err != nil {
 		a.logger.Error("get champions failed", zap.Error(err))
 	}
@@ -223,16 +223,16 @@ func (a *Analyzer) loadChampionTemplate() {
 			a.chamTemplate[strings.ToLower(cham.ID)] = cham
 		}
 	}
-	a.logger.Debug("succeed", zap.Int("championmap", len(a.chamTemplate)))
+	a.logger.Debug("load champion succeed", zap.Int("len", len(a.chamTemplate)))
 	return
 }
 
-func (a *Analyzer) handleMatches(exit chan struct{}) {
+func (a *Analyzer) handleMatches() {
 	for {
-		req := a.schd.Pull()
+		req := a.scheduler.Pull()
 		switch req.Type {
 		case "finish":
-			exit <- struct{}{}
+			a.Exit <- struct{}{}
 			return
 		case anaKey:
 			matches := req.Data.([]*riotmodel.MatchDB)

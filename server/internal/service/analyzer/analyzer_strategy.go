@@ -38,7 +38,7 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 
 func WithMode(mode ...riotmodel.GAMEMODE) Option {
 	return func(stgy *options) {
-		tmp := make([]riotmodel.GAMEMODE, 0, 4)
+		tmp := make([]riotmodel.GAMEMODE, 0, 10)
 		for _, m := range mode {
 			if riotmodel.CHERRY < m {
 				global.ChaLogger.Error("wrong param,using default option")

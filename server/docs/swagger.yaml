@@ -1,18 +1,5 @@
 basePath: /
 definitions:
-  item.itemQueryParam:
-    properties:
-      itemid:
-        type: string
-      lang:
-        type: string
-      version:
-        type: string
-    required:
-    - itemid
-    - lang
-    - version
-    type: object
   model.Image:
     properties:
       full:
@@ -101,17 +88,27 @@ info:
   version: "0.7"
 paths:
   /items/item:
-    post:
+    get:
       consumes:
       - application/json
-      description: 获得item@ersion in lang详情
+      description: 请求一个物品详情 @version,lang
       parameters:
-      - description: query with param
-        in: body
-        name: itemQueryParam
-        required: true
-        schema:
-          $ref: '#/definitions/item.itemQueryParam'
+      - default: "2010"
+        description: The ID of the item
+        example: "2010"
+        in: query
+        name: itemid
+        type: string
+      - default: zh_CN
+        description: Language
+        in: query
+        name: lang
+        type: string
+      - default: 13.8.1
+        description: Version
+        in: query
+        name: version
+        type: string
       produces:
       - application/json
       responses:
@@ -119,7 +116,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/riotmodel.ItemDTO'
-      summary: 获得item
+      summary: 请求一个物品详情
       tags:
       - item
 securityDefinitions:
