@@ -36,7 +36,7 @@ func init() {
 }
 
 func Run() {
-	conf := global.ChaConf.ServerConf
+	conf := global.ChaConf.System
 	logger := global.ChaLogger
 	conf.ID = masterId
 	conf.Name = global.MasterServiceName

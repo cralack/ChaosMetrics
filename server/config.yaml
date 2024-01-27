@@ -51,8 +51,9 @@ redis:
   conn_max_lifetime: 1h # 连接数最大生命周期
   conn_max_idletime: 1h # 连接数空闲时长
 
-server:
+system:
   registry_address: "localhost:2379"
   register_ttl: 60
   register_interval: 15
   client_timeout: 10
+  router_prefix: ""

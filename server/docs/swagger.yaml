@@ -1,0 +1,128 @@
+basePath: /
+definitions:
+  item.itemQueryParam:
+    properties:
+      itemid:
+        type: string
+      lang:
+        type: string
+      version:
+        type: string
+    required:
+    - itemid
+    - lang
+    - version
+    type: object
+  model.Image:
+    properties:
+      full:
+        description: 大图文件名
+        type: string
+      group:
+        description: 图像所属组
+        type: string
+      h:
+        description: 图像高度
+        type: integer
+      sprite:
+        description: 小图文件名
+        type: string
+      w:
+        description: 图像宽度
+        type: integer
+      x:
+        description: 图像 X 坐标
+        type: integer
+      "y":
+        description: 图像 Y 坐标
+        type: integer
+    type: object
+  riotmodel.GoldInfo:
+    properties:
+      base:
+        type: integer
+      purchasable:
+        type: boolean
+      sell:
+        type: integer
+      total:
+        type: integer
+    type: object
+  riotmodel.ItemDTO:
+    properties:
+      colloq:
+        type: string
+      depth:
+        type: integer
+      description:
+        type: string
+      from:
+        items:
+          type: string
+        type: array
+      gold:
+        $ref: '#/definitions/riotmodel.GoldInfo'
+      id:
+        type: string
+      image:
+        $ref: '#/definitions/model.Image'
+      into:
+        items:
+          type: string
+        type: array
+      maps:
+        additionalProperties:
+          type: boolean
+        type: object
+      name:
+        type: string
+      plaintext:
+        type: string
+      stats:
+        additionalProperties:
+          type: number
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8080
+info:
+  contact: {}
+  description: 使用Riot官方API获取数据进行分析、统计项目
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: ChaosMetrics API接口文档
+  version: "0.7"
+paths:
+  /items/item:
+    post:
+      consumes:
+      - application/json
+      description: 获得item@ersion in lang详情
+      parameters:
+      - description: query with param
+        in: body
+        name: itemQueryParam
+        required: true
+        schema:
+          $ref: '#/definitions/item.itemQueryParam'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/riotmodel.ItemDTO'
+      summary: 获得item
+      tags:
+      - item
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

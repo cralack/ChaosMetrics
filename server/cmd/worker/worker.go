@@ -46,7 +46,7 @@ func init() {
 
 func Run() {
 	// load conf
-	conf := global.ChaConf.ServerConf
+	conf := global.ChaConf.System
 	logger := global.ChaLogger
 	conf.Name = global.WorkerServiceName
 	conf.ID = workerID
@@ -63,7 +63,6 @@ func Run() {
 	}
 
 	// start pumper core
-	exit := make(chan struct{})
 	core, err := pumper.NewPumper(
 		conf.Name+"-"+conf.ID,
 		pumper.WithAreaLoc(area),
@@ -74,7 +73,7 @@ func Run() {
 		logger.Panic("init worker failed", zap.Error(err))
 		return
 	}
-	core.StartEngine(exit)
+	core.StartEngine()
 	logger.Info("starting worker engine...")
 
 	go register.RunHTTPServer(logger, conf)
