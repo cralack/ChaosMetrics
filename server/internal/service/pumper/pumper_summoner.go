@@ -19,12 +19,12 @@ type summonerTask struct {
 	summoner   *riotmodel.SummonerDTO
 }
 
-func (p *Pumper) UpdateSumoner(exit chan struct{}) {
+func (p *Pumper) UpdateSumoner() {
 	for _, loc := range p.stgy.Loc {
 		// Generate URLs
 		go p.createSummonerURL(loc)
 	}
-	<-exit
+	<-p.Exit
 }
 
 func (p *Pumper) loadSummoners(loc string) {

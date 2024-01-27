@@ -43,6 +43,7 @@ type Pumper struct {
 	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
 	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
 	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
+	Exit        chan struct{}
 	out         chan *DBResult
 	entrieIdx   []uint
 	summonerIdx []uint
@@ -105,6 +106,7 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		scheduler:   scheduler.NewSchdule(),
 		entrieIdx:   make([]uint, 16),
 		summonerIdx: make([]uint, 16),
+		Exit:        make(chan struct{}),
 		out:         make(chan *DBResult),
 		entryMap:    entryMap,
 		sumnMap:     sumnMap,
@@ -119,12 +121,12 @@ func (p *Pumper) Schedule() {
 	p.scheduler.Schedule()
 }
 
-func (p *Pumper) handleResult(exit chan struct{}) {
+func (p *Pumper) handleResult() {
 	for result := range p.out {
 		switch result.Type {
 		case finishTypeKey:
 			p.logger.Info(fmt.Sprintf("all %s result store done", result.Brief))
-			exit <- struct{}{}
+			p.Exit <- struct{}{}
 			continue
 
 		case entryTypeKey:
@@ -151,7 +153,7 @@ func (p *Pumper) handleResult(exit chan struct{}) {
 	}
 }
 
-func (p *Pumper) StartEngine(exit chan struct{}) {
+func (p *Pumper) StartEngine() {
 	// go p.LoadAll()
 	go p.Schedule()
 	// get task from etcd
@@ -159,7 +161,7 @@ func (p *Pumper) StartEngine(exit chan struct{}) {
 	go p.watchTasks()
 
 	go p.fetch()
-	go p.handleResult(exit)
+	go p.handleResult()
 }
 
 func (p *Pumper) LoadAll() {
@@ -171,13 +173,11 @@ func (p *Pumper) LoadAll() {
 	}
 }
 
-func (p *Pumper) UpdateAll(exit chan struct{}) {
-	// exit := make(chan struct{})
-	// p.StartEngine(exit)
-
-	p.UpdateEntries(exit)
-	p.UpdateSumoner(exit)
-	p.UpdateMatch(exit)
+// UpdateAll 's push task
+func (p *Pumper) UpdateAll() {
+	p.UpdateEntries()
+	p.UpdateSumoner()
+	p.UpdateMatch()
 }
 
 // core func

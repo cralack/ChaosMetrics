@@ -4,6 +4,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/master"
 	"github.com/cralack/ChaosMetrics/server/utils/register"
+	"github.com/gin-gonic/gin"
 	"github.com/go-micro/plugins/v4/registry/etcd"
 	"github.com/spf13/cobra"
 	"go-micro.dev/v4/registry"
@@ -57,4 +58,9 @@ func Run() {
 
 	go register.RunHTTPServer(logger, conf, m)
 	register.RunGRPCServer(logger, conf, m)
+}
+
+type Core struct {
+	engine *gin.Engine
+	master *master.Master
 }

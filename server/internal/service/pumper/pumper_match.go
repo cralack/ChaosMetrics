@@ -19,11 +19,11 @@ type matchTask struct {
 	sumn *riotmodel.SummonerDTO
 }
 
-func (p *Pumper) UpdateMatch(exit chan struct{}) {
+func (p *Pumper) UpdateMatch() {
 	for _, loc := range p.stgy.Loc {
 		go p.createMatchListURL(loc)
 	}
-	<-exit
+	<-p.Exit
 }
 
 func (p *Pumper) loadMatch(loc string) {

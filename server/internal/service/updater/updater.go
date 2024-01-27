@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 	"sync"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
@@ -219,13 +218,13 @@ func (u *Updater) UpdateItems(version string) {
 
 func (u *Updater) UpdatePerks(version string) {
 	var (
-		buff        []byte
-		url         string
-		err         error
-		key         string
-		vIdx        uint
-		perks       []*riotmodel.Perk
-		perkDetails []*riotmodel.PerkDetail
+		buff  []byte
+		url   string
+		err   error
+		key   string
+		vIdx  uint
+		perks []*riotmodel.Perk
+		// perkDetails []*riotmodel.PerkDetail
 	)
 	if version == "" {
 		u.logger.Error("wrong version")
@@ -256,25 +255,25 @@ func (u *Updater) UpdatePerks(version string) {
 		}
 
 		// fetch perk detail (third-party data)
-		if lang == "en_US" {
-			lang = "default"
-		}
-		url = fmt.Sprintf("https://raw.communitydragon.org/%s/plugins/rcp-be-lol-game-data/global/%s/v1/perks.json",
-			version[:len(version)-2], strings.ToLower(lang))
-		if buff, err = u.fetcher.Get(url); err != nil {
-			u.logger.Error("get  perks failed", zap.Error(err))
-			continue
-		}
-		if err = json.Unmarshal(buff, &perkDetails); err != nil {
-			u.logger.Error("unmarshal json to item list failed", zap.Error(err))
-			continue
-		}
-		for _, p := range perkDetails {
-			if err = u.rdb.HSet(ctx, key, fmt.Sprintf("%d@%d", p.ID, vIdx), p).Err(); err != nil {
-				u.logger.Error("save perks failed", zap.Error(err))
-				break
-			}
-		}
+		// if lang == "en_US" {
+		// 	lang = "default"
+		// }
+		// url = fmt.Sprintf("https://raw.communitydragon.org/%s/plugins/rcp-be-lol-game-data/global/%s/v1/perks.json",
+		// 	version[:len(version)-2], strings.ToLower(lang))
+		// if buff, err = u.fetcher.Get(url); err != nil {
+		// 	u.logger.Error("get  perks failed", zap.Error(err))
+		// 	continue
+		// }
+		// if err = json.Unmarshal(buff, &perkDetails); err != nil {
+		// 	u.logger.Error("unmarshal json to item list failed", zap.Error(err))
+		// 	continue
+		// }
+		// for _, p := range perkDetails {
+		// 	if err = u.rdb.HSet(ctx, key, fmt.Sprintf("%d@%d", p.ID, vIdx), p).Err(); err != nil {
+		// 		u.logger.Error("save perks failed", zap.Error(err))
+		// 		break
+		// 	}
+		// }
 	}
 	u.logger.Info("all perk update done")
 }

@@ -20,7 +20,7 @@ type entryTask struct {
 	Queue string
 }
 
-func (p *Pumper) UpdateEntries(exit chan struct{}) {
+func (p *Pumper) UpdateEntries() {
 	for _, loc := range p.stgy.Loc {
 		for _, que := range p.stgy.Que {
 			// Generate URLs
@@ -28,7 +28,7 @@ func (p *Pumper) UpdateEntries(exit chan struct{}) {
 		}
 	}
 	// blocking until handle final
-	<-exit
+	<-p.Exit
 }
 
 func (p *Pumper) loadEntrie(loc string) {

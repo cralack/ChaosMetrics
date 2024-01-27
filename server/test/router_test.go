@@ -3,21 +3,13 @@ package test
 import (
 	"testing"
 
-	"github.com/cralack/ChaosMetrics/server/app/middleware"
-	"github.com/gin-gonic/gin"
+	"github.com/cralack/ChaosMetrics/server/internal/service/router"
 	"go.uber.org/zap"
 )
 
 func Test_router(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	r := gin.New()
-	r.Use(middleware.GinLogger())
+	r := router.New()
 
-	r.GET("/ping", func(context *gin.Context) {
-		context.JSONP(200, gin.H{
-			"message": "pong",
-		})
-	})
 	if err := r.Run(":8080"); err != nil {
 		logger.Error("router failed", zap.Error(err))
 	}

@@ -19,7 +19,7 @@ type Master struct {
 	leaderID   string
 	workNodes  map[string]*registry.Node
 	tasks      map[string]*TaskSpec
-	rlock      *sync.Mutex
+	rlock      *sync.RWMutex
 	IDGen      *snowflake.Node
 	etcdCli    *clientv3.Client
 	forwardCli publisher.PublisherService
@@ -30,7 +30,7 @@ type Master struct {
 func New(id string, opts ...Option) (*Master, error) {
 	m := &Master{
 		workNodes: make(map[string]*registry.Node),
-		rlock:     &sync.Mutex{},
+		rlock:     &sync.RWMutex{},
 	}
 	options := defaultOptions
 	for _, opt := range opts {
