@@ -12,6 +12,7 @@ type itemQueryParam struct {
 	Version string `json:"version" binding:"required"`
 }
 
+// QueryApi godoc
 // @Summary		获得item
 // @Description	获得item@ersion in lang详情
 // @Accept			application/json
