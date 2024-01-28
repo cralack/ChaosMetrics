@@ -385,7 +385,8 @@ func (a *Analyzer) store() {
 		analyzedDetail = append(analyzedDetail, cham)
 		cmd = append(cmd, pipe.HSet(ctx, key, cham.ID, cham))
 
-		idx := fmt.Sprintf("%s_%s@%s", cham.Version, cham.GameMode, cham.Loc)
+		vidx, _ := utils.ConvertVersionToIdx(cham.Version)
+		idx := fmt.Sprintf("%d_%s@%s", vidx, cham.GameMode, cham.Loc)
 		if _, has := analyzed[idx]; !has {
 			analyzed[idx] = make([]*anres.ChampionBrief, 0, 200)
 		}

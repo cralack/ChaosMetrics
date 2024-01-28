@@ -56,4 +56,4 @@ system:
   register_ttl: 60
   register_interval: 15
   client_timeout: 10
-  router_prefix: ""
+  router_prefix: "#"

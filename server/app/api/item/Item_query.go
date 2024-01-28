@@ -32,7 +32,7 @@ func (i *itemApi) QueryApi(ctx *gin.Context) {
 	)
 	itemService := item.NewItemService()
 
-	if err := ctx.ShouldBindQuery(&param); err != nil {
+	if err = ctx.ShouldBindQuery(&param); err != nil {
 		ctx.JSON(400, gin.H{
 			"msg": "wrong param",
 		})

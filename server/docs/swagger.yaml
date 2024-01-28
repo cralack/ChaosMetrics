@@ -1,5 +1,30 @@
 basePath: /
 definitions:
+  anres.ChampionBrief:
+    properties:
+      avg_damage_dealt:
+        description: 场均输出占比 12%
+        type: number
+      avg_dead_time:
+        description: 场均死亡时长
+        type: number
+      ban_rate:
+        description: Ban率
+        type: number
+      id:
+        description: 英雄ID:Aatrox
+        type: string
+      image:
+        allOf:
+        - $ref: '#/definitions/model.Image'
+        description: basic info
+      pick_rate:
+        description: 登场率 15%
+        type: number
+      win_rate:
+        description: statistical data
+        type: number
+    type: object
   model.Image:
     properties:
       full:
@@ -87,6 +112,66 @@ info:
   title: ChaosMetrics API接口文档
   version: "0.7"
 paths:
+  /champion/ARAM:
+    get:
+      consumes:
+      - application/json
+      description: 请求一个ARAM英雄榜 @version,loc
+      parameters:
+      - default: na1
+        description: region
+        in: query
+        name: loc
+        required: true
+        type: string
+      - default: 14.1.1
+        description: Version
+        in: query
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/anres.ChampionBrief'
+            type: array
+      summary: 请求一个英雄榜
+      tags:
+      - championrank
+  /champion/CLASSIC:
+    get:
+      consumes:
+      - application/json
+      description: 请求一个CLASSIC英雄榜 @version,loc
+      parameters:
+      - default: na1
+        description: region
+        in: query
+        name: loc
+        required: true
+        type: string
+      - default: 14.1.1
+        description: Version
+        in: query
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/anres.ChampionBrief'
+            type: array
+      summary: 请求一个英雄榜
+      tags:
+      - championrank
   /items/item:
     get:
       consumes:
@@ -95,19 +180,21 @@ paths:
       parameters:
       - default: "2010"
         description: The ID of the item
-        example: "2010"
         in: query
         name: itemid
+        required: true
         type: string
       - default: zh_CN
         description: Language
         in: query
         name: lang
+        required: true
         type: string
       - default: 13.8.1
         description: Version
         in: query
         name: version
+        required: true
         type: string
       produces:
       - application/json

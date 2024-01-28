@@ -19,6 +19,94 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/champion/ARAM": {
+            "get": {
+                "description": "请求一个ARAM英雄榜 @version,loc",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "championrank"
+                ],
+                "summary": "请求一个英雄榜",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "na1",
+                        "description": "region",
+                        "name": "loc",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.1.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/anres.ChampionBrief"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/champion/CLASSIC": {
+            "get": {
+                "description": "请求一个CLASSIC英雄榜 @version,loc",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "championrank"
+                ],
+                "summary": "请求一个英雄榜",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "na1",
+                        "description": "region",
+                        "name": "loc",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.1.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/anres.ChampionBrief"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/items/item": {
             "get": {
                 "description": "请求一个物品详情 @version,lang",
@@ -36,24 +124,26 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "default": "2010",
-                        "example": "2010",
                         "description": "The ID of the item",
                         "name": "itemid",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "default": "zh_CN",
                         "description": "Language",
                         "name": "lang",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
                         "default": "13.8.1",
                         "description": "Version",
                         "name": "version",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -68,6 +158,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "anres.ChampionBrief": {
+            "type": "object",
+            "properties": {
+                "avg_damage_dealt": {
+                    "description": "场均输出占比 12%",
+                    "type": "number"
+                },
+                "avg_dead_time": {
+                    "description": "场均死亡时长",
+                    "type": "number"
+                },
+                "ban_rate": {
+                    "description": "Ban率",
+                    "type": "number"
+                },
+                "id": {
+                    "description": "英雄ID:Aatrox",
+                    "type": "string"
+                },
+                "image": {
+                    "description": "basic info",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Image"
+                        }
+                    ]
+                },
+                "pick_rate": {
+                    "description": "登场率 15%",
+                    "type": "number"
+                },
+                "win_rate": {
+                    "description": "statistical data",
+                    "type": "number"
+                }
+            }
+        },
         "model.Image": {
             "type": "object",
             "properties": {

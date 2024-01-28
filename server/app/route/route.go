@@ -3,6 +3,7 @@ package route
 import (
 	"net/http"
 
+	"github.com/cralack/ChaosMetrics/server/app/api/champion_rank"
 	"github.com/cralack/ChaosMetrics/server/app/api/item"
 	"github.com/cralack/ChaosMetrics/server/docs"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
@@ -23,6 +24,7 @@ func RegiserRoutes(r *gin.Engine) {
 			ctx.JSON(http.StatusOK, "ok")
 		})
 		item.InitItemRouter(r)
+		champion_rank.InitChampionRankRouter(r)
 	}
 	global.ChaLogger.Info("router register success")
 }
