@@ -52,7 +52,7 @@ func init() {
 		&riotmodel.MatchDB{},
 		&riotmodel.ParticipantDB{},
 
-		&anres.Champion{},
+		&anres.ChampionDetail{},
 	); err != nil {
 		global.ChaLogger.Error("init orm model failed", zap.Error(err))
 	} else {

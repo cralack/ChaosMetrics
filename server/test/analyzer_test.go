@@ -21,10 +21,9 @@ func Test_analyzer(t *testing.T) {
 
 func Test_result_list(t *testing.T) {
 	var (
-		tmp      *anres.Champion
-		aramList []*anres.Champion
-		// classicList []*anres.Champion
-		err error
+		tmp      *anres.ChampionDetail
+		aramList []*anres.ChampionDetail
+		err      error
 	)
 	if err = db.Where("game_mode = ?", "CLASSIC").Where("version LIKE ?",
 		"13.14%").Find(&aramList).Error; err != nil {

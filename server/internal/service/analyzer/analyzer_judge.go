@@ -4,10 +4,10 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 )
 
-type Judger func(tar *anres.Champion)
+type Judger func(tar *anres.ChampionDetail)
 
 func JudgeARAM() Judger {
-	return func(tar *anres.Champion) {
+	return func(tar *anres.ChampionDetail) {
 		tar.RankScore = tar.WinRate*1000 +
 			tar.PickRate*400 +
 			tar.AvgKDA*5 +
@@ -19,7 +19,7 @@ func JudgeARAM() Judger {
 }
 
 func JudgeClassic() Judger {
-	return func(tar *anres.Champion) {
+	return func(tar *anres.ChampionDetail) {
 		tar.RankScore = tar.WinRate*1000 +
 			tar.PickRate*400 +
 			tar.AvgKDA*5 +

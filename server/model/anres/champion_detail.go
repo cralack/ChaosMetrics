@@ -2,12 +2,12 @@ package anres
 
 import (
 	"encoding/json"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model"
 	"gorm.io/gorm"
 )
 
-type Champion struct {
+type ChampionDetail struct {
 	gorm.Model
 	// basic info
 	Image    *model.Image `json:"image" gorm:"embedded;embeddedPrefix:icon_image_"` // 图像
@@ -43,13 +43,13 @@ type Champion struct {
 	SpellSTR string                    `json:"-" gorm:"spell"`
 }
 
-func (c *Champion) TableName() string {
+func (c *ChampionDetail) TableName() string {
 	return "analyzed_champions"
 }
-func (c *Champion) MarshalBinary() ([]byte, error) {
+func (c *ChampionDetail) MarshalBinary() ([]byte, error) {
 	return json.Marshal(c)
 }
 
-func (c *Champion) UnmarshalBinary(bt []byte) error {
+func (c *ChampionDetail) UnmarshalBinary(bt []byte) error {
 	return json.Unmarshal(bt, c)
 }

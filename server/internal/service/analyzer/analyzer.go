@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -35,7 +36,7 @@ type Analyzer struct {
 	options       *options
 	chamTemplate  map[string]*riotmodel.ChampionDTO // chamTemplate[championName]
 	itemMap       map[string]*riotmodel.ItemDTO     // itemMap[itemID@version]
-	analyzed      map[uint]*anres.Champion          // analyzed[chamId+verId+loc+mode]
+	analyzed      map[uint]*anres.ChampionDetail    // analyzed[chamId+verId+loc+mode]
 	shoesList     map[uint]map[int]struct{}         // shoesList[version][shoes]
 }
 
@@ -57,7 +58,7 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 		options:       stgy,
 		chamTemplate:  make(map[string]*riotmodel.ChampionDTO),
 		itemMap:       make(map[string]*riotmodel.ItemDTO),
-		analyzed:      make(map[uint]*anres.Champion),
+		analyzed:      make(map[uint]*anres.ChampionDetail),
 		shoesList:     make(map[uint]map[int]struct{}),
 	}
 }
@@ -129,12 +130,11 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 
 	// count analyzed
 	var totalCount int64
-	totalCount = int64(len(matches))
-	// if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
-	// 	true).Count(&totalCount).Error; err != nil {
-	// 	a.logger.Error("count analyzed failed", zap.Error(err))
-	// 	return
-	// }
+	if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
+		true).Count(&totalCount).Error; err != nil {
+		a.logger.Error("count analyzed failed", zap.Error(err))
+		return
+	}
 
 	a.lock.Lock()
 	a.analyzedCount[loCode] += totalCount
@@ -249,7 +249,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 		return
 	}
 	var (
-		// tar     []*anres.Champion
+		// tar     []*anres.ChampionDetail
 		has     bool
 		verIdx  uint
 		modeIdx riotmodel.GAMEMODE
@@ -287,7 +287,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	// }
 
 	// match partic
-	// tar = make([]*anres.Champion, 0, len(match.Participants))
+	// tar = make([]*anres.ChampionDetail, 0, len(match.Participants))
 	for _, par := range match.Participants {
 		// skip BOT game
 		if par.Puuid == "BOT" {
@@ -297,7 +297,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 		var (
 			chamIdx  int
 			tarId    uint
-			tmp      *anres.Champion
+			tmp      *anres.ChampionDetail
 			template *riotmodel.ChampionDTO
 		)
 		// get champion data template
@@ -318,7 +318,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 		// match champion && version && loc && gamemode
 		tarId = uint(chamIdx)*1e8 + verIdx*1e4 + uint(loCode)*1e2 + uint(modeIdx)
 		if tmp, has = a.analyzed[tarId]; !has {
-			tmp = &anres.Champion{
+			tmp = &anres.ChampionDetail{
 				Loc:      match.Loc,
 				Version:  curVersion,
 				MetaName: keyName,
@@ -375,26 +375,52 @@ func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
 }
 
 func (a *Analyzer) store() {
-	analyzed := make([]*anres.Champion, 0, len(a.analyzed))
+	analyzedDetail := make([]*anres.ChampionDetail, 0, len(a.analyzed))
+	analyzed := make(map[string][]*anres.ChampionBrief)
 	cmd := make([]*redis.IntCmd, 0, len(a.analyzed))
 	ctx := context.Background()
 	pipe := a.rdb.Pipeline()
-	key := "/analyzed"
+	key := "/champion_detail"
 	for _, cham := range a.analyzed {
-		analyzed = append(analyzed, cham)
+		analyzedDetail = append(analyzedDetail, cham)
 		cmd = append(cmd, pipe.HSet(ctx, key, cham.ID, cham))
+
+		idx := fmt.Sprintf("%s_%s@%s", cham.Version, cham.GameMode, cham.Loc)
+		if _, has := analyzed[idx]; !has {
+			analyzed[idx] = make([]*anres.ChampionBrief, 0, 200)
+		}
+		analyzed[idx] = append(analyzed[idx], &anres.ChampionBrief{
+			Image:          cham.Image,
+			MetaName:       cham.MetaName,
+			WinRate:        cham.WinRate,
+			PickRate:       cham.PickRate,
+			BanRate:        cham.BanRate,
+			AvgDamageDealt: cham.AvgDamageDealt,
+			AvgDeadTime:    cham.AvgDeadTime,
+		})
 	}
-	// store
+	// store detail
 	if _, err := pipe.Exec(ctx); err != nil {
 		a.logger.Error("store analyzed result to redis failed")
 	}
-	if err := a.db.Save(analyzed).Error; err != nil {
+	if err := a.db.Save(analyzedDetail).Error; err != nil {
 		a.logger.Error("store analyzed result to db failed", zap.Error(err))
+	}
+	// store brief
+	for idx, list := range analyzed {
+		sort.Slice(list, func(i, j int) bool {
+			return list[i].MetaName < list[j].MetaName
+		})
+		buff, err := json.Marshal(list)
+		if err != nil {
+			a.logger.Error("marshal champion brief failed", zap.Error(err))
+		}
+		a.rdb.HSet(ctx, "/champion_brief", idx, buff)
 	}
 	a.rdb.HSet(ctx, "/lastupdate", "analyzer", time.Now().Unix())
 }
 
-func (a *Analyzer) handleAnares(tar *anres.Champion, par *riotmodel.ParticipantDB) error {
+func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.ParticipantDB) error {
 	var (
 		buff         []byte
 		totalCount   int64
