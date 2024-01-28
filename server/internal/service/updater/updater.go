@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/fetcher"
@@ -48,6 +49,21 @@ func NewRiotUpdater(opts ...Option) *Updater {
 		),
 		matchVis: make(map[string]map[string]bool),
 		stgy:     stgy,
+	}
+}
+
+func (u *Updater) UpdateAll(endMark string) {
+	versions := u.UpdateVersions()
+	for _, curVer := range versions {
+		if isEnd(curVer, endMark) {
+			u.logger.Info(curVer)
+			u.UpdatePerks(curVer)
+			u.UpdateItems(curVer)
+			u.UpdateChampions(curVer)
+		} else {
+			u.rdb.HSet(context.Background(), "/lastupdate", "updater", time.Now().Unix())
+			break
+		}
 	}
 }
 
@@ -294,4 +310,10 @@ func (u *Updater) UpdatePerks(version string) {
 		// }
 	}
 	u.logger.Info("all perk update done")
+}
+
+func isEnd(curVersion, endMark string) bool {
+	cIdx, _ := utils.ConvertVersionToIdx(curVersion)
+	eIdx, _ := utils.ConvertVersionToIdx(endMark)
+	return cIdx >= eIdx
 }

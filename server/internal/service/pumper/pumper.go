@@ -1,6 +1,7 @@
 package pumper
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/fetcher"
@@ -376,6 +378,9 @@ func (p *Pumper) fetch() {
 			}
 			p.logger.Debug(fmt.Sprintf("updating %s's match list @ %d,store %d matches",
 				summoner.Name, cnt, len(matches)))
+			if cnt == int(p.summonerIdx[loc]) {
+				p.rdb.HSet(context.Background(), "lastupdate", "pumper", time.Now().Unix())
+			}
 			if len(matches) == 0 {
 				continue
 			}

@@ -388,9 +388,10 @@ func (a *Analyzer) store() {
 	if _, err := pipe.Exec(ctx); err != nil {
 		a.logger.Error("store analyzed result to redis failed")
 	}
-	if err := a.db.CreateInBatches(analyzed, 100).Error; err != nil {
+	if err := a.db.Save(analyzed).Error; err != nil {
 		a.logger.Error("store analyzed result to db failed", zap.Error(err))
 	}
+	a.rdb.HSet(ctx, "/lastupdate", "analyzer", time.Now().Unix())
 }
 
 func (a *Analyzer) handleAnares(tar *anres.Champion, par *riotmodel.ParticipantDB) error {
