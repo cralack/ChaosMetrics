@@ -53,17 +53,23 @@ func (p *Pumper) loadSummoners(loc string) {
 	if err := p.db.Where("loc = ?", loc).Find(&summoners).Preload(clause.Associations).Error; err != nil {
 		p.logger.Error("load summoner from gorm db failed", zap.Error(err))
 	}
+
+	tmp := make([]*riotmodel.SummonerDTO, 0, len(summoners))
 	if len(summoners) != 0 {
 		for _, s := range summoners {
-			// assign to localmap
-			if _, has := p.sumnMap[loc][s.MetaSummonerID]; !has {
-				p.sumnMap[loc][s.MetaSummonerID] = s
+			if s.Name == "" {
+				continue
 			}
+			// assign to localmap
+			if _, has := p.sumnMap[loc][s.Name]; !has {
+				p.sumnMap[loc][s.Name] = s
+			}
+			tmp = append(tmp, s)
 		} // assign to redis
 		p.cacheSummoners(summoners, loc)
 	}
 	// check local && redis map diff
-	tmp := make([]*riotmodel.SummonerDTO, 0, p.stgy.MaxSize)
+	tmp = make([]*riotmodel.SummonerDTO, 0, p.stgy.MaxSize)
 	for k, s := range redisMap {
 		if _, has := p.sumnMap[loc][k]; !has {
 			p.sumnMap[loc][k] = s
@@ -91,32 +97,32 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 	p.loadSummoners(loc)
 	go p.summonerCounter(loc)
 	// expand from entry
-	for sID, entry := range p.entryMap[loc] {
+	for _, entry := range p.entryMap[loc] {
 		curTier, curRank := ConvertStrToRank(entry.Tier, entry.Rank)
-		if _, has := p.sumnMap[loc][sID]; has ||
+		if _, has := p.sumnMap[loc][entry.SummonerName]; has ||
 			(curTier > p.stgy.TestEndMark1 || (curTier == p.stgy.TestEndMark1 && curRank > p.stgy.TestEndMark2)) {
 			continue
 		}
-		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
+		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, entry.SummonerName)
 		p.scheduler.Push(&scheduler.Task{
 			Type: summonerTypeKey,
 			Loc:  loc,
 			URL:  url,
 			Data: &summonerTask{
-				summonerID: sID,
+				summonerID: entry.SummonerName,
 			},
 		})
 	}
 	// expand from self
-	for sID, sumn := range p.sumnMap[loc] {
-		if sumn.Name == "" {
-			url := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s", host, sID)
+	for _, sumn := range p.sumnMap[loc] {
+		if sumn.MetaSummonerID == "" {
+			url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, sumn.Name)
 			p.scheduler.Push(&scheduler.Task{
 				Type: summonerTypeKey,
 				Loc:  loc,
 				URL:  url,
 				Data: &summonerTask{
-					summonerID: sID,
+					summonerID: sumn.Name,
 				},
 			})
 		}
@@ -134,22 +140,19 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	if len(summoners) == 0 {
 		return
 	}
-	// set up redis pipe
-	// tmp := make([]*riotmodel.SummonerDTO, 0, p.stgy.MaxSize)
 	loCode := utils.ConverHostLoCode(loc)
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
 	for _, sumn := range summoners {
-		if s, has := p.sumnMap[loc][sumn.MetaSummonerID]; !has || s.ID < 1e9*uint(loCode) {
+		if s, has := p.sumnMap[loc][sumn.Name]; !has || s.ID < 1e9*uint(loCode) {
 			sumn.ID = p.summonerIdx[loCode]
 			p.summonerIdx[loCode]++
 		} else {
 			sumn.ID = s.ID
 		}
-		p.sumnMap[loc][sumn.MetaSummonerID] = sumn
+		p.sumnMap[loc][sumn.Name] = sumn
 		sumn.Loc = loc
-		p.rdb.HSet(context.Background(), "/summoner/"+loc, sumn.MetaSummonerID, sumn)
 	}
 
 	// check oversize && split
@@ -172,7 +175,6 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 			}
 		}
 	}
-
 	return
 }
 
@@ -183,7 +185,7 @@ func (p *Pumper) cacheSummoners(summoners []*riotmodel.SummonerDTO, loc string) 
 	pipe.Expire(ctx, key, p.stgy.LifeTime)
 	cmds := make([]*redis.IntCmd, 0, len(summoners))
 	for _, s := range summoners {
-		cmds = append(cmds, pipe.HSet(ctx, key, s.MetaSummonerID, s))
+		cmds = append(cmds, pipe.HSet(ctx, key, s.Name, s))
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
 		p.logger.Error("redis store summoner failed", zap.Error(err))
@@ -225,13 +227,18 @@ func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDT
 		return res
 	}
 	// redis read
-
-	// db read
-	// var res *riotmodel.SummonerDTO
-	if err := p.db.Where("loc = ?", loc).Where("name = ?", name).First(&res).Preload(
-		clause.Associations).Error; err == nil && res.AccountID != "" {
+	key := fmt.Sprintf("/summoner/%s", loc)
+	buff := p.rdb.HGet(context.Background(), key, name).Val()
+	if err := json.Unmarshal([]byte(buff), &res); err == nil && res.Name == name {
 		return res
 	}
+
+	// db read
+	if err := p.db.Where("loc = ?", loc).Where("name = ?", name).First(&res).Preload(
+		clause.Associations).Error; err == nil && res.Name == name {
+		return res
+	}
+
 	// http read
 	url := fmt.Sprintf("https://%s.api.riotgames.com/lol/summoner/v4/summoners/by-name/%s", loc, name)
 	buffer, err := p.fetcher.Get(url)
@@ -239,7 +246,7 @@ func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDT
 		p.logger.Error("wrong name or loc")
 		return nil
 	}
-	if err = json.Unmarshal(buffer, &res); err == nil && res.AccountID != "" {
+	if err = json.Unmarshal(buffer, &res); err == nil && res.Name == name {
 		p.handleSummoner(loc, res)
 		return res
 	}

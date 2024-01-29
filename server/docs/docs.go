@@ -19,9 +19,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/champion/ARAM": {
+        "/ARAM": {
             "get": {
-                "description": "请求一个ARAM英雄榜 @version,loc",
+                "description": "query @version,loc",
                 "consumes": [
                     "application/json"
                 ],
@@ -29,14 +29,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "championrank"
+                    "Champion Rank"
                 ],
-                "summary": "请求一个英雄榜",
+                "summary": "请求一个ARAM英雄榜",
                 "parameters": [
                     {
                         "type": "string",
                         "default": "na1",
-                        "description": "region",
+                        "description": "Region",
                         "name": "loc",
                         "in": "query",
                         "required": true
@@ -63,9 +63,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/champion/CLASSIC": {
+        "/CLASSIC": {
             "get": {
-                "description": "请求一个CLASSIC英雄榜 @version,loc",
+                "description": "query @version,loc",
                 "consumes": [
                     "application/json"
                 ],
@@ -73,14 +73,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "championrank"
+                    "Champion Rank"
                 ],
-                "summary": "请求一个英雄榜",
+                "summary": "请求一个CLASSIC英雄榜",
                 "parameters": [
                     {
                         "type": "string",
                         "default": "na1",
-                        "description": "region",
+                        "description": "Region",
                         "name": "loc",
                         "in": "query",
                         "required": true
@@ -107,7 +107,64 @@ const docTemplate = `{
                 }
             }
         },
-        "/items/item": {
+        "/champion": {
+            "get": {
+                "description": "请求一个英雄详情 @name,version,loc,mode",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Champion Detail"
+                ],
+                "summary": "请求一个英雄详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "na1",
+                        "description": "Region",
+                        "name": "loc",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "CLASSIC",
+                        "description": "Game mode",
+                        "name": "mode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Ahri",
+                        "description": "Champion name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.1.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/anres.ChampionDetail"
+                        }
+                    }
+                }
+            }
+        },
+        "/item": {
             "get": {
                 "description": "请求一个物品详情 @version,lang",
                 "consumes": [
@@ -117,7 +174,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "item"
+                    "Item"
                 ],
                 "summary": "请求一个物品详情",
                 "parameters": [
@@ -191,6 +248,131 @@ const docTemplate = `{
                 },
                 "win_rate": {
                     "description": "statistical data",
+                    "type": "number"
+                }
+            }
+        },
+        "anres.ChampionDetail": {
+            "type": "object",
+            "properties": {
+                "avg_damage_dealt": {
+                    "description": "场均输出占比 12%",
+                    "type": "number"
+                },
+                "avg_damage_taken": {
+                    "description": "场均承伤占比 10%",
+                    "type": "number"
+                },
+                "avg_dead_time": {
+                    "description": "场均死亡时长",
+                    "type": "number"
+                },
+                "avg_kda": {
+                    "description": "场均KDA 15%",
+                    "type": "number"
+                },
+                "avg_kp": {
+                    "description": "场均参团率 10%",
+                    "type": "number"
+                },
+                "avg_time_ccing": {
+                    "description": "场均控制时长 5%",
+                    "type": "number"
+                },
+                "avg_vision_score": {
+                    "description": "场均视野得分 3%",
+                    "type": "number"
+                },
+                "ban_rate": {
+                    "description": "Ban率",
+                    "type": "number"
+                },
+                "game_mode": {
+                    "description": "游戏模式",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "英雄ID:Aatrox",
+                    "type": "string"
+                },
+                "idx": {
+                    "description": "basic info",
+                    "type": "string"
+                },
+                "image": {
+                    "description": "图像",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Image"
+                        }
+                    ]
+                },
+                "item": {
+                    "description": "build winrate",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "key": {
+                    "description": "英雄Key:266",
+                    "type": "string"
+                },
+                "loc": {
+                    "description": "对局服务器",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "英雄名称:暗裔剑魔",
+                    "type": "string"
+                },
+                "perk": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "pick_rate": {
+                    "description": "登场率 15%",
+                    "type": "number"
+                },
+                "rank_score": {
+                    "description": "statistical data",
+                    "type": "number"
+                },
+                "skill": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "spell": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "title": {
+                    "description": "英雄称号:亚托克斯",
+                    "type": "string"
+                },
+                "total_played": {
+                    "description": "英雄出场总数",
+                    "type": "number"
+                },
+                "total_win": {
+                    "description": "英雄胜利总数",
+                    "type": "number"
+                },
+                "version": {
+                    "description": "对局版本",
+                    "type": "string"
+                },
+                "win_rate": {
+                    "description": "胜率 30%",
                     "type": "number"
                 }
             }

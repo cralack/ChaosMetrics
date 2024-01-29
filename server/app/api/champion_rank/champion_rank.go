@@ -1,26 +1,26 @@
 package champion_rank
 
 import (
-	"github.com/cralack/ChaosMetrics/server/internal/service/provider/champion_rank"
+	"github.com/cralack/ChaosMetrics/server/app/provider/champion_rank"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/gin-gonic/gin"
 )
 
 type championRankParam struct {
-	Loc     string `form:"loc" default:"na1" binding:"required"`        // region
+	Loc     string `form:"loc" default:"na1" binding:"required"`        // Region
 	Version string `form:"version" default:"14.1.1" binding:"required"` // Version
 }
 
 // QueryChampionRankARAM godoc
 //
-//	@Summary		请求一个英雄榜
-//	@Description	请求一个ARAM英雄榜 @version,loc
+//	@Summary		请求一个ARAM英雄榜
+//	@Description	query @version,loc
 //	@Accept			application/json
 //	@Produce		application/json
-//	@Tags			championrank
+//	@Tags			Champion Rank
 //	@Param			championRankParam	query		championRankParam	true	"Query champion rank list for aram"
 //	@Success		200					{object}	[]anres.ChampionBrief
-//	@Router			/champion/ARAM [get]
+//	@Router			/ARAM [get]
 func (c *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
 	var (
 		param            championRankParam
@@ -51,14 +51,14 @@ func (c *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
 
 // QueryChampionRankCLASSIC godoc
 //
-//	@Summary		请求一个英雄榜
-//	@Description	请求一个CLASSIC英雄榜 @version,loc
+//	@Summary		请求一个CLASSIC英雄榜
+//	@Description	query @version,loc
 //	@Accept			application/json
 //	@Produce		application/json
-//	@Tags			championrank
+//	@Tags			Champion Rank
 //	@Param			championRankParam	query		championRankParam	true	"Query champion rank list for classic"
 //	@Success		200					{object}	[]anres.ChampionBrief
-//	@Router			/champion/CLASSIC [get]
+//	@Router			/CLASSIC [get]
 func (c *championRankApi) QueryChampionRankCLASSIC(ctx *gin.Context) {
 	var (
 		param            championRankParam

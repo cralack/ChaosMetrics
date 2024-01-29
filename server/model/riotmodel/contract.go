@@ -3,9 +3,9 @@ package riotmodel
 type TIER uint
 
 const (
-	CHALLENGER  TIER = iota // top 200 players
-	GRANDMASTER             // top 201-701 players
-	MASTER                  // top 702-2922 players
+	CHALLENGER  TIER = iota // most top 200 players
+	GRANDMASTER             // most top 201-701 players
+	MASTER                  // most top 702-2922 players
 	DIAMOND
 	EMERALD
 	PLATINUM

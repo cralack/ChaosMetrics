@@ -13,6 +13,7 @@ func Test_pumper_update(t *testing.T) {
 		"1",
 		pumper.WithLoc(riotmodel.NA1),
 		pumper.WithEndMark(riotmodel.DIAMOND, 1),
+		pumper.WithQues(riotmodel.RANKED_SOLO_5x5, riotmodel.RANKED_FLEX_SR),
 	)
 	p.StartEngine()
 	p.UpdateAll()
@@ -27,12 +28,14 @@ func Test_pumper_fetch_match_byId(t *testing.T) {
 }
 
 func Test_pumper_fetch_single_summoner(t *testing.T) {
-	p, err := pumper.NewPumper("1")
+	p, err := pumper.NewPumper("1",
+		pumper.WithLoc(riotmodel.NA1),
+	)
 	if err != nil {
 		t.Log(err)
 	}
 	// exit := make(chan struct{})
-	// go p.StartEngine(exit)
+	go p.StartEngine()
 	// p.loadSummoners("tw2")
-	p.LoadSingleSummoner("Mes", "tw2")
+	p.LoadSingleSummoner("Pink HairDryer", "na1")
 }

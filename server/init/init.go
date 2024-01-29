@@ -3,7 +3,6 @@ package init
 import (
 	"github.com/cralack/ChaosMetrics/server/internal/config"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/pkg/xgorm"
 	"github.com/cralack/ChaosMetrics/server/pkg/xredis"
@@ -45,14 +44,14 @@ func init() {
 	global.ChaLogger.Debug("env pkg init succeed")
 
 	// if.need.AutoMigrate
-	if err := global.ChaDB.AutoMigrate(
+	if err = global.ChaDB.AutoMigrate(
 		&riotmodel.LeagueEntryDTO{},
 		&riotmodel.SummonerDTO{},
 		// match
 		&riotmodel.MatchDB{},
 		&riotmodel.ParticipantDB{},
 
-		&anres.ChampionDetail{},
+		// &anres.ChampionDetail{},
 	); err != nil {
 		global.ChaLogger.Error("init orm model failed", zap.Error(err))
 	} else {

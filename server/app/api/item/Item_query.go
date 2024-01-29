@@ -1,7 +1,7 @@
 package item
 
 import (
-	"github.com/cralack/ChaosMetrics/server/internal/service/provider/item"
+	"github.com/cralack/ChaosMetrics/server/app/provider/item"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/gin-gonic/gin"
 )
@@ -20,10 +20,10 @@ type itemQueryParam struct {
 //	@Description	请求一个物品详情 @version,lang
 //	@Accept			application/json
 //	@Produce		application/json
-//	@Tags			item
+//	@Tags			Item
 //	@Param			itemQueryParam	query		itemQueryParam	true	"Query parameters for item"
 //	@Success		200				{object}	riotmodel.ItemDTO
-//	@Router			/items/item [get]
+//	@Router			/item [get]
 func (i *itemApi) QueryApi(ctx *gin.Context) {
 	var (
 		param   itemQueryParam

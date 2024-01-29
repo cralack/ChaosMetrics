@@ -34,9 +34,12 @@ type Analyzer struct {
 	curVersion    string
 	analyzedCount []int64
 	options       *options
+	idxMap        map[int]string                    // idx->championName
+	totalPlayed   map[uint]int64                    // totalPlayed[vIdx]
+	banedMap      map[string]float32                // banedMap[name+ver+loc+mode]
 	chamTemplate  map[string]*riotmodel.ChampionDTO // chamTemplate[championName]
 	itemMap       map[string]*riotmodel.ItemDTO     // itemMap[itemID@version]
-	analyzed      map[uint]*anres.ChampionDetail    // analyzed[chamId+verId+loc+mode]
+	analyzed      map[string]*anres.ChampionDetail  // analyzed[name+ver+loc+mode]
 	shoesList     map[uint]map[int]struct{}         // shoesList[version][shoes]
 }
 
@@ -44,6 +47,11 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 	stgy := defaultOptions
 	for _, opt := range opts {
 		opt(stgy)
+	}
+	buff := global.ChaRDB.HGet(context.Background(), "/championlist", "idxmap").Val()
+	idxMap := make(map[int]string)
+	if err := json.Unmarshal([]byte(buff), &idxMap); err != nil {
+		global.ChaLogger.Error("failed to parse idx map", zap.Error(err))
 	}
 
 	return &Analyzer{
@@ -56,9 +64,12 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 		curVersion:    global.ChaRDB.HGet(context.Background(), "/version", "cur").Val(),
 		analyzedCount: make([]int64, 16),
 		options:       stgy,
+		idxMap:        idxMap,
+		totalPlayed:   make(map[uint]int64),
+		banedMap:      make(map[string]float32),
 		chamTemplate:  make(map[string]*riotmodel.ChampionDTO),
 		itemMap:       make(map[string]*riotmodel.ItemDTO),
-		analyzed:      make(map[uint]*anres.ChampionDetail),
+		analyzed:      make(map[string]*anres.ChampionDetail),
 		shoesList:     make(map[uint]map[int]struct{}),
 	}
 }
@@ -250,44 +261,37 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	}
 	var (
 		// tar     []*anres.ChampionDetail
-		has     bool
-		verIdx  uint
-		modeIdx riotmodel.GAMEMODE
-		err     error
+		has    bool
+		verIdx uint
+		// modeIdx riotmodel.GAMEMODE
+		err error
 	)
 	// get param
 	loCode := utils.ConverHostLoCode(match.Loc)
 	curVersion := match.GameVersion
-	verIdx, err = utils.ConvertVersionToIdx(curVersion)
+	verIdx, _ = utils.ConvertVersionToIdx(curVersion)
+
 	if err != nil {
 		a.logger.Error("wrong match version")
 		return
 	}
-	switch match.GameMode {
-	case "ARAM":
-		modeIdx = riotmodel.ARAM
-	case "CHERRY":
-		modeIdx = riotmodel.CHERRY
-	case "CLASSIC":
-		modeIdx = riotmodel.CLASSIC
-	case "CONVERGENCE":
-		modeIdx = riotmodel.CONVERGENCE
-	case "NEXUSBLITZ":
-		modeIdx = riotmodel.NEXUSBLITZ
+
+	// count ban rate
+	if match.GameMode == "CLASSIC" {
+		var bans []int
+		if err = json.Unmarshal([]byte(match.Bans), &bans); err != nil {
+			a.logger.Error("wrong bans", zap.Error(err))
+		}
+		for _, id := range bans {
+			if id == -1 {
+				continue
+			}
+			k := GetID(a.idxMap[id], curVersion, match.Loc, match.GameMode)
+			a.banedMap[k] = (a.banedMap[k]*float32(a.totalPlayed[verIdx]) + 1) / float32(a.totalPlayed[verIdx]+1)
+		}
 	}
-	// init champion each version?
-	// if match.GameMode == "CLASSIC" {
-	// 	var bans []int
-	// 	if err = json.Unmarshal([]byte(match.Bans), &bans); err != nil {
-	// 		a.logger.Error("wrong bans", zap.Error(err))
-	// 	}
-	// 	for _, id := range bans {
-	// 		banId := uint(id)*1e8 + verIdx*1e4 + loCode*1e2 + modeIdx
-	// 	}
-	// }
 
 	// match partic
-	// tar = make([]*anres.ChampionDetail, 0, len(match.Participants))
 	for _, par := range match.Participants {
 		// skip BOT game
 		if par.Puuid == "BOT" {
@@ -295,28 +299,19 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 		}
 		keyName := par.ChampionName
 		var (
-			chamIdx  int
-			tarId    uint
+			// chamIdx  int
+			tarId    string
 			tmp      *anres.ChampionDetail
 			template *riotmodel.ChampionDTO
 		)
 		// get champion data template
-		if cham, has := a.chamTemplate[strings.ToLower(keyName)]; !has {
+		if template, has = a.chamTemplate[strings.ToLower(keyName)]; !has {
 			a.logger.Error(keyName + "doesnt exist")
 			return
-		} else {
-			chamIdx, err = strconv.Atoi(cham.Key)
-			if err != nil {
-				a.logger.Error("wrong key")
-				return
-			}
-			template = cham
 		}
-		if template == nil {
-			return
-		}
+
 		// match champion && version && loc && gamemode
-		tarId = uint(chamIdx)*1e8 + verIdx*1e4 + uint(loCode)*1e2 + uint(modeIdx)
+		tarId = GetID(keyName, curVersion, match.Loc, match.GameMode)
 		if tmp, has = a.analyzed[tarId]; !has {
 			tmp = &anres.ChampionDetail{
 				Loc:      match.Loc,
@@ -352,26 +347,9 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	// analyzed match count
+	a.totalPlayed[verIdx]++
 	a.analyzedCount[loCode]++
 	return
-}
-
-func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
-	var (
-		cur  int64
-		rate float32
-	)
-	ticker := time.NewTicker(time.Second * 15)
-
-	for {
-		// count
-		cur = a.analyzedCount[loc]
-		rate = float32(cur) / float32(total)
-		a.logger.Info(fmt.Sprintf("analyzed %05.02f%% (%d/%d) match", rate*100, cur, total))
-		// store
-		// a.store()
-		<-ticker.C
-	}
 }
 
 func (a *Analyzer) store() {
@@ -380,11 +358,14 @@ func (a *Analyzer) store() {
 	cmd := make([]*redis.IntCmd, 0, len(a.analyzed))
 	ctx := context.Background()
 	pipe := a.rdb.Pipeline()
-	key := "/champion_detail"
-	for _, cham := range a.analyzed {
-		analyzedDetail = append(analyzedDetail, cham)
-		cmd = append(cmd, pipe.HSet(ctx, key, cham.ID, cham))
 
+	// traverse all analyzed result
+	for key, cham := range a.analyzed {
+		cham.BanRate = a.banedMap[key]
+
+		analyzedDetail = append(analyzedDetail, cham)
+		cmd = append(cmd, pipe.HSet(ctx, "/champion_detail", cham.ID, cham))
+		// store analyzed brief
 		vidx, _ := utils.ConvertVersionToIdx(cham.Version)
 		idx := fmt.Sprintf("%d_%s@%s", vidx, cham.GameMode, cham.Loc)
 		if _, has := analyzed[idx]; !has {
@@ -404,9 +385,7 @@ func (a *Analyzer) store() {
 	if _, err := pipe.Exec(ctx); err != nil {
 		a.logger.Error("store analyzed result to redis failed")
 	}
-	if err := a.db.Save(analyzedDetail).Error; err != nil {
-		a.logger.Error("store analyzed result to db failed", zap.Error(err))
-	}
+
 	// store brief
 	for idx, list := range analyzed {
 		sort.Slice(list, func(i, j int) bool {
@@ -423,8 +402,7 @@ func (a *Analyzer) store() {
 
 func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.ParticipantDB) error {
 	var (
-		buff         []byte
-		totalCount   int64
+		// buff         []byte
 		verIdx       uint
 		startCapital int
 		startItem    []string
@@ -500,7 +478,7 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 	} else {
 		spell = fmt.Sprintf("%d,%d", par.Summoner2Id, par.Summoner1Id)
 	}
-	totalCount = a.analyzedCount[utils.ConverHostLoCode(tar.Loc)] + 1
+
 	// count
 	if par.Win {
 		tar.TotalWin++
@@ -516,29 +494,9 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 		}
 		tar.SpellWin[spell]++
 	}
-	if buff, err = json.Marshal(tar.PerkWin); err != nil {
-		return errors.New("marshal perks faild" + err.Error())
-	} else {
-		tar.PerkSTR = string(buff)
-	}
-	if buff, err = json.Marshal(tar.ItemWin); err != nil {
-		return errors.New("marshal perks faild" + err.Error())
-	} else {
-		tar.ItemSTR = string(buff)
-	}
-	if buff, err = json.Marshal(tar.SkillWin); err != nil {
-		return errors.New("marshal skill faild" + err.Error())
-	} else {
-		tar.SkillSTR = string(buff)
-	}
-	if buff, err = json.Marshal(tar.SpellWin); err != nil {
-		return errors.New("marshal spell faild" + err.Error())
-	} else {
-		tar.SpellSTR = string(buff)
-	}
 
 	tar.WinRate = tar.TotalWin / (tar.TotalPlayed + 1)
-	tar.PickRate = (tar.TotalPlayed + 1) / float32(totalCount)
+	tar.PickRate = (tar.TotalPlayed + 1) / float32(a.totalPlayed[verIdx])
 	tar.AvgKDA = (tar.AvgKDA*tar.TotalPlayed + par.KDA) / (tar.TotalPlayed + 1)
 	tar.AvgKP = (tar.AvgKP*tar.TotalPlayed + par.KP) / (tar.TotalPlayed + 1)
 	tar.AvgDamageDealt = (tar.AvgDamageDealt*tar.TotalPlayed + float32(par.DamageDealt)) / (tar.TotalPlayed + 1)
@@ -551,4 +509,33 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 
 	judge(tar)
 	return nil
+}
+
+func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
+	var (
+		cur  int64
+		rate float32
+	)
+	ticker := time.NewTicker(time.Second * 5)
+
+	for {
+		// count
+		cur = a.analyzedCount[loc]
+		rate = float32(cur) / float32(total)
+		a.logger.Info(fmt.Sprintf("analyzed %05.02f%% (%d/%d) match", rate*100, cur, total))
+		// store
+		// a.store()
+		<-ticker.C
+	}
+}
+
+func GetID(name, version, loc, mode string) string {
+	vidx, _ := utils.ConvertVersionToIdx(version)
+
+	return fmt.Sprintf("%s-%d-%s-%s",
+		strings.ToLower(name),
+		vidx,
+		strings.ToLower(loc),
+		strings.ToLower(mode),
+	)
 }

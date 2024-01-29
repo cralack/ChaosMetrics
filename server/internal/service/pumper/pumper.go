@@ -42,8 +42,8 @@ type Pumper struct {
 	etcdcli     *clientv3.Client
 	fetcher     fetcher.Fetcher
 	scheduler   scheduler.Scheduler
-	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
-	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
+	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerName]
+	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerName]
 	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
 	Exit        chan struct{}
 	out         chan *DBResult
@@ -262,7 +262,6 @@ func (p *Pumper) fetch() {
 					Brief: "entry",
 					Data:  nil,
 				}
-				// *need release scheduler resource*
 				continue
 			}
 

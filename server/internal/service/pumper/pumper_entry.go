@@ -60,12 +60,12 @@ func (p *Pumper) loadEntrie(loc string) {
 	}
 	if len(entries) != 0 {
 		for _, e := range entries {
+			k := fmt.Sprintf("%s@%s", e.SummonerName, e.QueType)
 			// assign to localmap
-			if _, has := p.entryMap[loc][e.SummonerID]; !has {
-				p.entryMap[loc][e.SummonerID] = e
+			if _, has := p.entryMap[loc][k]; !has {
+				p.entryMap[loc][k] = e
 			}
 		} // assign to redis
-		p.cacheEntries(entries, loc)
 	}
 
 	// check local && redis map diff
@@ -158,8 +158,9 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 
 	for _, entry := range entries {
 		// entry doenst exist:create new data
-		if e, has := p.entryMap[loc][entry.SummonerID]; !has {
-			p.entryMap[loc][entry.SummonerID] = entry
+		k := fmt.Sprintf("%s@%s", entry.SummonerName, entry.QueType)
+		if e, has := p.entryMap[loc][k]; !has {
+			p.entryMap[loc][k] = entry
 			entry.ID = p.entrieIdx[loCode]
 			p.entrieIdx[loCode]++
 		} else {
@@ -206,7 +207,8 @@ func (p *Pumper) cacheEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {
 	pipe.Expire(ctx, key, p.stgy.LifeTime)
 	cmds := make([]*redis.IntCmd, 0, len(entries))
 	for _, e := range entries {
-		cmds = append(cmds, pipe.HSet(ctx, key, e.SummonerID, e))
+		field := fmt.Sprintf("%s@%s", e.SummonerName, e.QueType)
+		cmds = append(cmds, pipe.HSet(ctx, key, field, e))
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
 		p.logger.Error("redis store entry failed", zap.Error(err))

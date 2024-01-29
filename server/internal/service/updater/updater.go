@@ -123,6 +123,26 @@ func (u *Updater) UpdateChampions(version string) {
 	ctx := context.Background()
 	cList = make([]string, 0, 300)
 
+	// store idxap[idx]->champion name
+	idxMap := make(map[string]string)
+	if version == u.CurVersion {
+		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
+		if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
+			u.logger.Error("get champion list failed", zap.Error(err))
+		}
+		if err = json.Unmarshal(buff, &chamList); err != nil {
+			u.logger.Error("unmarshal json to champion list failed", zap.Error(err))
+		}
+		for name, c := range chamList.Data {
+			idxMap[c.Key] = name
+		}
+		buff, _ = json.Marshal(idxMap)
+		if err = u.rdb.HSet(ctx, "/championlist", "idxmap", buff).Err(); err != nil {
+			u.logger.Error("store champion idxmap failed", zap.Error(err))
+		}
+
+	}
+
 	// get chamlist from rdb or riot
 	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%d", vIdx)).Val(); buffer == "" {
 		// get champion chamList

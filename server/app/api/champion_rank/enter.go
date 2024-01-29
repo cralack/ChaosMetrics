@@ -8,7 +8,7 @@ type championRankApi struct{}
 
 func InitChampionRankRouter(r *gin.Engine) {
 	api := championRankApi{}
-	championRankApi := r.Group("/champion")
+	championRankApi := r.Group("")
 	{
 		championRankApi.GET("/ARAM", api.QueryChampionRankARAM)
 		championRankApi.GET("/CLASSIC", api.QueryChampionRankCLASSIC)

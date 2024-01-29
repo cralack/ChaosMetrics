@@ -16,7 +16,7 @@ type Option func(stgy *options) // Strategy的配置选项
 
 var defaultOptions = &options{
 	Loc:       []riotmodel.LOCATION{riotmodel.TW2},                          // 默认地区为台湾
-	Mode:      []riotmodel.GAMEMODE{riotmodel.ARAM},                         // 默认模式为大乱斗
+	Mode:      []riotmodel.GAMEMODE{riotmodel.ARAM, riotmodel.CLASSIC},      // 默认模式为大乱斗
 	Lang:      []riotmodel.LANG{riotmodel.LANG_zh_CN, riotmodel.LANG_en_US}, // 默认中文、英文
 	BatchSize: 100,
 	// LifeTime: -1, // cache forever

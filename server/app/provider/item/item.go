@@ -13,22 +13,22 @@ import (
 	"go.uber.org/zap"
 )
 
-type ItemService struct {
+type ItmService struct {
 	rdb   *redis.Client
 	rlock *sync.RWMutex
 }
 
-func NewItemService(params ...interface{}) *ItemService {
+func NewItemService(params ...interface{}) *ItmService {
 	if len(params) > 0 {
 		global.ChaLogger.Debug("param", zap.Int("len", len(params)))
 	}
-	return &ItemService{
+	return &ItmService{
 		rdb:   global.ChaRDB,
 		rlock: &sync.RWMutex{},
 	}
 }
 
-func (i *ItemService) QueryItem(itemId, version, lang string) (*riotmodel.ItemDTO, error) {
+func (i *ItmService) QueryItem(itemId, version, lang string) (*riotmodel.ItemDTO, error) {
 	var (
 		item *riotmodel.ItemDTO
 		vIdx uint
