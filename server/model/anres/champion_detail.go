@@ -44,7 +44,6 @@ func (c *ChampionDetail) TableName() string {
 func (c *ChampionDetail) MarshalBinary() ([]byte, error) {
 	return json.Marshal(c)
 }
-
 func (c *ChampionDetail) UnmarshalBinary(bt []byte) error {
 	return json.Unmarshal(bt, c)
 }

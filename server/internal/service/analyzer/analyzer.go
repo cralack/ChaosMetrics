@@ -36,7 +36,8 @@ type Analyzer struct {
 	options       *options
 	idxMap        map[int]string                    // idx->championName
 	totalPlayed   map[uint]int64                    // totalPlayed[vIdx]
-	banedMap      map[string]float32                // banedMap[name+ver+loc+mode]
+	banedCount    map[string]int                    // banedCount[name+ver+loc+mode]
+	pickCount     map[string]int                    // pickCount[name+ver+loc+mode]
 	chamTemplate  map[string]*riotmodel.ChampionDTO // chamTemplate[championName]
 	itemMap       map[string]*riotmodel.ItemDTO     // itemMap[itemID@version]
 	analyzed      map[string]*anres.ChampionDetail  // analyzed[name+ver+loc+mode]
@@ -66,7 +67,8 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 		options:       stgy,
 		idxMap:        idxMap,
 		totalPlayed:   make(map[uint]int64),
-		banedMap:      make(map[string]float32),
+		banedCount:    make(map[string]int),
+		pickCount:     make(map[string]int),
 		chamTemplate:  make(map[string]*riotmodel.ChampionDTO),
 		itemMap:       make(map[string]*riotmodel.ItemDTO),
 		analyzed:      make(map[string]*anres.ChampionDetail),
@@ -287,7 +289,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 				continue
 			}
 			k := GetID(a.idxMap[id], curVersion, match.Loc, match.GameMode)
-			a.banedMap[k] = (a.banedMap[k]*float32(a.totalPlayed[verIdx]) + 1) / float32(a.totalPlayed[verIdx]+1)
+			a.banedCount[k]++
 		}
 	}
 
@@ -334,8 +336,8 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 			}
 			tmp.ID = tarId
 		}
+		a.pickCount[tarId]++
 		// analyze data
-
 		if err = a.handleAnares(tmp, par); err != nil {
 			a.logger.Error("parse match failed", zap.Error(err))
 			return
@@ -361,12 +363,16 @@ func (a *Analyzer) store() {
 
 	// traverse all analyzed result
 	for key, cham := range a.analyzed {
-		cham.BanRate = a.banedMap[key]
+		vidx, _ := utils.ConvertVersionToIdx(cham.Version)
+		if vidx == 1323 && cham.Name == "Hecarim" {
+			a.logger.Debug("")
+		}
+		cham.BanRate = float32(a.banedCount[key]) / float32(a.totalPlayed[vidx])
+		cham.PickRate = float32(a.pickCount[key]) / float32(a.totalPlayed[vidx])
 
 		analyzedDetail = append(analyzedDetail, cham)
 		cmd = append(cmd, pipe.HSet(ctx, "/champion_detail", cham.ID, cham))
 		// store analyzed brief
-		vidx, _ := utils.ConvertVersionToIdx(cham.Version)
 		idx := fmt.Sprintf("%d_%s@%s", vidx, cham.GameMode, cham.Loc)
 		if _, has := analyzed[idx]; !has {
 			analyzed[idx] = make([]*anres.ChampionBrief, 0, 200)
@@ -383,7 +389,7 @@ func (a *Analyzer) store() {
 	}
 	// store detail
 	if _, err := pipe.Exec(ctx); err != nil {
-		a.logger.Error("store analyzed result to redis failed")
+		a.logger.Error("store analyzed result to redis failed", zap.Error(err))
 	}
 
 	// store brief
@@ -496,7 +502,6 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 	}
 
 	tar.WinRate = tar.TotalWin / (tar.TotalPlayed + 1)
-	tar.PickRate = (tar.TotalPlayed + 1) / float32(a.totalPlayed[verIdx])
 	tar.AvgKDA = (tar.AvgKDA*tar.TotalPlayed + par.KDA) / (tar.TotalPlayed + 1)
 	tar.AvgKP = (tar.AvgKP*tar.TotalPlayed + par.KP) / (tar.TotalPlayed + 1)
 	tar.AvgDamageDealt = (tar.AvgDamageDealt*tar.TotalPlayed + float32(par.DamageDealt)) / (tar.TotalPlayed + 1)

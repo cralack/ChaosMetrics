@@ -21,7 +21,6 @@ type ChampionBrief struct {
 func (c *ChampionBrief) MarshalBinary() ([]byte, error) {
 	return json.Marshal(c)
 }
-
 func (c *ChampionBrief) UnmarshalBinary(bt []byte) error {
 	return json.Unmarshal(bt, c)
 }
