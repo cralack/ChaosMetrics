@@ -191,8 +191,8 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
-github.com/go-micro/plugins/v4/client/grpc v1.1.0 h1:1MlhnyLxlZpzYY7gepj5zGJNn06yL+3OBbDfh0Z6jH0=
-github.com/go-micro/plugins/v4/client/grpc v1.1.0/go.mod h1:7mskyLlKoKT2V5mC4mdBcrpDx+CiLZxXtTMD+jpFuRY=
+github.com/go-micro/plugins/v4/client/grpc v1.2.1 h1:7xAwZRCO6mdUtBHsYIQs1/eCTdhCrnjF70GB+AVd6L0=
+github.com/go-micro/plugins/v4/client/grpc v1.2.1/go.mod h1:3fDuzyfYLwEImn8+lkhKl3W4Ay1jFevkTeC32PBlgQs=
 github.com/go-micro/plugins/v4/registry/etcd v1.2.0 h1:tcHlU1GzvX3oZa8WQH8ylMCGie5qD5g98YWTESJjeqQ=
 github.com/go-micro/plugins/v4/registry/etcd v1.2.0/go.mod h1:CQeTHkjN3xMtIQsynaTTquMz2sHEdsTfRIfFzrX7aug=
 github.com/go-micro/plugins/v4/server/grpc v1.2.0 h1:lXfM+/0oE/u1g0hVBYsvbP4lYOYXYOmwf5qH7ghi7Cc=

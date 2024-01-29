@@ -6,7 +6,7 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-micro/plugins/v4/client/grpc v1.1.0
+	github.com/go-micro/plugins/v4/client/grpc v1.2.1
 	github.com/go-micro/plugins/v4/registry/etcd v1.2.0
 	github.com/go-micro/plugins/v4/server/grpc v1.2.0
 	github.com/go-sql-driver/mysql v1.7.1
