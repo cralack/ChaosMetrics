@@ -9,7 +9,12 @@ import (
 
 func New() *gin.Engine {
 	switch global.ChaEnv {
-
+	case global.TestEnv:
+		gin.SetMode(gin.TestMode)
+	case global.DevEnv:
+		gin.SetMode(gin.DebugMode)
+	case global.ProductEnv:
+		gin.SetMode(gin.ReleaseMode)
 	}
 
 	router := gin.New()

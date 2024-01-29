@@ -35,7 +35,7 @@ type Analyzer struct {
 	analyzedCount []int64
 	options       *options
 	idxMap        map[int]string                    // idx->championName
-	totalPlayed   map[uint]int64                    // totalPlayed[vIdx]
+	totalPlayed   map[string]int64                  // totalPlayed[version+loc+mode]
 	banedCount    map[string]int                    // banedCount[name+ver+loc+mode]
 	pickCount     map[string]int                    // pickCount[name+ver+loc+mode]
 	chamTemplate  map[string]*riotmodel.ChampionDTO // chamTemplate[championName]
@@ -66,7 +66,7 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 		analyzedCount: make([]int64, 16),
 		options:       stgy,
 		idxMap:        idxMap,
-		totalPlayed:   make(map[uint]int64),
+		totalPlayed:   make(map[string]int64),
 		banedCount:    make(map[string]int),
 		pickCount:     make(map[string]int),
 		chamTemplate:  make(map[string]*riotmodel.ChampionDTO),
@@ -263,15 +263,15 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	}
 	var (
 		// tar     []*anres.ChampionDetail
-		has    bool
-		verIdx uint
+		has bool
+		// verIdx uint
 		// modeIdx riotmodel.GAMEMODE
 		err error
 	)
 	// get param
 	loCode := utils.ConverHostLoCode(match.Loc)
 	curVersion := match.GameVersion
-	verIdx, _ = utils.ConvertVersionToIdx(curVersion)
+	// verIdx, _ = utils.ConvertVersionToIdx(curVersion)
 
 	if err != nil {
 		a.logger.Error("wrong match version")
@@ -349,7 +349,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	// analyzed match count
-	a.totalPlayed[verIdx]++
+	a.totalPlayed[GetID("", curVersion, match.Loc, match.GameMode)]++
 	a.analyzedCount[loCode]++
 	return
 }
@@ -363,16 +363,14 @@ func (a *Analyzer) store() {
 
 	// traverse all analyzed result
 	for key, cham := range a.analyzed {
-		vidx, _ := utils.ConvertVersionToIdx(cham.Version)
-		if vidx == 1323 && cham.Name == "Hecarim" {
-			a.logger.Debug("")
-		}
-		cham.BanRate = float32(a.banedCount[key]) / float32(a.totalPlayed[vidx])
-		cham.PickRate = float32(a.pickCount[key]) / float32(a.totalPlayed[vidx])
+		k := GetID("", cham.Version, cham.Loc, cham.GameMode)
+		cham.BanRate = float32(a.banedCount[key]) / float32(a.totalPlayed[k])
+		cham.PickRate = float32(a.pickCount[key]) / float32(a.totalPlayed[k])
 
 		analyzedDetail = append(analyzedDetail, cham)
 		cmd = append(cmd, pipe.HSet(ctx, "/champion_detail", cham.ID, cham))
 		// store analyzed brief
+		vidx, _ := utils.ConvertVersionToIdx(cham.Version)
 		idx := fmt.Sprintf("%d_%s@%s", vidx, cham.GameMode, cham.Loc)
 		if _, has := analyzed[idx]; !has {
 			analyzed[idx] = make([]*anres.ChampionBrief, 0, 200)
@@ -536,6 +534,13 @@ func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
 
 func GetID(name, version, loc, mode string) string {
 	vidx, _ := utils.ConvertVersionToIdx(version)
+	if name == "" {
+		return fmt.Sprintf("%d-%s-%s",
+			vidx,
+			strings.ToLower(loc),
+			strings.ToLower(mode),
+		)
+	}
 
 	return fmt.Sprintf("%s-%d-%s-%s",
 		strings.ToLower(name),
