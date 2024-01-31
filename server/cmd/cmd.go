@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/cralack/ChaosMetrics/server/cmd/master"
 	"github.com/cralack/ChaosMetrics/server/cmd/worker"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
@@ -46,17 +48,17 @@ func AddCommands(root *cobra.Command) {
 
 func RunCmd() error {
 	AddCommands(rootCmd)
-	// { // debug master part
-	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
-	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
-	// 		arg := "master"
-	// 		extraArg1 := "--id=4"
-	// 		extraArg2 := "--http=:8084"
-	// 		extraArg3 := "--grpc=:9094"
-	// 		args := append([]string{arg, extraArg1, extraArg2, extraArg3}, os.Args[1:]...)
-	// 		rootCmd.SetArgs(args)
-	// 	}
-	// }
+	{ // debug master part
+		cmd, _, err := rootCmd.Find(os.Args[1:])
+		if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
+			arg := "master"
+			extraArg1 := "--id=4"
+			extraArg2 := "--http=:8084"
+			extraArg3 := "--grpc=:9094"
+			args := append([]string{arg, extraArg1, extraArg2, extraArg3}, os.Args[1:]...)
+			rootCmd.SetArgs(args)
+		}
+	}
 	// {
 	// 	// debug worker part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])

@@ -138,6 +138,17 @@ definitions:
         description: 图像 Y 坐标
         type: integer
     type: object
+  response.SummonerDTO:
+    properties:
+      loc:
+        type: string
+      name:
+        type: string
+      profileIconID:
+        type: integer
+      summonerLevel:
+        type: integer
+    type: object
   riotmodel.GoldInfo:
     properties:
       base:
@@ -335,6 +346,34 @@ paths:
       summary: 请求一个物品详情
       tags:
       - Item
+  /summoner:
+    get:
+      consumes:
+      - application/json
+      description: 请求一个召唤师详情 @name,loc
+      parameters:
+      - default: na1
+        description: Region
+        in: query
+        name: loc
+        required: true
+        type: string
+      - default: Solarbacca
+        description: Summoner name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SummonerDTO'
+      summary: 请求一个召唤师详情
+      tags:
+      - Champion Detail
 securityDefinitions:
   BasicAuth:
     type: basic

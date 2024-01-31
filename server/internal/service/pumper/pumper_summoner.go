@@ -105,7 +105,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 		}
 		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, entry.SummonerName)
 		p.scheduler.Push(&scheduler.Task{
-			Type: summonerTypeKey,
+			Type: SummonerTypeKey,
 			Loc:  loc,
 			URL:  url,
 			Data: &summonerTask{
@@ -118,7 +118,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 		if sumn.MetaSummonerID == "" {
 			url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, sumn.Name)
 			p.scheduler.Push(&scheduler.Task{
-				Type: summonerTypeKey,
+				Type: SummonerTypeKey,
 				Loc:  loc,
 				URL:  url,
 				Data: &summonerTask{
@@ -129,7 +129,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 	}
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
-		Type: summonerTypeKey,
+		Type: SummonerTypeKey,
 		Loc:  loc,
 		Data: nil,
 	})
@@ -158,7 +158,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	// check oversize && split
 	if len(summoners) < p.stgy.MaxSize {
 		p.out <- &DBResult{
-			Type: summonerTypeKey,
+			Type: SummonerTypeKey,
 			Data: summoners,
 		}
 	} else {
@@ -170,7 +170,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 				end = totalSize
 			}
 			p.out <- &DBResult{
-				Type: summonerTypeKey,
+				Type: SummonerTypeKey,
 				Data: summoners[i:end],
 			}
 		}

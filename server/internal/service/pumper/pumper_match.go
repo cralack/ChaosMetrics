@@ -105,7 +105,7 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 			url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
 				region, summoner.PUUID, queryParams)
 			p.scheduler.Push(&scheduler.Task{
-				Type: matchTypeKey,
+				Type: MatchTypeKey,
 				Loc:  loc,
 				URL:  url,
 				Data: &matchTask{
@@ -118,7 +118,7 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
-		Type: matchTypeKey,
+		Type: MatchTypeKey,
 		Loc:  loc,
 		Data: nil,
 	})
@@ -228,7 +228,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	chunkSize := 5
 	if totalSize < chunkSize {
 		p.out <- &DBResult{
-			Type:  matchTypeKey,
+			Type:  MatchTypeKey,
 			Brief: sName,
 			Data:  matches,
 		}
@@ -245,7 +245,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 
 	for _, chunk := range chunks {
 		p.out <- &DBResult{
-			Type:  matchTypeKey,
+			Type:  MatchTypeKey,
 			Brief: sName,
 			Data:  chunk,
 		}
@@ -275,7 +275,7 @@ func (p *Pumper) FetchMatchByName(summonerName string, loc riotmodel.LOCATION) e
 		region, puuid, queryParams)
 
 	p.scheduler.Push(&scheduler.Task{
-		Type: matchTypeKey,
+		Type: MatchTypeKey,
 		Loc:  locStr,
 		URL:  url,
 		Data: &matchTask{

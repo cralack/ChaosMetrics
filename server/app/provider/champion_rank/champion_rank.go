@@ -24,7 +24,7 @@ func NewChampionRankService() *ChampionRankService {
 	}
 }
 
-func (c *ChampionRankService) QueryChampionRank(version, location, gamemode string) ([]*anres.ChampionBrief, error) {
+func (s *ChampionRankService) QueryChampionRank(version, location, gamemode string) ([]*anres.ChampionBrief, error) {
 	var (
 		res  []*anres.ChampionBrief
 		err  error
@@ -33,7 +33,7 @@ func (c *ChampionRankService) QueryChampionRank(version, location, gamemode stri
 	key := "/champion_brief"
 	vidx, _ := utils.ConvertVersionToIdx(version)
 	field := fmt.Sprintf("%d_%s@%s", vidx, gamemode, location)
-	buff = c.rdb.HGet(context.Background(), key, field).Val()
+	buff = s.rdb.HGet(context.Background(), key, field).Val()
 	if err = json.Unmarshal([]byte(buff), &res); err != nil {
 		return nil, err
 	}

@@ -25,11 +25,11 @@ import (
 const testSize = 1
 
 const (
-	entryTypeKey       = "entry"
+	EntryTypeKey       = "entry"
 	bestEntryTypeKey   = "best"
 	mortalEntryTypeKey = "mortal"
-	summonerTypeKey    = "sum"
-	matchTypeKey       = "match"
+	SummonerTypeKey    = "sum"
+	MatchTypeKey       = "match"
 	finishTypeKey      = "finish"
 )
 
@@ -131,19 +131,19 @@ func (p *Pumper) handleResult() {
 			p.Exit <- struct{}{}
 			continue
 
-		case entryTypeKey:
+		case EntryTypeKey:
 			entries := result.Data.([]*riotmodel.LeagueEntryDTO)
 			if err := p.db.Save(entries).Error; err != nil {
 				p.logger.Error("riot entry store failed", zap.Error(err))
 			}
 
-		case summonerTypeKey:
+		case SummonerTypeKey:
 			summoners := result.Data.([]*riotmodel.SummonerDTO)
 			if err := p.db.Save(summoners).Error; err != nil {
 				p.logger.Error("riot summoner model store failed", zap.Error(err))
 			}
 
-		case matchTypeKey:
+		case MatchTypeKey:
 			matches := result.Data.([]*riotmodel.MatchDB)
 			if len(matches) == 0 {
 				continue
@@ -252,8 +252,8 @@ func (p *Pumper) fetch() {
 			}
 			// clear list
 			list = nil
-			p.logger.Info(fmt.Sprintf("all %d %s data fetch done",
-				len(entries), data.Tier))
+			p.logger.Info(fmt.Sprintf("all %d %s @ %s data fetch done",
+				len(entries), data.Tier, data.Queue[7:]))
 			p.handleEntries(entries, req.Loc)
 			p.cacheEntries(entries, req.Loc)
 			if data.Tier == endTier && data.Rank == endRank {
@@ -283,7 +283,8 @@ func (p *Pumper) fetch() {
 					p.logger.Error(fmt.Sprintf("unmarshal json to %s failed",
 						"LeagueEntryDTO"), zap.Error(err))
 				} else {
-					p.logger.Info(fmt.Sprintf("fetch %s %s page %d done", data.Tier, data.Rank, page))
+					p.logger.Info(fmt.Sprintf("fetch %s %s @ %s,page %d done",
+						data.Tier, data.Rank, data.Queue[7:], page))
 				}
 				for _, e := range entries {
 					e.Loc = req.Loc
@@ -313,7 +314,7 @@ func (p *Pumper) fetch() {
 				continue
 			}
 
-		case summonerTypeKey:
+		case SummonerTypeKey:
 			data := req.Data.(*summonerTask)
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
@@ -331,7 +332,7 @@ func (p *Pumper) fetch() {
 			}
 			p.handleSummoner(req.Loc, sumn)
 
-		case matchTypeKey:
+		case MatchTypeKey:
 			data := req.Data.(*matchTask)
 			// get old & cur match list
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {

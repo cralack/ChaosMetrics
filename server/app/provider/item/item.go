@@ -28,7 +28,7 @@ func NewItemService(params ...interface{}) *ItmService {
 	}
 }
 
-func (i *ItmService) QueryItem(itemId, version, lang string) (*riotmodel.ItemDTO, error) {
+func (s *ItmService) QueryItem(itemId, version, lang string) (*riotmodel.ItemDTO, error) {
 	var (
 		item *riotmodel.ItemDTO
 		vIdx uint
@@ -42,7 +42,7 @@ func (i *ItmService) QueryItem(itemId, version, lang string) (*riotmodel.ItemDTO
 
 	key := fmt.Sprintf("/items/%s", lang)
 	field := fmt.Sprintf("%s@%d", itemId, vIdx)
-	buff = i.rdb.HGet(context.Background(), key, field).Val()
+	buff = s.rdb.HGet(context.Background(), key, field).Val()
 	if err = json.Unmarshal([]byte(buff), &item); err != nil {
 		return nil, err
 	}

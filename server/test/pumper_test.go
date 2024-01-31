@@ -34,8 +34,6 @@ func Test_pumper_fetch_single_summoner(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	// exit := make(chan struct{})
 	go p.StartEngine()
-	// p.loadSummoners("tw2")
 	p.LoadSingleSummoner("Pink HairDryer", "na1")
 }

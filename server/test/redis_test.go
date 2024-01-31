@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/cralack/ChaosMetrics/server/app/provider/summoner"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/redis/go-redis/v9"
 )
@@ -34,7 +35,7 @@ func Test_redis_crud(t *testing.T) {
 	for _, e := range entries {
 		cmd = append(cmd, pipe.HSet(context.Background(), "/entry/tw2", e.SummonerID, e))
 	}
-	if _, err := pipe.Exec(context.Background()); err != nil {
+	if _, err = pipe.Exec(context.Background()); err != nil {
 		t.Log(err)
 	}
 }
@@ -46,4 +47,12 @@ func Test_redis(t *testing.T) {
 		t.Log(err)
 	}
 	t.Log(cList[0])
+}
+
+func Test_query(t *testing.T) {
+	s := summoner.NewSumnService()
+	if sumn := s.QuerySummonerByName("na1", "xyaaaz"); sumn != nil {
+		t.Log(sumn.Name)
+	}
+
 }

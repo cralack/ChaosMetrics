@@ -23,7 +23,7 @@ func NewChampionDetailService() *ChampionDetailService {
 	}
 }
 
-func (c *ChampionDetailService) QueryChampionDetail(name, version, location, gamemode string) (*anres.ChampionDetail, error) {
+func (s *ChampionDetailService) QueryChampionDetail(name, version, location, gamemode string) (*anres.ChampionDetail, error) {
 	var (
 		res  *anres.ChampionDetail
 		err  error
@@ -31,7 +31,7 @@ func (c *ChampionDetailService) QueryChampionDetail(name, version, location, gam
 	)
 	key := "/champion_detail"
 	field := analyzer.GetID(name, version, location, gamemode)
-	buff = c.rdb.HGet(context.Background(), key, field).Val()
+	buff = s.rdb.HGet(context.Background(), key, field).Val()
 	if err = json.Unmarshal([]byte(buff), &res); err != nil {
 		return nil, err
 	}

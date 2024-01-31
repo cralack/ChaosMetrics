@@ -192,7 +192,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 	// send to DB handler
 	for _, chunk := range chunks {
 		p.out <- &DBResult{
-			Type:  entryTypeKey,
+			Type:  EntryTypeKey,
 			Brief: chunk[0].Tier + " " + chunk[0].Rank,
 			Data:  chunk,
 		}
@@ -240,7 +240,7 @@ func (p *Pumper) FetchEntryByName(summonerName string, loc riotmodel.LOCATION) e
 
 	for _, entry := range entries {
 		p.scheduler.Push(&scheduler.Task{
-			Type:     entryTypeKey,
+			Type:     EntryTypeKey,
 			Loc:      locStr,
 			URL:      url,
 			Priority: true,

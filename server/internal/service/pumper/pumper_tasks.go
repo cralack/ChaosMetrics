@@ -79,10 +79,12 @@ func (p *Pumper) handleTask(ctx context.Context, task *master.TaskSpec) {
 	}
 	loc := utils.ConverHostLoCode(task.Loc)
 	switch task.Type {
-	case entryTypeKey:
+	case EntryTypeKey:
 		err = p.FetchEntryByName(task.SumName, loc)
-	case matchTypeKey:
+	case MatchTypeKey:
 		err = p.FetchMatchByName(task.SumName, loc)
+	case SummonerTypeKey:
+
 	}
 
 	if err == nil {

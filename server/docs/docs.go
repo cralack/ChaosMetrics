@@ -212,6 +212,47 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/summoner": {
+            "get": {
+                "description": "请求一个召唤师详情 @name,loc",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Champion Detail"
+                ],
+                "summary": "请求一个召唤师详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "na1",
+                        "description": "Region",
+                        "name": "loc",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Solarbacca",
+                        "description": "Summoner name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SummonerDTO"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -406,6 +447,23 @@ const docTemplate = `{
                 },
                 "y": {
                     "description": "图像 Y 坐标",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.SummonerDTO": {
+            "type": "object",
+            "properties": {
+                "loc": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "profileIconID": {
+                    "type": "integer"
+                },
+                "summonerLevel": {
                     "type": "integer"
                 }
             }
