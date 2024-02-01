@@ -85,7 +85,7 @@ func (p *Pumper) loadSummoners(loc string) {
 			mx = s.ID
 		}
 	}
-	loCode := uint(utils.ConverHostLoCode(loc))
+	loCode := uint(utils.ConvertLocodeToLocation(loc))
 	p.lock.Lock()
 	p.summonerIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
@@ -93,7 +93,7 @@ func (p *Pumper) loadSummoners(loc string) {
 }
 
 func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
-	loc, host := utils.ConvertHostURL(loCode)
+	loc, host := utils.ConvertLocationToLoHo(loCode)
 	p.loadSummoners(loc)
 	go p.summonerCounter(loc)
 	// expand from entry
@@ -140,7 +140,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	if len(summoners) == 0 {
 		return
 	}
-	loCode := utils.ConverHostLoCode(loc)
+	loCode := utils.ConvertLocodeToLocation(loc)
 	p.lock.Lock()
 	defer p.lock.Unlock()
 

@@ -174,7 +174,7 @@ func (u *Updater) UpdateChampions(version string) {
 
 	// update champion for each lang
 	for _, langCode := range u.stgy.Lang {
-		lang := utils.ConvertLanguageCode(langCode)
+		lang := utils.ConvertLangToLangSTR(langCode)
 		key := fmt.Sprintf("/champions/%s", lang)
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		cmds := make([]*redis.IntCmd, 0, len(cList))
@@ -237,7 +237,7 @@ func (u *Updater) UpdateItems(version string) {
 
 	ctx := context.Background()
 	for _, langCode := range u.stgy.Lang {
-		lang := utils.ConvertLanguageCode(langCode)
+		lang := utils.ConvertLangToLangSTR(langCode)
 		key := fmt.Sprintf("/items/%s", lang)
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/item.json",
@@ -286,7 +286,7 @@ func (u *Updater) UpdatePerks(version string) {
 	vIdx, err = utils.ConvertVersionToIdx(version)
 	ctx := context.Background()
 	for _, langCode := range u.stgy.Lang {
-		lang := utils.ConvertLanguageCode(langCode)
+		lang := utils.ConvertLangToLangSTR(langCode)
 		key = fmt.Sprintf("/perks/%s", lang)
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		// fetch perk relation

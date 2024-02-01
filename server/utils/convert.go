@@ -9,7 +9,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-func ConvertHostURL(loc riotmodel.LOCATION) (loCode, hostURL string) {
+func ConvertLocationToLoHo(loc riotmodel.LOCATION) (loCode, hostURL string) {
 	platformCodeMap := map[riotmodel.LOCATION]string{
 		riotmodel.BR1:  "br1",
 		riotmodel.EUN1: "eun1",
@@ -33,7 +33,7 @@ func ConvertHostURL(loc riotmodel.LOCATION) (loCode, hostURL string) {
 	return loCode, "https://" + loCode + host
 }
 
-func ConverHostLoCode(loCode string) riotmodel.LOCATION {
+func ConvertLocodeToLocation(loCode string) riotmodel.LOCATION {
 	platformCodeMap := map[string]riotmodel.LOCATION{
 		"br1":  riotmodel.BR1,
 		"eun1": riotmodel.EUN1,
@@ -56,7 +56,7 @@ func ConverHostLoCode(loCode string) riotmodel.LOCATION {
 	return platformCodeMap[loCode]
 }
 
-func ConvertLocToRegion(loc riotmodel.LOCATION) string {
+func ConvertLocationToRegionHost(loc riotmodel.LOCATION) string {
 	platformToRegion := map[riotmodel.LOCATION]string{
 		// The AMERICAS routing value serves NA, BR, LAN and LAS.
 		riotmodel.BR1: "AMERICAS",
@@ -92,7 +92,7 @@ func ConvertLocToRegion(loc riotmodel.LOCATION) string {
 	return "https://" + host
 }
 
-func ConvertRegionToRegCode(region string) riotmodel.AREA {
+func ConvertRegionSTRToArea(region string) riotmodel.AREA {
 	regionCode := map[string]riotmodel.AREA{
 		"AMERICAS": riotmodel.LOC_AMERICAS,
 		"ASIA":     riotmodel.LOC_ASIA,
@@ -105,7 +105,7 @@ func ConvertRegionToRegCode(region string) riotmodel.AREA {
 	return regionCode[region]
 }
 
-func ConvertLanguageCode(lang riotmodel.LANG) string {
+func ConvertLangToLangSTR(lang riotmodel.LANG) string {
 	langMap := map[riotmodel.LANG]string{
 		riotmodel.LANG_cs_CZ: "cs_CZ",
 		riotmodel.LANG_el_GR: "el_GR",
@@ -148,7 +148,7 @@ func ConvertStrToSlice(str string) []string {
 	return strings.Split(str, ",")
 }
 
-// ConvertVersionToIdx return a 4 digit str xxyy
+// ConvertVersionToIdx return a 4 digit str xxyy (1401)
 func ConvertVersionToIdx(version string) (uint, error) {
 	versions := strings.Split(version, ".")
 	if len(versions) < 3 {

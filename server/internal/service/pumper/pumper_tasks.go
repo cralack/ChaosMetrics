@@ -77,7 +77,7 @@ func (p *Pumper) handleTask(ctx context.Context, task *master.TaskSpec) {
 	if err != nil || p.id != id {
 		return
 	}
-	loc := utils.ConverHostLoCode(task.Loc)
+	loc := utils.ConvertLocodeToLocation(task.Loc)
 	switch task.Type {
 	case EntryTypeKey:
 		err = p.FetchEntryByName(task.SumName, loc)

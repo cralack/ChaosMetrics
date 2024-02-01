@@ -192,7 +192,7 @@ func Test_parse_match_list(t *testing.T) {
 		list []string
 	)
 	puuid := "6RtCOQdb0rlWO0S714_nYds_xDw2-bwrB8IsVzJbAQi8uBfosVT5UyfayA9oirdE5pCFMEFB6TkAlA"
-	region := utils.ConvertLocToRegion(loc)
+	region := utils.ConvertLocationToRegionHost(loc)
 	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d", startTime, endTime, maxMatch)
@@ -304,7 +304,7 @@ func Test_parse_mortal(t *testing.T) {
 }
 
 func Test_parse_champion(t *testing.T) {
-	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
+	lang := utils.ConvertLangToLangSTR(riotmodel.LANG_zh_CN)
 	version := "13.14.1"
 	championName := "Aatrox"
 	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion/%s.json",
@@ -325,7 +325,7 @@ func Test_parse_champion(t *testing.T) {
 }
 
 func Test_parse_champions(t *testing.T) {
-	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
+	lang := utils.ConvertLangToLangSTR(riotmodel.LANG_zh_CN)
 	version := "13.14.1"
 	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/champion.json", version, lang)
 	buff, err := f.Get(url)
@@ -355,7 +355,7 @@ func Test_parse_version(t *testing.T) {
 }
 
 func Test_parse_item_list(t *testing.T) {
-	lang := utils.ConvertLanguageCode(riotmodel.LANG_zh_CN)
+	lang := utils.ConvertLangToLangSTR(riotmodel.LANG_zh_CN)
 	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/13.14.1/data/%s/item.json", lang)
 	buff, err := f.Get(url)
 	if err != nil {

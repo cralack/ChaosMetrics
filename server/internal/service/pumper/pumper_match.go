@@ -88,8 +88,8 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 		has      bool
 		count    int
 	)
-	loc, _ := utils.ConvertHostURL(loCode)
-	region := utils.ConvertLocToRegion(loCode)
+	loc, _ := utils.ConvertLocationToLoHo(loCode)
+	region := utils.ConvertLocationToRegionHost(loCode)
 	p.loadMatch(loc)
 
 	// init query val
@@ -204,7 +204,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	cmds := make([]*redis.IntCmd, 0, len(matches))
 
 	for _, m := range matches {
-		loCode := utils.ConverHostLoCode(m.Loc)
+		loCode := utils.ConvertLocodeToLocation(m.Loc)
 		key := fmt.Sprintf("/match/%s", m.Loc)
 		cmds = append(cmds, pipe.HSet(ctx, key, m.MetaMatchID, true))
 		var gameId uint
@@ -261,8 +261,8 @@ func (p *Pumper) FetchMatchByName(summonerName string, loc riotmodel.LOCATION) e
 		locStr string
 		sumn   *riotmodel.SummonerDTO
 	)
-	locStr, _ = utils.ConvertHostURL(loc)
-	region = utils.ConvertLocToRegion(loc)
+	locStr, _ = utils.ConvertLocationToLoHo(loc)
+	region = utils.ConvertLocationToRegionHost(loc)
 	sumn = p.LoadSingleSummoner(summonerName, locStr)
 	puuid = sumn.PUUID
 	url = fmt.Sprintf("")

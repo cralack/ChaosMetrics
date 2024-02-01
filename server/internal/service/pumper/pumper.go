@@ -68,7 +68,7 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 	sumnMap := make(map[string]map[string]*riotmodel.SummonerDTO)
 	matchMap := make(map[string]map[string]bool)
 	for _, l := range stgy.Loc {
-		loc, _ := utils.ConvertHostURL(l)
+		loc, _ := utils.ConvertLocationToLoHo(l)
 		entryMap[loc] = make(map[string]*riotmodel.LeagueEntryDTO)
 		sumnMap[loc] = make(map[string]*riotmodel.SummonerDTO)
 		matchMap[loc] = make(map[string]bool)
@@ -168,7 +168,7 @@ func (p *Pumper) StartEngine() {
 
 func (p *Pumper) LoadAll() {
 	for _, l := range p.stgy.Loc {
-		loc, _ := utils.ConvertHostURL(l)
+		loc, _ := utils.ConvertLocationToLoHo(l)
 		p.loadSummoners(loc)
 		p.loadEntrie(loc)
 		p.loadMatch(loc)
@@ -360,8 +360,8 @@ func (p *Pumper) fetch() {
 			p.handleSummoner(req.Loc, summoner)
 			// init val
 			matches = make([]*riotmodel.MatchDB, 0, p.stgy.MaxMatchCount)
-			loc := utils.ConverHostLoCode(req.Loc)
-			region := utils.ConvertLocToRegion(loc)
+			loc := utils.ConvertLocodeToLocation(req.Loc)
+			region := utils.ConvertLocationToRegionHost(loc)
 			// fetch match
 			for _, matchID := range curMatchList {
 				if _, has := p.matchMap[req.Loc][matchID]; has {

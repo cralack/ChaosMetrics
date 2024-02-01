@@ -86,7 +86,7 @@ func (p *Pumper) loadEntrie(loc string) {
 		}
 	}
 
-	loCode := uint(utils.ConverHostLoCode(loc))
+	loCode := uint(utils.ConvertLocodeToLocation(loc))
 	p.lock.Lock()
 	p.entrieIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
@@ -100,7 +100,7 @@ func (p *Pumper) createEntriesURL(loc riotmodel.LOCATION, que riotmodel.QUECODE)
 		tier riotmodel.TIER
 		rank uint
 	)
-	locStr, host := utils.ConvertHostURL(loc)
+	locStr, host := utils.ConvertLocationToLoHo(loc)
 	queStr := getQueueString(que)
 	p.loadEntrie(locStr)
 
@@ -151,7 +151,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 		return
 	}
 	tmp := make([]*riotmodel.LeagueEntryDTO, 0, p.stgy.MaxSize)
-	loCode := utils.ConverHostLoCode(loc)
+	loCode := utils.ConvertLocodeToLocation(loc)
 
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -226,7 +226,7 @@ func (p *Pumper) FetchEntryByName(summonerName string, loc riotmodel.LOCATION) e
 		sumn    *riotmodel.SummonerDTO
 		entries []*riotmodel.LeagueEntryDTO
 	)
-	locStr, host = utils.ConvertHostURL(loc)
+	locStr, host = utils.ConvertLocationToLoHo(loc)
 	sumn = p.LoadSingleSummoner(summonerName, locStr)
 	sumId = sumn.MetaSummonerID
 
