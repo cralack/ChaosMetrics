@@ -22,6 +22,7 @@ type entryTask struct {
 
 func (p *Pumper) UpdateEntries() {
 	for _, loc := range p.stgy.Loc {
+		p.loadEntrie(loc)
 		for _, que := range p.stgy.Que {
 			// Generate URLs
 			go p.createEntriesURL(loc, que)
@@ -31,7 +32,8 @@ func (p *Pumper) UpdateEntries() {
 	<-p.Exit
 }
 
-func (p *Pumper) loadEntrie(loc string) {
+func (p *Pumper) loadEntrie(location riotmodel.LOCATION) {
+	loc, _ := utils.ConvertLocationToLoHoSTR(location)
 	ctx := context.Background()
 	key := fmt.Sprintf("/entry/%s", loc)
 	// init if local map doesn't exist
@@ -86,7 +88,7 @@ func (p *Pumper) loadEntrie(loc string) {
 		}
 	}
 
-	loCode := uint(utils.ConvertLocodeToLocation(loc))
+	loCode := uint(utils.ConvertLocStrToLocation(loc))
 	p.lock.Lock()
 	p.entrieIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
@@ -100,9 +102,9 @@ func (p *Pumper) createEntriesURL(loc riotmodel.LOCATION, que riotmodel.QUECODE)
 		tier riotmodel.TIER
 		rank uint
 	)
-	locStr, host := utils.ConvertLocationToLoHo(loc)
-	queStr := getQueueString(que)
-	p.loadEntrie(locStr)
+	locStr, host := utils.ConvertLocationToLoHoSTR(loc)
+	queStr := utils.ConvertQueToQueSTR(que)
+	// p.loadEntrie(locStr)
 
 	// generate BEST URL task
 	for tier = riotmodel.CHALLENGER; tier <= riotmodel.MASTER; tier++ {
@@ -151,7 +153,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 		return
 	}
 	tmp := make([]*riotmodel.LeagueEntryDTO, 0, p.stgy.MaxSize)
-	loCode := utils.ConvertLocodeToLocation(loc)
+	loCode := utils.ConvertLocStrToLocation(loc)
 
 	p.lock.Lock()
 	defer p.lock.Unlock()
@@ -226,7 +228,7 @@ func (p *Pumper) FetchEntryByName(summonerName string, loc riotmodel.LOCATION) e
 		sumn    *riotmodel.SummonerDTO
 		entries []*riotmodel.LeagueEntryDTO
 	)
-	locStr, host = utils.ConvertLocationToLoHo(loc)
+	locStr, host = utils.ConvertLocationToLoHoSTR(loc)
 	sumn = p.LoadSingleSummoner(summonerName, locStr)
 	sumId = sumn.MetaSummonerID
 

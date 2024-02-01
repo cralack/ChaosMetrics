@@ -21,18 +21,21 @@ type matchTask struct {
 
 func (p *Pumper) UpdateMatch() {
 	for _, loc := range p.stgy.Loc {
+		p.loadMatch(loc)
 		go p.createMatchListURL(loc)
 	}
 	<-p.Exit
 }
 
-func (p *Pumper) loadMatch(loc string) {
+func (p *Pumper) loadMatch(location riotmodel.LOCATION) {
 	var (
 		matches  []*riotmodel.MatchDB
 		redisMap map[string]bool
 		size     int64
+		loc      string
 		err      error
 	)
+	loc, _ = utils.ConvertLocationToLoHoSTR(location)
 	if _, has := p.matchMap[loc]; !has {
 		p.matchMap[loc] = make(map[string]bool)
 	}
@@ -88,9 +91,9 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 		has      bool
 		count    int
 	)
-	loc, _ := utils.ConvertLocationToLoHo(loCode)
+	loc, _ := utils.ConvertLocationToLoHoSTR(loCode)
 	region := utils.ConvertLocationToRegionHost(loCode)
-	p.loadMatch(loc)
+	// p.loadMatch(loc)
 
 	// init query val
 	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
@@ -204,7 +207,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	cmds := make([]*redis.IntCmd, 0, len(matches))
 
 	for _, m := range matches {
-		loCode := utils.ConvertLocodeToLocation(m.Loc)
+		loCode := utils.ConvertLocStrToLocation(m.Loc)
 		key := fmt.Sprintf("/match/%s", m.Loc)
 		cmds = append(cmds, pipe.HSet(ctx, key, m.MetaMatchID, true))
 		var gameId uint
@@ -261,7 +264,7 @@ func (p *Pumper) FetchMatchByName(summonerName string, loc riotmodel.LOCATION) e
 		locStr string
 		sumn   *riotmodel.SummonerDTO
 	)
-	locStr, _ = utils.ConvertLocationToLoHo(loc)
+	locStr, _ = utils.ConvertLocationToLoHoSTR(loc)
 	region = utils.ConvertLocationToRegionHost(loc)
 	sumn = p.LoadSingleSummoner(summonerName, locStr)
 	puuid = sumn.PUUID

@@ -54,5 +54,4 @@ func Test_query(t *testing.T) {
 	if sumn := s.QuerySummonerByName("na1", "xyaaaz"); sumn != nil {
 		t.Log(sumn.Name)
 	}
-
 }

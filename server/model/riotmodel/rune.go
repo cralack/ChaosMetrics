@@ -25,13 +25,8 @@ type Perk struct {
 	Slots []*Slot `json:"slots"`
 }
 
-func (p *Perk) MarshalBinary() ([]byte, error) {
-	return json.Marshal(p)
-}
-
-func (p *Perk) UnmarshalBinary(bt []byte) error {
-	return json.Unmarshal(bt, p)
-}
+func (p *Perk) MarshalBinary() ([]byte, error)  { return json.Marshal(p) }
+func (p *Perk) UnmarshalBinary(bt []byte) error { return json.Unmarshal(bt, p) }
 
 type PerkDetail struct {
 	ID                                 int            `json:"id"`

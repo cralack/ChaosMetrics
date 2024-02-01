@@ -11,7 +11,6 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
-	"github.com/cralack/ChaosMetrics/server/utils"
 	grpccli "github.com/go-micro/plugins/v4/client/grpc"
 	"github.com/go-micro/plugins/v4/registry/etcd"
 	"github.com/redis/go-redis/v9"
@@ -56,7 +55,7 @@ func NewSumnService(params ...interface{}) *SumonerService {
 	}
 }
 
-func (s SumonerService) QuerySummonerByName(name, loc string) *response.SummonerDTO {
+func (s *SumonerService) QuerySummonerByName(name, loc string) *response.SummonerDTO {
 	var (
 		res      *riotmodel.SummonerDTO
 		services []*registry.Service
@@ -67,13 +66,13 @@ func (s SumonerService) QuerySummonerByName(name, loc string) *response.Summoner
 	key := fmt.Sprintf("/summoner/%s", loc)
 	buff = s.rdb.HGet(context.Background(), key, name).Val()
 	if err = json.Unmarshal([]byte(buff), &res); err == nil && res.Name == name {
-		return utils.ConvertSummonerToDTO(res)
+		return s.HandleSummoner(res)
 	}
 
 	// query from db
 	if err = s.db.Where("loc=?", loc).Where("name=?",
 		name).Find(&res).Error; err == nil && res.Name == name {
-		return utils.ConvertSummonerToDTO(res)
+		return s.HandleSummoner(res)
 	}
 
 	// reg

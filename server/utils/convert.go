@@ -9,7 +9,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-func ConvertLocationToLoHo(loc riotmodel.LOCATION) (loCode, hostURL string) {
+func ConvertLocationToLoHoSTR(loc riotmodel.LOCATION) (loCode, hostURL string) {
 	platformCodeMap := map[riotmodel.LOCATION]string{
 		riotmodel.BR1:  "br1",
 		riotmodel.EUN1: "eun1",
@@ -33,7 +33,7 @@ func ConvertLocationToLoHo(loc riotmodel.LOCATION) (loCode, hostURL string) {
 	return loCode, "https://" + loCode + host
 }
 
-func ConvertLocodeToLocation(loCode string) riotmodel.LOCATION {
+func ConvertLocStrToLocation(loCode string) riotmodel.LOCATION {
 	platformCodeMap := map[string]riotmodel.LOCATION{
 		"br1":  riotmodel.BR1,
 		"eun1": riotmodel.EUN1,
@@ -92,7 +92,7 @@ func ConvertLocationToRegionHost(loc riotmodel.LOCATION) string {
 	return "https://" + host
 }
 
-func ConvertRegionSTRToArea(region string) riotmodel.AREA {
+func ConvertRegionStrToArea(region string) riotmodel.AREA {
 	regionCode := map[string]riotmodel.AREA{
 		"AMERICAS": riotmodel.LOC_AMERICAS,
 		"ASIA":     riotmodel.LOC_ASIA,
@@ -105,7 +105,7 @@ func ConvertRegionSTRToArea(region string) riotmodel.AREA {
 	return regionCode[region]
 }
 
-func ConvertLangToLangSTR(lang riotmodel.LANG) string {
+func ConvertLangToLangStr(lang riotmodel.LANG) string {
 	langMap := map[riotmodel.LANG]string{
 		riotmodel.LANG_cs_CZ: "cs_CZ",
 		riotmodel.LANG_el_GR: "el_GR",
@@ -170,4 +170,27 @@ func ConvertVersionToIdx(version string) (uint, error) {
 	}
 
 	return uint(idx), nil
+}
+
+func ConvertQueToQueSTR(que riotmodel.QUECODE) string {
+	switch que {
+	case riotmodel.RANKED_SOLO_5x5:
+		return "RANKED_SOLO_5x5"
+	case riotmodel.RANKED_FLEX_SR:
+		return "RANKED_FLEX_SR"
+	default:
+		return ""
+	}
+}
+
+// ConvertQueStrToQue
+func _(que string) riotmodel.QUECODE {
+	switch que {
+	case "RANKED_SOLO_5x5":
+		return riotmodel.RANKED_SOLO_5x5
+	case "RANKED_FLEX_SR":
+		return riotmodel.RANKED_FLEX_SR
+	default:
+		return 999
+	}
 }

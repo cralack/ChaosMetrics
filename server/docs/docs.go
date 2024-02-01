@@ -223,7 +223,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Champion Detail"
+                    "Summoner Detail"
                 ],
                 "summary": "请求一个召唤师详情",
                 "parameters": [
@@ -237,7 +237,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "default": "Solarbacca",
+                        "default": "pwVx hysamirapwd",
                         "description": "Summoner name",
                         "name": "name",
                         "in": "query",
@@ -451,17 +451,187 @@ const docTemplate = `{
                 }
             }
         },
+        "response.EntryDTO": {
+            "type": "object",
+            "properties": {
+                "leaguePoints": {
+                    "description": "段位积分",
+                    "type": "integer"
+                },
+                "losses": {
+                    "description": "负场次数（召唤师峡谷）",
+                    "type": "integer"
+                },
+                "queueType": {
+                    "description": "排位类型",
+                    "type": "string"
+                },
+                "rank": {
+                    "description": "段位",
+                    "type": "string"
+                },
+                "tier": {
+                    "description": "段位",
+                    "type": "string"
+                },
+                "wins": {
+                    "description": "胜场次数（召唤师峡谷）",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.MatchDTO": {
+            "type": "object",
+            "properties": {
+                "gameCreation": {
+                    "type": "integer"
+                },
+                "gameDuration": {
+                    "type": "integer"
+                },
+                "matchID": {
+                    "type": "string"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.Participant"
+                    }
+                },
+                "queueId": {
+                    "description": "队列ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "response.Participant": {
+            "type": "object",
+            "properties": {
+                "assists": {
+                    "description": "助攻数",
+                    "type": "integer"
+                },
+                "championName": {
+                    "description": "英雄名称",
+                    "type": "string"
+                },
+                "damageDealt": {
+                    "description": "造成伤害",
+                    "type": "integer"
+                },
+                "damageToken": {
+                    "description": "承受伤害",
+                    "type": "integer"
+                },
+                "deaths": {
+                    "description": "死亡数",
+                    "type": "integer"
+                },
+                "item0": {
+                    "description": "物品0",
+                    "type": "integer"
+                },
+                "item1": {
+                    "description": "物品1",
+                    "type": "integer"
+                },
+                "item2": {
+                    "description": "物品2",
+                    "type": "integer"
+                },
+                "item3": {
+                    "description": "物品3",
+                    "type": "integer"
+                },
+                "item4": {
+                    "description": "物品4",
+                    "type": "integer"
+                },
+                "item5": {
+                    "description": "物品5",
+                    "type": "integer"
+                },
+                "item6": {
+                    "description": "物品6 (饰品)",
+                    "type": "integer"
+                },
+                "itemBuild": {
+                    "description": "出装构筑",
+                    "type": "string"
+                },
+                "kda": {
+                    "description": "KDA",
+                    "type": "number"
+                },
+                "kills": {
+                    "description": "击杀数",
+                    "type": "integer"
+                },
+                "kp": {
+                    "description": "击杀参与率",
+                    "type": "number"
+                },
+                "pentaKills": {
+                    "description": "五杀数",
+                    "type": "integer"
+                },
+                "perkBuild": {
+                    "description": "符文构筑",
+                    "type": "string"
+                },
+                "quadraKills": {
+                    "description": "四杀数",
+                    "type": "integer"
+                },
+                "skillBuild": {
+                    "description": "技能构筑",
+                    "type": "string"
+                },
+                "summoner1Id": {
+                    "description": "召唤师技能1ID",
+                    "type": "integer"
+                },
+                "summoner2Id": {
+                    "description": "召唤师技能2ID",
+                    "type": "integer"
+                },
+                "summonerName": {
+                    "description": "召唤师名称",
+                    "type": "string"
+                },
+                "teamId": {
+                    "description": "队伍ID",
+                    "type": "integer"
+                },
+                "tripleKills": {
+                    "description": "三杀数",
+                    "type": "integer"
+                }
+            }
+        },
         "response.SummonerDTO": {
             "type": "object",
             "properties": {
+                "flexEntry": {
+                    "$ref": "#/definitions/response.EntryDTO"
+                },
                 "loc": {
                     "type": "string"
+                },
+                "matches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.MatchDTO"
+                    }
                 },
                 "name": {
                     "type": "string"
                 },
                 "profileIconID": {
                     "type": "integer"
+                },
+                "soloEntry": {
+                    "$ref": "#/definitions/response.EntryDTO"
                 },
                 "summonerLevel": {
                     "type": "integer"

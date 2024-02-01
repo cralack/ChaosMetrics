@@ -49,9 +49,9 @@ const (
 type QUECODE uint
 
 const (
-	RANKED_SOLO_5x5 QUECODE = iota
-	RANKED_FLEX_SR
-	RANKED_FLEX_TT
+	RANKED_SOLO_5x5 QUECODE = iota // 单排/双排
+	RANKED_FLEX_SR                 // 灵活排位
+	// RANKED_FLEX_TT // abandoned?
 )
 
 type LANG uint
@@ -90,9 +90,9 @@ const (
 type GAMEMODE uint
 
 const (
-	CLASSIC     GAMEMODE = iota // 召唤师峡谷 mapid:11
-	ARAM                        // 大乱斗 mapid:12
-	NEXUSBLITZ                  // 扭曲丛林？ mapid:21
-	CONVERGENCE                 // ??? mapid:22
-	CHERRY                      // 斗魂竞技场 mapid:30
+	CLASSIC GAMEMODE = iota // 召唤师峡谷 mapid:11
+	ARAM                    // 大乱斗 mapid:12
+	CHERRY                  // 斗魂竞技场 mapid:30
+	// NEXUSBLITZ                  // 扭曲丛林？ mapid:21
+	// CONVERGENCE                 // ??? mapid:22
 )

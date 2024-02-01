@@ -53,7 +53,7 @@ func Run() {
 	conf.GRPCListenAddress = GRPCListenAddress
 	conf.HTTPListenAddress = HTTPListenAddress
 
-	area := utils.ConvertRegionSTRToArea(region)
+	area := utils.ConvertRegionStrToArea(region)
 	if workerID == "" {
 		if podIP != "" {
 			workerID = strconv.Itoa(int(utils.GetIDbyIP(podIP)))

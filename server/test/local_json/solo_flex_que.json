@@ -1,0 +1,32 @@
+[
+  {
+    "leagueId": "49a2bbcf-a211-36c2-ac2f-a6e7f1903826",
+    "queueType": "RANKED_SOLO_5x5",
+    "tier": "MASTER",
+    "rank": "I",
+    "summonerId": "Mo9E5PgFBTCLo4m0GXhODXOCuuLgt1W-VEP7vu5iBrgRQ2o",
+    "summonerName": "pwVx hysamirapwd",
+    "leaguePoints": 0,
+    "wins": 63,
+    "losses": 37,
+    "veteran": false,
+    "inactive": false,
+    "freshBlood": false,
+    "hotStreak": false
+  },
+  {
+    "leagueId": "eaf3166e-f25f-32d1-bbef-b237d05a0575",
+    "queueType": "RANKED_FLEX_SR",
+    "tier": "CHALLENGER",
+    "rank": "I",
+    "summonerId": "Mo9E5PgFBTCLo4m0GXhODXOCuuLgt1W-VEP7vu5iBrgRQ2o",
+    "summonerName": "pwVx hysamirapwd",
+    "leaguePoints": 763,
+    "wins": 38,
+    "losses": 0,
+    "veteran": false,
+    "inactive": false,
+    "freshBlood": false,
+    "hotStreak": true
+  }
+]

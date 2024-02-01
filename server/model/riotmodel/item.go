@@ -2,7 +2,7 @@ package riotmodel
 
 import (
 	"encoding/json"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model"
 )
 
@@ -66,13 +66,8 @@ type ItemDTO struct {
 	Depth       int                `json:"depth"`
 }
 
-func (i *ItemDTO) MarshalBinary() ([]byte, error) {
-	return json.Marshal(i)
-}
-
-func (i *ItemDTO) UnmarshalBinary(bt []byte) error {
-	return json.Unmarshal(bt, i)
-}
+func (i *ItemDTO) MarshalBinary() ([]byte, error)  { return json.Marshal(i) }
+func (i *ItemDTO) UnmarshalBinary(bt []byte) error { return json.Unmarshal(bt, i) }
 
 type GroupInfo struct {
 	ID              string `json:"id"`

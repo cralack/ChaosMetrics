@@ -131,7 +131,7 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 		matches []*riotmodel.MatchDB
 	)
 
-	loc, _ := utils.ConvertLocationToLoHo(loCode)
+	loc, _ := utils.ConvertLocationToLoHoSTR(loCode)
 	// preload when begin
 	if err = a.db.Where("loc = ?", loc).Where("analyzed = ?", false).Preload(
 		"Participants").Find(&matches).Error; err != nil {
@@ -209,7 +209,7 @@ func (a *Analyzer) loadChampionTemplate() {
 		a.logger.Error("wrong version", zap.Error(err))
 	}
 	ctx = context.Background()
-	curLang := utils.ConvertLangToLangSTR(riotmodel.LANG_zh_CN)
+	curLang := utils.ConvertLangToLangStr(riotmodel.LANG_zh_CN)
 	key := "/champions/" + curLang
 	// get champion name list
 	buff := a.rdb.HGet(context.Background(), "/championlist", strconv.Itoa(int(vIdx))).Val()
@@ -269,7 +269,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 		err error
 	)
 	// get param
-	loCode := utils.ConvertLocodeToLocation(match.Loc)
+	loCode := utils.ConvertLocStrToLocation(match.Loc)
 	curVersion := match.GameVersion
 	// verIdx, _ = utils.ConvertVersionToIdx(curVersion)
 

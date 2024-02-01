@@ -2,7 +2,7 @@ package riotmodel
 
 import (
 	"encoding/json"
-	
+
 	"github.com/cralack/ChaosMetrics/server/model"
 )
 
@@ -13,21 +13,21 @@ type ChampionSingleDTO struct {
 	Data    map[string]*ChampionDTO `json:"data"`
 }
 type ChampionDTO struct {
-	ID        string          `json:"id"`        // 英雄ID:Aatrox
-	Key       string          `json:"key"`       // 英雄Key:266
-	Name      string          `json:"name"`      // 英雄名称:暗裔剑魔
-	Title     string          `json:"title"`     // 英雄称号:亚托克斯
-	Image     *model.Image    `json:"image"`     // 图像
-	Skins     []*Skin         `json:"skins"`     // 皮肤
-	Lore      string          `json:"lore"`      // 英雄背景故事
-	Blurb     string          `json:"blurb"`     // 英雄简介
-	AllyTips  []string        `json:"allytips"`  // 盟友提示
-	EnemyTips []string        `json:"enemytips"` // 敌人提示
-	Tags      []string        `json:"tags"`      // 标签
-	Partype   string          `json:"partype"`   // 资源类型
-	Info      *Info           `json:"info"`      // 信息
-	Stats     *ChampionStats  `json:"stats"`     // 统计数据
-	Spells    []*Spell        `json:"spells"`    // 技能
+	ID        string         `json:"id"`        // 英雄ID:Aatrox
+	Key       string         `json:"key"`       // 英雄Key:266
+	Name      string         `json:"name"`      // 英雄名称:暗裔剑魔
+	Title     string         `json:"title"`     // 英雄称号:亚托克斯
+	Image     *model.Image   `json:"image"`     // 图像
+	Skins     []*Skin        `json:"skins"`     // 皮肤
+	Lore      string         `json:"lore"`      // 英雄背景故事
+	Blurb     string         `json:"blurb"`     // 英雄简介
+	AllyTips  []string       `json:"allytips"`  // 盟友提示
+	EnemyTips []string       `json:"enemytips"` // 敌人提示
+	Tags      []string       `json:"tags"`      // 标签
+	Partype   string         `json:"partype"`   // 资源类型
+	Info      *Info          `json:"info"`      // 信息
+	Stats     *ChampionStats `json:"stats"`     // 统计数据
+	Spells    []*Spell       `json:"spells"`    // 技能
 	Passive   struct {
 		Name        string       `json:"name"`        // 被动技能名称
 		Description string       `json:"description"` // 被动技能描述
@@ -112,13 +112,8 @@ type Spell struct {
 	Resource     string       `json:"resource"`     // 资源
 }
 
-func (c *ChampionDTO) MarshalBinary() ([]byte, error) {
-	return json.Marshal(c)
-}
-
-func (c *ChampionDTO) UnmarshalBinary(bt []byte) error {
-	return json.Unmarshal(bt, c)
-}
+func (c *ChampionDTO) MarshalBinary() ([]byte, error)  { return json.Marshal(c) }
+func (c *ChampionDTO) UnmarshalBinary(bt []byte) error { return json.Unmarshal(bt, c) }
 
 type LevelTip struct {
 	Label  []string `json:"label" gorm:"column:label"`   // 等级提示标签

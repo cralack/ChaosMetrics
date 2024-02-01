@@ -4,19 +4,6 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-func getQueueString(que riotmodel.QUECODE) string {
-	switch que {
-	case riotmodel.RANKED_SOLO_5x5:
-		return "RANKED_SOLO_5x5"
-	case riotmodel.RANKED_FLEX_SR:
-		return "RANKED_FLEX_SR"
-	case riotmodel.RANKED_FLEX_TT:
-		return "RANKED_FLEX_TT"
-	default:
-		return ""
-	}
-}
-
 func ConvertRankToStr(tier riotmodel.TIER, div uint) (string, string) {
 	var d string
 	switch div {

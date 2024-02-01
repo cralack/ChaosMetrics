@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
@@ -21,13 +22,15 @@ type summonerTask struct {
 
 func (p *Pumper) UpdateSumoner() {
 	for _, loc := range p.stgy.Loc {
+		p.loadSummoners(loc)
 		// Generate URLs
 		go p.createSummonerURL(loc)
 	}
 	<-p.Exit
 }
 
-func (p *Pumper) loadSummoners(loc string) {
+func (p *Pumper) loadSummoners(location riotmodel.LOCATION) {
+	loc, _ := utils.ConvertLocationToLoHoSTR(location)
 	ctx := context.Background()
 	key := fmt.Sprintf("/summoner/%s", loc)
 	// init if local map doesn't exist
@@ -85,7 +88,7 @@ func (p *Pumper) loadSummoners(loc string) {
 			mx = s.ID
 		}
 	}
-	loCode := uint(utils.ConvertLocodeToLocation(loc))
+	loCode := uint(utils.ConvertLocStrToLocation(loc))
 	p.lock.Lock()
 	p.summonerIdx[loCode] += (mx+1)%(loCode*1e9) + (loCode * 1e9)
 	p.lock.Unlock()
@@ -93,9 +96,10 @@ func (p *Pumper) loadSummoners(loc string) {
 }
 
 func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
-	loc, host := utils.ConvertLocationToLoHo(loCode)
-	p.loadSummoners(loc)
+	loc, host := utils.ConvertLocationToLoHoSTR(loCode)
+	// p.loadSummoners(loc)
 	go p.summonerCounter(loc)
+
 	// expand from entry
 	for _, entry := range p.entryMap[loc] {
 		curTier, curRank := ConvertStrToRank(entry.Tier, entry.Rank)
@@ -103,11 +107,13 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 			(curTier > p.stgy.TestEndMark1 || (curTier == p.stgy.TestEndMark1 && curRank > p.stgy.TestEndMark2)) {
 			continue
 		}
-		url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, entry.SummonerName)
+		ogUrl := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s",
+			host, strings.ReplaceAll(entry.SummonerName, " ", "%20"))
+
 		p.scheduler.Push(&scheduler.Task{
 			Type: SummonerTypeKey,
 			Loc:  loc,
-			URL:  url,
+			URL:  ogUrl,
 			Data: &summonerTask{
 				summonerID: entry.SummonerName,
 			},
@@ -116,11 +122,11 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 	// expand from self
 	for _, sumn := range p.sumnMap[loc] {
 		if sumn.MetaSummonerID == "" {
-			url := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, sumn.Name)
+			ogUrl := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, sumn.Name)
 			p.scheduler.Push(&scheduler.Task{
 				Type: SummonerTypeKey,
 				Loc:  loc,
-				URL:  url,
+				URL:  ogUrl,
 				Data: &summonerTask{
 					summonerID: sumn.Name,
 				},
@@ -140,7 +146,7 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	if len(summoners) == 0 {
 		return
 	}
-	loCode := utils.ConvertLocodeToLocation(loc)
+	loCode := utils.ConvertLocStrToLocation(loc)
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -154,6 +160,8 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 		p.sumnMap[loc][sumn.Name] = sumn
 		sumn.Loc = loc
 	}
+
+	p.cacheSummoners(summoners, loc)
 
 	// check oversize && split
 	if len(summoners) < p.stgy.MaxSize {
@@ -201,10 +209,10 @@ func (p *Pumper) summonerCounter(loc string) {
 	)
 	ticker := time.NewTicker(time.Second * 15)
 	checkTicker := time.NewTicker(time.Millisecond * 100)
-	total = len(p.entryMap[loc])
 	for {
 		select {
 		case <-checkTicker.C:
+			total = len(p.entryMap[loc])
 			cur = len(p.sumnMap[loc])
 			if cur == total {
 				p.logger.Info("all ready fetch 100% summoners")
@@ -240,8 +248,8 @@ func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDT
 	}
 
 	// http read
-	url := fmt.Sprintf("https://%s.api.riotgames.com/lol/summoner/v4/summoners/by-name/%s", loc, name)
-	buffer, err := p.fetcher.Get(url)
+	ogUrl := fmt.Sprintf("https://%s.api.riotgames.com/lol/summoner/v4/summoners/by-name/%s", loc, name)
+	buffer, err := p.fetcher.Get(ogUrl)
 	if err != nil {
 		p.logger.Error("wrong name or loc")
 		return nil

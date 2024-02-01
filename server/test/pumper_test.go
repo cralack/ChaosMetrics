@@ -12,7 +12,7 @@ func Test_pumper_update(t *testing.T) {
 	p, _ := pumper.NewPumper(
 		"1",
 		pumper.WithLoc(riotmodel.NA1),
-		pumper.WithEndMark(riotmodel.DIAMOND, 1),
+		pumper.WithEndMark(riotmodel.MASTER, 1),
 		pumper.WithQues(riotmodel.RANKED_SOLO_5x5, riotmodel.RANKED_FLEX_SR),
 	)
 	p.StartEngine()

@@ -68,7 +68,7 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 	sumnMap := make(map[string]map[string]*riotmodel.SummonerDTO)
 	matchMap := make(map[string]map[string]bool)
 	for _, l := range stgy.Loc {
-		loc, _ := utils.ConvertLocationToLoHo(l)
+		loc, _ := utils.ConvertLocationToLoHoSTR(l)
 		entryMap[loc] = make(map[string]*riotmodel.LeagueEntryDTO)
 		sumnMap[loc] = make(map[string]*riotmodel.SummonerDTO)
 		matchMap[loc] = make(map[string]bool)
@@ -167,8 +167,7 @@ func (p *Pumper) StartEngine() {
 }
 
 func (p *Pumper) LoadAll() {
-	for _, l := range p.stgy.Loc {
-		loc, _ := utils.ConvertLocationToLoHo(l)
+	for _, loc := range p.stgy.Loc {
 		p.loadSummoners(loc)
 		p.loadEntrie(loc)
 		p.loadMatch(loc)
@@ -317,7 +316,8 @@ func (p *Pumper) fetch() {
 		case SummonerTypeKey:
 			data := req.Data.(*summonerTask)
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
-				p.logger.Error(fmt.Sprintf("fetch summonerID %s failed", data.summonerID), zap.Error(err))
+				p.logger.Error(fmt.Sprintf("fetch summonerID %s@%s failed",
+					data.summonerID, data.summoner.MetaSummonerID), zap.Error(err))
 				// fetch again
 				if req.Retry < p.stgy.Retry {
 					req.Retry++
@@ -360,7 +360,7 @@ func (p *Pumper) fetch() {
 			p.handleSummoner(req.Loc, summoner)
 			// init val
 			matches = make([]*riotmodel.MatchDB, 0, p.stgy.MaxMatchCount)
-			loc := utils.ConvertLocodeToLocation(req.Loc)
+			loc := utils.ConvertLocStrToLocation(req.Loc)
 			region := utils.ConvertLocationToRegionHost(loc)
 			// fetch match
 			for _, matchID := range curMatchList {

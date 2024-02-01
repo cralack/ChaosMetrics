@@ -20,7 +20,7 @@ type MatchDB struct {
 	GameMode       string           `json:"gameMode" gorm:"column:game_mode;type:varchar(100)"`             // 游戏模式
 	GameVersion    string           `json:"gameVersion" gorm:"column:game_version;type:varchar(100)"`       // 游戏版本
 	MapID          int              `json:"mapId" gorm:"column:map_id;type:smallint"`                       // 地图ID
-	QueueID        int              `json:"queueId" gorm:"column:queue_id;type:smallint"`                   // 队列ID
+	QueueID        int              `json:"queueId" gorm:"column:queue_id;type:smallint"`                   // 队列ID (420:rank,430:match,450:ARAM,1700:CHERRY)
 	Participants   []*ParticipantDB `json:"participants" gorm:"foreignKey:match_id"`                        // 参与者列表
 	TournamentCode string           `json:"tournamentCode" gorm:"column:tournament_code;type:varchar(100)"` // 生成比赛的锦标赛代码
 }
@@ -60,7 +60,7 @@ type ParticipantDB struct {
 	JudgeScore                float32 `json:"judgeScore" gorm:"column:judge_score"`                                  // 评分
 	KDA                       float32 `json:"kda" gorm:"column:kda"`                                                 // KDA
 	KP                        float32 `json:"kp" gorm:"column:kp"`                                                   // 击杀参与率
-	TeamId                    int     `json:"teamId" gorm:"column:team_id;type:smallint"`                            // 队伍ID(420:rank,430:match,450:ARAM,1700:CHERRY)
+	TeamId                    int     `json:"teamId" gorm:"column:team_id;type:smallint"`                            // 队伍ID
 	DamageDealt               int     `json:"damageDealt" gorm:"column:damage_dealt"`                                // 造成伤害
 	DamageToken               int     `json:"damageToken" gorm:"column:damage_token"`                                // 承受伤害
 	VisionScore               int     `json:"visionScore" gorm:"column:vision_score;type:smallint"`                  // 视野得分
