@@ -18,7 +18,6 @@ var podIP string
 var HTTPListenAddress string
 var GRPCListenAddress string
 var PProfListenAddress string
-var cluster bool
 var region string
 var token string
 
@@ -41,7 +40,6 @@ func init() {
 	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
 	Cmd.Flags().StringVar(&region, "region", "AMERICAS", "set worker region")
 	Cmd.Flags().StringVar(&token, "token", "", "set worker token")
-	Cmd.Flags().BoolVar(&cluster, "cluster", true, "run mode")
 }
 
 func Run() {

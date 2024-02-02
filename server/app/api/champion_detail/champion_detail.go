@@ -5,6 +5,7 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/app/provider/champion_detail"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
+	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,14 +19,14 @@ type championDetailParam struct {
 // QueryChampionDetail godoc
 //
 //	@Summary		请求一个英雄详情
-//	@Description	请求一个英雄详情 @name,version,loc,mode
+//	@Description	query @name,version,loc,mode
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Champion Detail
-//	@Param			championDetailParam	query		championDetailParam	true	"Query champion rank list for aram"
-//	@Success		200					{object}	anres.ChampionDetail
+//	@Param			data	query		championDetailParam	true	"Query champion rank list for aram"
+//	@Success		200		{object}	response.Response{data=anres.ChampionDetail}
 //	@Router			/champion [get]
-func (c *championDetailApi) QueryChampionDetail(ctx *gin.Context) {
+func (a *championDetailApi) QueryChampionDetail(ctx *gin.Context) {
 	var (
 		param    championDetailParam
 		champion *anres.ChampionDetail
@@ -33,27 +34,19 @@ func (c *championDetailApi) QueryChampionDetail(ctx *gin.Context) {
 	)
 	championRankService := champion_detail.NewChampionDetailService()
 	if err = ctx.ShouldBindQuery(&param); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "wrong param",
-		})
+		response.FailWithMessage("wrong param", ctx)
 		return
 	}
 	if champion, err = championRankService.QueryChampionDetail(
 		param.Name, param.Version, param.Loc, param.Mode); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "can not find champion detail by " + err.Error(),
-		})
+		response.FailWithDetailed(err, "can not find champion", ctx)
 		return
 	} else {
 		for key := range champion.ItemWin {
 			champion.ItemWin[key] = ShrinkMap(champion.ItemWin[key])
 		}
 		champion.PerkWin = ShrinkMap(champion.PerkWin)
-
-		ctx.JSON(200, gin.H{
-			"msg":  "query success",
-			"data": champion,
-		})
+		response.OkWithData(champion, ctx)
 	}
 }
 

@@ -14,12 +14,12 @@ type summonerQueryParam struct {
 // QuerySummoner godoc
 //
 //	@Summary		请求一个召唤师详情
-//	@Description	请求一个召唤师详情 @name,loc
+//	@Description	query @name,loc
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Summoner Detail
 //	@Param			summonerQueryParam	query		summonerQueryParam	true	"Query champion rank list for aram"
-//	@Success		200					{object}	response.SummonerDTO
+//	@Success		200					{object}	response.Response{data=response.SummonerDTO}
 //	@Router			/summoner [get]
 func (a *sumnApi) QuerySummoner(ctx *gin.Context) {
 	var (
@@ -29,21 +29,14 @@ func (a *sumnApi) QuerySummoner(ctx *gin.Context) {
 	)
 	sumService := summoner.NewSumnService()
 	if err = ctx.ShouldBindQuery(&param); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "wrong param",
-		})
+		response.FailWithMessage("wrong param", ctx)
 		return
 	}
 	if sumn = sumService.QuerySummonerByName(param.Name,
 		param.Loc); sumn == nil {
-		ctx.JSON(404, gin.H{
-			"msg": "can not find sumn now,try later",
-		})
+		response.FailWithMessage("can not find sumn now,try later", ctx)
 		return
 	} else {
-		ctx.JSON(200, gin.H{
-			"msg":  "query success",
-			"data": sumn,
-		})
+		response.OkWithData(sumn, ctx)
 	}
 }

@@ -49,6 +49,9 @@ func (s *SumonerService) HandleSummoner(src *riotmodel.SummonerDTO) (des *respon
 			des.FlexEntry = ConvertEntry(entry)
 		}
 	}
+	if src.Matches == "" {
+		return
+	}
 
 	matchList = utils.ConvertStrToSlice(src.Matches)
 	des.Matches = make([]*response.MatchDTO, 0, len(matchList))

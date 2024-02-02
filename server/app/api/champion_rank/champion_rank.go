@@ -3,6 +3,7 @@ package champion_rank
 import (
 	"github.com/cralack/ChaosMetrics/server/app/provider/champion_rank"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
+	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,9 +20,9 @@ type championRankParam struct {
 //	@Produce		application/json
 //	@Tags			Champion Rank
 //	@Param			championRankParam	query		championRankParam	true	"Query champion rank list for aram"
-//	@Success		200					{object}	[]anres.ChampionBrief
+//	@Success		200					{object}	response.Response{data=[]anres.ChampionBrief}
 //	@Router			/ARAM [get]
-func (c *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
+func (a *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
 	var (
 		param            championRankParam
 		championRankList []*anres.ChampionBrief
@@ -30,22 +31,15 @@ func (c *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
 	championRankService := champion_rank.NewChampionRankService()
 
 	if err = ctx.ShouldBindQuery(&param); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "wrong param",
-		})
+		response.FailWithMessage("wrong param", ctx)
 		return
 	}
 	if championRankList, err = championRankService.QueryChampionRank(
 		param.Version, param.Loc, "ARAM"); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "can not find champion rank list by " + err.Error(),
-		})
+		response.FailWithDetailed(err, "can not find ARAM champion rank list", ctx)
 		return
 	} else {
-		ctx.JSON(200, gin.H{
-			"msg":  "query success",
-			"data": championRankList,
-		})
+		response.OkWithData(championRankList, ctx)
 	}
 }
 
@@ -59,7 +53,7 @@ func (c *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
 //	@Param			championRankParam	query		championRankParam	true	"Query champion rank list for classic"
 //	@Success		200					{object}	[]anres.ChampionBrief
 //	@Router			/CLASSIC [get]
-func (c *championRankApi) QueryChampionRankCLASSIC(ctx *gin.Context) {
+func (a *championRankApi) QueryChampionRankCLASSIC(ctx *gin.Context) {
 	var (
 		param            championRankParam
 		championRankList []*anres.ChampionBrief
@@ -68,21 +62,14 @@ func (c *championRankApi) QueryChampionRankCLASSIC(ctx *gin.Context) {
 	championRankService := champion_rank.NewChampionRankService()
 
 	if err = ctx.ShouldBindQuery(&param); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "wrong param",
-		})
+		response.FailWithMessage("wrong param", ctx)
 		return
 	}
 	if championRankList, err = championRankService.QueryChampionRank(
 		param.Version, param.Loc, "CLASSIC"); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "can not find champion rank list by " + err.Error(),
-		})
+		response.FailWithDetailed(err, "can not find CLASSIC champion rank list", ctx)
 		return
 	} else {
-		ctx.JSON(200, gin.H{
-			"msg":  "query success",
-			"data": championRankList,
-		})
+		response.OkWithData(championRankList, ctx)
 	}
 }

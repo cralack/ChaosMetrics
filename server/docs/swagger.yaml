@@ -253,6 +253,14 @@ definitions:
         description: 三杀数
         type: integer
     type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      msg:
+        type: string
+    type: object
   response.SummonerDTO:
     properties:
       flexEntry:
@@ -359,9 +367,14 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/anres.ChampionBrief'
-            type: array
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/anres.ChampionBrief'
+                  type: array
+              type: object
       summary: 请求一个ARAM英雄榜
       tags:
       - Champion Rank
@@ -399,7 +412,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 请求一个英雄详情 @name,version,loc,mode
+      description: query @name,version,loc,mode
       parameters:
       - default: na1
         description: Region
@@ -431,7 +444,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/anres.ChampionDetail'
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/anres.ChampionDetail'
+              type: object
       summary: 请求一个英雄详情
       tags:
       - Champion Detail
@@ -439,7 +457,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 请求一个物品详情 @version,lang
+      description: query @version,lang
       parameters:
       - default: "2010"
         description: The ID of the item
@@ -465,7 +483,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/riotmodel.ItemDTO'
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/riotmodel.ItemDTO'
+              type: object
       summary: 请求一个物品详情
       tags:
       - Item
@@ -473,7 +496,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 请求一个召唤师详情 @name,loc
+      description: query @name,loc
       parameters:
       - default: na1
         description: Region
@@ -493,7 +516,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.SummonerDTO'
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.SummonerDTO'
+              type: object
       summary: 请求一个召唤师详情
       tags:
       - Summoner Detail

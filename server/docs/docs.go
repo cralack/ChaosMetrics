@@ -54,10 +54,22 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/anres.ChampionBrief"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/anres.ChampionBrief"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -109,7 +121,7 @@ const docTemplate = `{
         },
         "/champion": {
             "get": {
-                "description": "请求一个英雄详情 @name,version,loc,mode",
+                "description": "query @name,version,loc,mode",
                 "consumes": [
                     "application/json"
                 ],
@@ -158,7 +170,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/anres.ChampionDetail"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/anres.ChampionDetail"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -166,7 +190,7 @@ const docTemplate = `{
         },
         "/item": {
             "get": {
-                "description": "请求一个物品详情 @version,lang",
+                "description": "query @version,lang",
                 "consumes": [
                     "application/json"
                 ],
@@ -207,7 +231,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/riotmodel.ItemDTO"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/riotmodel.ItemDTO"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -215,7 +251,7 @@ const docTemplate = `{
         },
         "/summoner": {
             "get": {
-                "description": "请求一个召唤师详情 @name,loc",
+                "description": "query @name,loc",
                 "consumes": [
                     "application/json"
                 ],
@@ -248,7 +284,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.SummonerDTO"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.SummonerDTO"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -606,6 +654,18 @@ const docTemplate = `{
                 "tripleKills": {
                     "description": "三杀数",
                     "type": "integer"
+                }
+            }
+        },
+        "response.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "msg": {
+                    "type": "string"
                 }
             }
         },

@@ -2,12 +2,14 @@ package item
 
 import (
 	"github.com/cralack/ChaosMetrics/server/app/provider/item"
+	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/gin-gonic/gin"
 )
 
 // itemQueryParam represents the query parameters for an item request
-// @Description Query parameters for requesting item details
+//
+//	@Description	Query parameters for requesting item details
 type itemQueryParam struct {
 	ItemID  string `form:"itemid" default:"2010" binding:"required"`    // The ID of the item
 	Lang    string `form:"lang" default:"zh_CN" binding:"required"`     // Language
@@ -17,12 +19,12 @@ type itemQueryParam struct {
 // QueryApi godoc
 //
 //	@Summary		请求一个物品详情
-//	@Description	请求一个物品详情 @version,lang
+//	@Description	query @version,lang
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Item
 //	@Param			itemQueryParam	query		itemQueryParam	true	"Query parameters for item"
-//	@Success		200				{object}	riotmodel.ItemDTO
+//	@Success		200				{object}	response.Response{data=riotmodel.ItemDTO}
 //	@Router			/item [get]
 func (i *itemApi) QueryApi(ctx *gin.Context) {
 	var (
@@ -33,21 +35,14 @@ func (i *itemApi) QueryApi(ctx *gin.Context) {
 	itemService := item.NewItemService()
 
 	if err = ctx.ShouldBindQuery(&param); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "wrong param",
-		})
+		response.FailWithMessage("wrong param", ctx)
 		return
 	}
 
 	if itemDTO, err = itemService.QueryItem(param.ItemID, param.Version, param.Lang); err != nil {
-		ctx.JSON(400, gin.H{
-			"msg": "can not find item by " + err.Error(),
-		})
+		response.FailWithDetailed(err, "can not find item", ctx)
 		return
 	} else {
-		ctx.JSON(200, gin.H{
-			"msg":  "query success",
-			"data": itemDTO,
-		})
+		response.OkWithData(itemDTO, ctx)
 	}
 }
