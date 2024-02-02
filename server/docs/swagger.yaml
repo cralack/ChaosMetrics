@@ -330,6 +330,37 @@ definitions:
           type: string
         type: array
     type: object
+  user.loginParam:
+    properties:
+      password:
+        example: "123456"
+        minLength: 6
+        type: string
+      username:
+        example: snoop
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  user.registerParam:
+    properties:
+      email:
+        example: snoop@dogg.com
+        minLength: 6
+        type: string
+      password:
+        example: "123456"
+        minLength: 6
+        type: string
+      username:
+        example: snoop
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -525,6 +556,105 @@ paths:
       summary: 请求一个召唤师详情
       tags:
       - Summoner Detail
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: login @usrname,passwd
+      parameters:
+      - description: login
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.loginParam'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      summary: 用户登陆
+      tags:
+      - User Service
+  /user/logout:
+    get:
+      consumes:
+      - application/json
+      description: login @usrname,passwd
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      summary: 用户登陆
+      tags:
+      - User Service
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: register @usrname,passwd,email
+      parameters:
+      - description: Register a new user
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.registerParam'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      summary: 注册一个新用户
+      tags:
+      - User Service
+  /user/verify:
+    get:
+      consumes:
+      - application/json
+      description: query @token
+      parameters:
+      - in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      summary: 验证注册信息
+      tags:
+      - User Service
 securityDefinitions:
   BasicAuth:
     type: basic

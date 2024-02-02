@@ -4,6 +4,7 @@ import (
 	_ "github.com/cralack/ChaosMetrics/server/init"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/fetcher"
+	"github.com/cralack/ChaosMetrics/server/model/usermodel"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -25,19 +26,21 @@ func init() {
 	logger = global.ChaLogger
 	// wipe gdb && rdb
 	// global.ChaDB.Exec("DROP TABLE IF EXISTS analyzed_champions,entries,match_participants,matches,summoners")
+	global.ChaDB.Exec("DROP TABLE IF EXISTS users")
 	// global.ChaRDB.FlushDB(context.Background())
 	// AutoMigrate
-	// if err := db.AutoMigrate(
-	// 	&riotmodel.LeagueEntryDTO{},
-	// 	&riotmodel.SummonerDTO{},
-	// 	// match
-	// 	&riotmodel.MatchDB{},
-	// 	&riotmodel.ParticipantDB{},
-	//
-	// 	&anres.Champion{},
-	// ); err != nil {
-	// 	logger.Error("init orm model failed", zap.Error(err))
-	// } else {
-	// 	logger.Debug("init orm model succeed")
-	// }
+	if err := db.AutoMigrate(
+		&usermodel.User{},
+		// 	&riotmodel.LeagueEntryDTO{},
+		// 	&riotmodel.SummonerDTO{},
+		// 	// match
+		// 	&riotmodel.MatchDB{},
+		// 	&riotmodel.ParticipantDB{},
+		//
+		// 	&anres.Champion{},
+	); err != nil {
+		logger.Error("init test orm model failed", zap.Error(err))
+	} else {
+		logger.Debug("init test orm model succeed")
+	}
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strconv"
 	"sync"
 	"time"
@@ -196,13 +195,13 @@ func (p *Pumper) fetch() {
 	)
 	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark1, p.stgy.TestEndMark2)
 	// catch panic
-	defer func() {
-		if err := recover(); err != nil {
-			p.logger.Panic("fetcher panic",
-				zap.Any("err", err),
-				zap.String("stack", string(debug.Stack())))
-		}
-	}()
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		p.logger.Panic("fetcher panic",
+	// 			zap.Any("err", err),
+	// 			zap.String("stack", string(debug.Stack())))
+	// 	}
+	// }()
 
 	for {
 		req := p.scheduler.Pull()
@@ -316,8 +315,8 @@ func (p *Pumper) fetch() {
 		case SummonerTypeKey:
 			data := req.Data.(*summonerTask)
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
-				p.logger.Error(fmt.Sprintf("fetch summonerID %s@%s failed",
-					data.summonerID, data.summoner.MetaSummonerID), zap.Error(err))
+				p.logger.Error(fmt.Sprintf("fetch %s failed",
+					data.summonerBrief), zap.Error(err))
 				// fetch again
 				if req.Retry < p.stgy.Retry {
 					req.Retry++

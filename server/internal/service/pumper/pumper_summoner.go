@@ -16,8 +16,8 @@ import (
 )
 
 type summonerTask struct {
-	summonerID string
-	summoner   *riotmodel.SummonerDTO
+	summonerBrief string
+	summoner      *riotmodel.SummonerDTO
 }
 
 func (p *Pumper) UpdateSumoner() {
@@ -115,7 +115,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 			Loc:  loc,
 			URL:  ogUrl,
 			Data: &summonerTask{
-				summonerID: entry.SummonerName,
+				summonerBrief: fmt.Sprintf("%s@%s", entry.SummonerName, entry.SummonerID),
 			},
 		})
 	}
@@ -128,7 +128,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 				Loc:  loc,
 				URL:  ogUrl,
 				Data: &summonerTask{
-					summonerID: sumn.Name,
+					summonerBrief: sumn.Name,
 				},
 			})
 		}

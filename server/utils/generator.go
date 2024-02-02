@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"math/rand"
 	"net"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
@@ -38,4 +39,13 @@ func GetLocalIP() (string, error) {
 		}
 	}
 	return "", errors.New("no local ip")
+}
+
+func GenerateRandomString(n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var result = make([]byte, n)
+	for i := 0; i < n; i++ {
+		result[i] = letters[rand.Intn(len(result))]
+	}
+	return string(result)
 }
