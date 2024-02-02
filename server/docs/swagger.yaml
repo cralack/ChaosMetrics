@@ -333,7 +333,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: ChaosMetrics API接口文档
-  version: "0.7"
+  version: "0.8"
 paths:
   /ARAM:
     get:

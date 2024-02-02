@@ -8,9 +8,11 @@ import (
 )
 
 type Strategy struct {
-	Loc      []riotmodel.LOCATION
-	Lang     []riotmodel.LANG
-	LifeTime time.Duration
+	Loc         []riotmodel.LOCATION
+	Lang        []riotmodel.LANG
+	LifeTime    time.Duration
+	ForceUpdate bool
+	EndMark     string
 }
 
 type Option func(stgy *Strategy) // Strategy的配置选项
@@ -22,7 +24,7 @@ var defaultStrategy = &Strategy{
 	LifeTime: time.Hour * 24 * 7, // 7 day
 }
 
-func WithLoc(locs ...riotmodel.LOCATION) Option {
+func _(locs ...riotmodel.LOCATION) Option {
 	return func(stgy *Strategy) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
@@ -39,5 +41,17 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 func WithLifeTime(life time.Duration) Option {
 	return func(stgy *Strategy) {
 		stgy.LifeTime = life
+	}
+}
+
+func WithForceUpdate(flag bool) Option {
+	return func(stgy *Strategy) {
+		stgy.ForceUpdate = flag
+	}
+}
+
+func WithEndmark(version string) Option {
+	return func(stgy *Strategy) {
+		stgy.EndMark = version
 	}
 }

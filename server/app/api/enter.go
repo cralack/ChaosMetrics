@@ -25,10 +25,11 @@ func RegiserRoutes(r *gin.Engine) {
 		PublicGroup.GET("/health", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, "ok")
 		})
-		item.InitItemRouter(r)
-		champion_rank.InitChampionRankRouter(r)
-		champion_detail.InitChampionRankRouter(r)
-		summoner.InitSummonerRouter(r)
+		item.InitItemRouter(PublicGroup)
+		champion_rank.InitChampionRankRouter(PublicGroup)
+		champion_detail.InitChampionRankRouter(PublicGroup)
+		summoner.InitSummonerRouter(PublicGroup)
 	}
+
 	global.ChaLogger.Info("router register success")
 }

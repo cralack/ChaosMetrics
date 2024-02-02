@@ -6,10 +6,11 @@ import (
 
 type sumnApi struct{}
 
-func InitSummonerRouter(r *gin.Engine) {
+func InitSummonerRouter(router *gin.RouterGroup) {
 	api := sumnApi{}
-	SummonerApi := r.Group("")
+	routerPath := ""
+	summonerRouter := router.Group(routerPath)
 	{
-		SummonerApi.GET("/summoner", api.QuerySummoner)
+		summonerRouter.GET("/summoner", api.QuerySummoner)
 	}
 }

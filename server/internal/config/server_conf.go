@@ -13,5 +13,5 @@ type SystemConf struct {
 	RegisterTTL       time.Duration `mapstructure:"register_ttl" yaml:"register_ttl"`               // 注册TTL（Time-to-Live）
 	RegisterInterval  time.Duration `mapstructure:"register_interval" yaml:"register_interval"`     // 注册间隔
 	ClientTimeOut     time.Duration `mapstructure:"client_timeout" yaml:"client_timeout"`           // 客户端超时时间
-	RouterPrefix      string        `mapstructure:"router-prefix" yaml:"router-prefix"`             // 路由全局前缀
+	RouterPrefix      string        `mapstructure:"router_prefix" yaml:"router_prefix"`             // 路由全局前缀
 }

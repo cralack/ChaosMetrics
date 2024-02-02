@@ -6,11 +6,12 @@ import (
 
 type championRankApi struct{}
 
-func InitChampionRankRouter(r *gin.Engine) {
+func InitChampionRankRouter(r *gin.RouterGroup) {
 	api := championRankApi{}
-	championRankApi := r.Group("")
+	routerPath := ""
+	championRouter := r.Group(routerPath)
 	{
-		championRankApi.GET("/ARAM", api.QueryChampionRankARAM)
-		championRankApi.GET("/CLASSIC", api.QueryChampionRankCLASSIC)
+		championRouter.GET("/ARAM", api.QueryChampionRankARAM)
+		championRouter.GET("/CLASSIC", api.QueryChampionRankCLASSIC)
 	}
 }

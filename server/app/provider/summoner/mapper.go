@@ -51,7 +51,6 @@ func (s *SumonerService) HandleSummoner(src *riotmodel.SummonerDTO) (des *respon
 	}
 
 	matchList = utils.ConvertStrToSlice(src.Matches)
-
 	des.Matches = make([]*response.MatchDTO, 0, len(matchList))
 	// load match from redis
 	key = fmt.Sprintf("/matchDTO/%s", src.Loc)
@@ -71,7 +70,7 @@ func (s *SumonerService) HandleSummoner(src *riotmodel.SummonerDTO) (des *respon
 	{
 		loCode := utils.ConvertLocStrToLocation(src.Loc)
 		pipe := s.rdb.Pipeline()
-		pipe.Expire(ctx, key, time.Second*60*60*24*7)
+		pipe.Expire(ctx, key, time.Hour*24*7)
 		cmds := make([]*redis.IntCmd, 0, len(matchList))
 		for _, m := range matchList {
 			id, _ := strconv.Atoi(m[4:])

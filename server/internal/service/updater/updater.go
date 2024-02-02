@@ -17,10 +17,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// type Updater interface {
-// 	Update(loc uint, args ...string) error
-// }
-
 type Updater struct {
 	logger  *zap.Logger
 	db      *gorm.DB
@@ -52,10 +48,10 @@ func NewRiotUpdater(opts ...Option) *Updater {
 	}
 }
 
-func (u *Updater) UpdateAll(endMark string) {
+func (u *Updater) UpdateAll() {
 	versions := u.UpdateVersions()
 	for _, curVer := range versions {
-		if isEnd(curVer, endMark) {
+		if isEnd(curVer, u.stgy.EndMark) {
 			u.logger.Info(curVer)
 			u.UpdatePerks(curVer)
 			u.UpdateItems(curVer)
@@ -144,7 +140,8 @@ func (u *Updater) UpdateChampions(version string) {
 	}
 
 	// get chamlist from rdb or riot
-	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%d", vIdx)).Val(); buffer == "" {
+	if buffer = u.rdb.HGet(ctx, "/championlist", fmt.Sprintf("%d",
+		vIdx)).Val(); u.stgy.ForceUpdate || buffer == "" {
 		// get champion chamList
 		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/en_US/champion.json", version)
 		if buff, err = u.fetcher.Get(url); err != nil || buff == nil {
@@ -159,7 +156,6 @@ func (u *Updater) UpdateChampions(version string) {
 		}
 		// store chamlist
 		sort.Strings(cList)
-
 	} else {
 		err = json.Unmarshal([]byte(buffer), &cList)
 	}
@@ -182,7 +178,8 @@ func (u *Updater) UpdateChampions(version string) {
 		cnt := 0
 
 		for _, chamID := range cList {
-			if buffer = u.rdb.HGet(ctx, key, fmt.Sprintf("%s@%d", chamID, vIdx)).Val(); buffer != "" {
+			if buffer = u.rdb.HGet(ctx, key, fmt.Sprintf("%s@%d", chamID,
+				vIdx)).Val(); buffer != "" && !u.stgy.ForceUpdate {
 				continue
 			}
 

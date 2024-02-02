@@ -6,10 +6,11 @@ import (
 
 type itemApi struct{}
 
-func InitItemRouter(r *gin.Engine) {
+func InitItemRouter(router *gin.RouterGroup) {
 	api := itemApi{}
-	itemApi := r.Group("")
+	routerPath := ""
+	itemRouter := router.Group(routerPath)
 	{
-		itemApi.GET("/item", api.QueryApi)
+		itemRouter.GET("/item", api.QueryApi)
 	}
 }

@@ -9,8 +9,10 @@ import (
 
 func Test_update_champion(t *testing.T) {
 	u := updater.NewRiotUpdater(
-		updater.WithLifeTime(time.Hour * 24 * 30 * 2), // 2 month
+		updater.WithLifeTime(time.Hour*24*30*2), // 2 month
+		updater.WithForceUpdate(false),
+		updater.WithEndmark("13.3.1"),
 	)
 
-	u.UpdateAll("13.3.1")
+	u.UpdateAll()
 }
