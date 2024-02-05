@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/cralack/ChaosMetrics/server/app/middleware/auth"
+	"github.com/cralack/ChaosMetrics/server/app/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +15,6 @@ func InitUserRouter(router *gin.RouterGroup) {
 		userRouter.POST("/register", api.Register)
 		userRouter.GET("/verify", api.Verify)
 		userRouter.POST("/login", api.Login)
-		userRouter.GET("/logout", api.Logout, auth.Auth())
+		userRouter.GET("/logout", middleware.JWTAuth(), api.Logout)
 	}
-
 }

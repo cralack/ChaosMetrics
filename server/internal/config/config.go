@@ -8,6 +8,7 @@ type Root struct {
 	LogConf   *LoggerConfig   `mapstructure:"logger"`
 	Fetcher   *FetcherConfig  `mapstructure:"fetcher"`
 	System    *SystemConf     `mapstructure:"system"`
+	JwtConf   *JwtConfig      `mapstructure:"jwt"`
 }
 type DirTree struct {
 	WorkDir string

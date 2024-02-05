@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -63,34 +62,23 @@ func (s *UsrService) SendVerifyEmail(token string) error {
 }
 
 func (s *UsrService) VerifyRegister(token string) (bool, error) {
+	var err error
 	key := fmt.Sprintf("user:register-%s", token)
 	val := s.rdb.Get(context.Background(), key).Val()
 	var tar *usermodel.User
-	if err := json.Unmarshal([]byte(val), &tar); err != nil {
+	if err = json.Unmarshal([]byte(val), &tar); err != nil {
 		return false, err
 	}
 	if tar.Token != token {
 		return false, nil
 	}
-	if err := s.rdb.Del(context.Background(), key).Err(); err != nil {
+	if err = s.rdb.Del(context.Background(), key).Err(); err != nil {
 		return false, err
 	}
 
 	// gen passwd
-	var cost int
-	switch global.ChaEnv {
-	case global.TestEnv:
-		cost = bcrypt.MinCost
-	case global.DevEnv:
-		cost = bcrypt.DefaultCost
-	case global.ProductEnv:
-		cost = bcrypt.MaxCost
-	}
-	hash, err := bcrypt.GenerateFromPassword([]byte(tar.Password), cost)
-	if err != nil {
-		return false, err
-	}
-	tar.Password = string(hash)
+
+	tar.Password = utils.BcryptHash(tar.Password)
 	if err = s.db.Create(tar).Error; err != nil {
 		return false, err
 	}
@@ -98,49 +86,15 @@ func (s *UsrService) VerifyRegister(token string) (bool, error) {
 	return true, nil
 }
 
-func (s *UsrService) Login(usrname, passwd string) (string, error) {
+func (s *UsrService) Login(usrname, passwd string) (*usermodel.User, error) {
 	var tarDB *usermodel.User
 	if err := s.db.Where("username=?", usrname).First(&tarDB).Error; err != nil {
-		return "", err
-	}
-	if err := bcrypt.CompareHashAndPassword([]byte(tarDB.Password), []byte(passwd)); err != nil {
-		return "", errors.New("wrong password")
-	}
-	// cache session
-	tarDB.Password = ""
-	tarDB.Token = utils.GenerateRandomString(tokenLen)
-	key := fmt.Sprintf("session:%s", tarDB.Token)
-	if err := s.rdb.Set(context.Background(), key, tarDB, time.Hour*24).Err(); err != nil {
-		return "", err
-	}
-	return tarDB.Token, nil
-}
-
-func (s *UsrService) Logout(tar *usermodel.User) error {
-	session, err := s.VerifyLogin(tar.Token)
-	if err != nil || session.UserName != tar.UserName {
-		return errors.New("verify user failed " + err.Error())
-	}
-	key := fmt.Sprintf("session:%s", tar.Token)
-	if err = s.rdb.Del(context.Background(), key).Err(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *UsrService) VerifyLogin(token string) (*usermodel.User, error) {
-	key := fmt.Sprintf("session:%s", token)
-	res := s.rdb.Get(context.Background(), key)
-	if res.Err() != nil {
-		return nil, res.Err()
-	}
-
-	var tar *usermodel.User
-	err := json.Unmarshal([]byte(res.Val()), &tar)
-	if err != nil {
 		return nil, err
 	}
-	return tar, nil
+	if ok := utils.BcryptCheck(tarDB.Password, passwd); !ok {
+		return nil, errors.New("wrong password")
+	}
+	return tarDB, nil
 }
 
 func (s *UsrService) GetUser(userID uint) (*usermodel.User, error) {
@@ -150,4 +104,18 @@ func (s *UsrService) GetUser(userID uint) (*usermodel.User, error) {
 		return nil, err
 	}
 	return tar, nil
+}
+
+func (s *UsrService) ChangePassword(src *usermodel.User, newPasswd string) (err error) {
+	var des *usermodel.User
+	if err = global.ChaDB.Where("id=?", src.ID).First(&des).Error; err != nil {
+		return err
+	}
+
+	if ok := utils.BcryptCheck(src.Password, des.Password); !ok {
+		return errors.New("passwd check failed")
+	}
+	des.Password = utils.BcryptHash(newPasswd)
+	err = global.ChaDB.Save(&des).Error
+	return err
 }

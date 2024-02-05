@@ -57,3 +57,9 @@ system:
   register_interval: 15
   client_timeout: 10
   router_prefix: ""
+
+jwt:
+  signing_key: open sesame
+  expires_time: 1h
+  buffer_time: 15m
+  issuer: chaos

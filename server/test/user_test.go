@@ -41,30 +41,30 @@ func Test_Register(t *testing.T) {
 	t.Log(usrDB.CreatedAt)
 
 	// login
-	token, err := serv.Login(usr1.UserName, usr1.Password)
+	tarUsr, err := serv.Login(usr1.UserName, usr1.Password)
 	if err != nil || usrDB == nil {
 		t.Log(err)
 	}
-	t.Log(token)
-	usr1.Token = token
+	t.Log(tarUsr.Token)
+	usr1.Token = tarUsr.Token
 
 	// get user
 	usrDB, err = serv.GetUser(usr1.ID)
 	t.Log(usrDB.ID == usr1.ID)
 
-	// verify
-	sess, err := serv.VerifyLogin(usr1.Token)
-	if err != nil || sess == nil {
-		t.Log(err)
-	}
-
-	// logout
-	err = serv.Logout(usr1)
-	if err != nil {
-		t.Log(err)
-	}
-	sess, err = serv.VerifyLogin(usr1.Token)
-	if err == nil || sess != nil {
-		t.Log("?")
-	}
+	// // verify
+	// sess, err := serv.VerifyLogin(usr1.Token)
+	// if err != nil || sess == nil {
+	// 	t.Log(err)
+	// }
+	//
+	// // logout
+	// err = serv.Logout(usr1)
+	// if err != nil {
+	// 	t.Log(err)
+	// }
+	// sess, err = serv.VerifyLogin(usr1.Token)
+	// if err == nil || sess != nil {
+	// 	t.Log("?")
+	// }
 }

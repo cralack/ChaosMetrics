@@ -9,6 +9,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/cralack/ChaosMetrics/server/model/usermodel"
 	"github.com/cralack/ChaosMetrics/server/utils"
+	"github.com/cralack/ChaosMetrics/server/utils/jwt"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -16,11 +17,6 @@ import (
 type loginParam struct {
 	UserName string `json:"username" example:"snoop" binding:"required"`
 	Password string `json:"password" example:"123456" binding:"required,gte=6"`
-}
-type LoginResponse struct {
-	User      usermodel.User `json:"user"`
-	Token     string         `json:"token"`
-	ExpiresAt int64          `json:"expiresAt"`
 }
 
 // Login godoc
@@ -37,30 +33,32 @@ func (a *usrApi) Login(ctx *gin.Context) {
 	var (
 		param loginParam
 		err   error
-		token string
+		tar   *usermodel.User
+		// token string
 	)
 	// need captha
 	if err = ctx.ShouldBindJSON(&param); err != nil {
 		response.FailWithMessage("wrong param", ctx)
+		return
 	}
 	serv := user.NewUserService()
-	if token, err = serv.Login(param.UserName, param.Password); err != nil {
+	if tar, err = serv.Login(param.UserName, param.Password); err != nil {
 		response.FailWithDetailed(err, "login failed", ctx)
+		return
 	}
-	utils.SetToken(ctx, token, 3600)
-	// a.TokenNext(ctx)
+	a.genToken(ctx, tar)
 	response.Ok(ctx)
 	return
 }
 
-func (a *usrApi) TokenNext(ctx *gin.Context, tar usermodel.User) {
-	j := utils.NewJWT()
-	claims := j.CreateClaims(request.BaseClaims{
-		UUID:        tar.UUID,
-		ID:          tar.ID,
-		Username:    tar.UserName,
-		NickName:    tar.NickName,
-		AuthorityId: tar.Role,
+func (a *usrApi) genToken(ctx *gin.Context, tar *usermodel.User) {
+	j := jwt.NewJWT()
+	claims := j.CreateClaims(request.PrivateClaims{
+		UUID:     tar.UUID,
+		ID:       tar.ID,
+		Username: tar.UserName,
+		NickName: tar.NickName,
+		Role:     tar.Role,
 	})
 	token, err := j.CreateToken(claims)
 	if err != nil {
@@ -69,4 +67,5 @@ func (a *usrApi) TokenNext(ctx *gin.Context, tar usermodel.User) {
 		return
 	}
 	utils.SetToken(ctx, token, int(claims.RegisteredClaims.ExpiresAt.Unix()-time.Now().Unix()))
+	response.OkWithDetailed(gin.H{"token": token}, "login succeed", ctx)
 }

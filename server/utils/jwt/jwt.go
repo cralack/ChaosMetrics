@@ -1,9 +1,12 @@
-package utils
+package jwt
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/request"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -19,23 +22,21 @@ type JWT struct {
 	SigningKey []byte
 }
 
-const SigningKey = "Open Sesame"
-
 func NewJWT() *JWT {
-	return &JWT{SigningKey: []byte(SigningKey)}
+	return &JWT{SigningKey: []byte(global.ChaConf.JwtConf.SigningKey)}
 }
 
-func (j *JWT) CreateClaims(baseClaims request.BaseClaims) request.CustomClaims {
-	buf := time.Hour * 24
-	exp := time.Hour * 2
+func (j *JWT) CreateClaims(baseClaims request.PrivateClaims) request.CustomClaims {
+	// buf := global.ChaConf.JwtConf.BufferTime
+	exp := global.ChaConf.JwtConf.ExpiresTime
 	return request.CustomClaims{
-		BaseClaims: baseClaims,
-		BufferTime: int64(buf / time.Second),
+		PrivateClaims: baseClaims,
+		// BufferTime:    int64(buf / time.Second),
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    "ChaosMetric",
+			Issuer:    global.ChaConf.JwtConf.Issuer,
 			Audience:  jwt.ClaimStrings{"Chao"},
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(-1000)),
-			NotBefore: jwt.NewNumericDate(time.Now().Add(exp)),
+			NotBefore: jwt.NewNumericDate(time.Now().Add(-1000)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(exp)),
 		},
 	}
 }
@@ -69,4 +70,16 @@ func (j *JWT) ParseToken(tokenStr string) (*request.CustomClaims, error) {
 		}
 	}
 	return nil, TokenInvalid
+}
+
+func (j *JWT) SetJWTBlack(jwt string) (err error) {
+	// 此处过期时间等于jwt过期时间
+	dura := global.ChaConf.JwtConf.ExpiresTime
+	err = global.ChaRDB.Set(context.Background(), fmt.Sprintf("jwt-%s", jwt), 1, dura).Err()
+	return err
+}
+
+func (j *JWT) InBlackList(jwt string) bool {
+	_, err := global.ChaRDB.Get(context.Background(), fmt.Sprintf("jwt-%s", jwt)).Result()
+	return err == nil
 }

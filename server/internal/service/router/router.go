@@ -23,7 +23,7 @@ func New() *gin.Engine {
 		gin.Recovery(),
 	)
 
-	api.RegiserRoutes(router)
+	api.RegisterRoutes(router)
 
 	return router
 }

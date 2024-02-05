@@ -7,6 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type Role uint
+
+const (
+	Criminal Role = iota
+	Civilian
+	Judge
+)
+
 type User struct {
 	gorm.Model
 
@@ -15,7 +23,7 @@ type User struct {
 	Password string    `gorm:"column:password"`
 	Email    string    `gorm:"column:email"`
 	NickName string    `gorm:"column:nickname"`
-	Role     uint      `gorm:"column:role"`
+	Role     Role      `gorm:"column:role"`
 
 	Token string `gorm:"-"` // 注册token或者登录token
 }
