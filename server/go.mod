@@ -22,7 +22,7 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
-	github.com/swaggo/swag v1.16.2
+	github.com/swaggo/swag v1.16.3
 	go-micro.dev/v4 v4.10.2
 	go.etcd.io/etcd/client/v3 v3.5.11
 	go.uber.org/zap v1.26.0
