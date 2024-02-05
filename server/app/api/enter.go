@@ -5,6 +5,7 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/app/api/champion_detail"
 	"github.com/cralack/ChaosMetrics/server/app/api/champion_rank"
+	"github.com/cralack/ChaosMetrics/server/app/api/comment"
 	"github.com/cralack/ChaosMetrics/server/app/api/item"
 	"github.com/cralack/ChaosMetrics/server/app/api/summoner"
 	"github.com/cralack/ChaosMetrics/server/app/api/user"
@@ -40,6 +41,9 @@ func RegisterRoutes(r *gin.Engine) {
 
 	PrivateGroup := r.Group(global.ChaConf.System.RouterPrefix)
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
+	{
+		comment.InitCommentRouter(PrivateGroup)
+	}
 
 	global.ChaLogger.Info("router register success")
 }

@@ -3,8 +3,8 @@ package init
 import (
 	"github.com/cralack/ChaosMetrics/server/internal/config"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/model"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
-	"github.com/cralack/ChaosMetrics/server/model/usermodel"
 	"github.com/cralack/ChaosMetrics/server/pkg/xgorm"
 	"github.com/cralack/ChaosMetrics/server/pkg/xredis"
 	"github.com/cralack/ChaosMetrics/server/pkg/xviper"
@@ -52,7 +52,8 @@ func init() {
 		&riotmodel.MatchDB{},
 		&riotmodel.ParticipantDB{},
 		// usermodel
-		&usermodel.User{},
+		&model.User{},
+		&model.Comment{},
 	); err != nil {
 		global.ChaLogger.Error("init orm model failed", zap.Error(err))
 	} else {

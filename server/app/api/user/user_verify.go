@@ -28,15 +28,18 @@ func (a *usrApi) Verify(ctx *gin.Context) {
 	)
 	if err = ctx.ShouldBindQuery(&param); err != nil {
 		response.FailWithMessage("wrong param", ctx)
+		return
 	}
 
 	serv := user.NewUserService()
 	ok, err = serv.VerifyRegister(param.Token)
 	if err != nil {
 		response.FailWithDetailed(err, "", ctx)
+		return
 	}
 	if !ok {
 		response.FailWithMessage("verify failed", ctx)
+		return
 	}
 	response.OkWithMessage("register succeed,refresh", ctx)
 }

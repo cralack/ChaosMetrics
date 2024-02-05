@@ -3,8 +3,8 @@ package user
 import (
 	"github.com/cralack/ChaosMetrics/server/app/provider/user"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/model"
 	"github.com/cralack/ChaosMetrics/server/model/response"
-	"github.com/cralack/ChaosMetrics/server/model/usermodel"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +27,7 @@ type registerParam struct {
 func (a *usrApi) Register(ctx *gin.Context) {
 	var (
 		param registerParam
-		tar   *usermodel.User
+		tar   *model.User
 		token string
 		err   error
 	)
@@ -37,17 +37,19 @@ func (a *usrApi) Register(ctx *gin.Context) {
 	}
 
 	serv := user.NewUserService()
-	tar = &usermodel.User{
+	tar = &model.User{
 		UserName: param.UserName,
 		Password: param.Password,
 		Email:    param.Email,
 	}
 	if token, err = serv.PreRegister(tar); err != nil {
 		response.FailWithDetailed(err, "register failed,try later", ctx)
+		return
 	}
 	global.ChaLogger.Debug(token)
 	if err = serv.SendVerifyEmail(token); err != nil {
 		response.FailWithMessage("send mail ailed,try later", ctx)
+		return
 	}
 	response.Ok(ctx)
 	return

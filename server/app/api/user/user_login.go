@@ -5,9 +5,9 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/app/provider/user"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/model"
 	"github.com/cralack/ChaosMetrics/server/model/request"
 	"github.com/cralack/ChaosMetrics/server/model/response"
-	"github.com/cralack/ChaosMetrics/server/model/usermodel"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/cralack/ChaosMetrics/server/utils/jwt"
 	"github.com/gin-gonic/gin"
@@ -33,7 +33,7 @@ func (a *usrApi) Login(ctx *gin.Context) {
 	var (
 		param loginParam
 		err   error
-		tar   *usermodel.User
+		tar   *model.User
 		// token string
 	)
 	// need captha
@@ -51,7 +51,7 @@ func (a *usrApi) Login(ctx *gin.Context) {
 	return
 }
 
-func (a *usrApi) genToken(ctx *gin.Context, tar *usermodel.User) {
+func (a *usrApi) genToken(ctx *gin.Context, tar *model.User) {
 	j := jwt.NewJWT()
 	claims := j.CreateClaims(request.PrivateClaims{
 		UUID:     tar.UUID,

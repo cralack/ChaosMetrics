@@ -182,6 +182,165 @@
                 }
             }
         },
+        "/comments": {
+            "post": {
+                "description": "post @ChampionID,Version",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "发表一个评论",
+                "parameters": [
+                    {
+                        "description": "Post a comment @ champion,version",
+                        "name": "postCommentParam",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.postCommentParam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "msg": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete @id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "删除一个评论",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "msg": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/comments/list": {
+            "get": {
+                "description": "query @ChampionID,Version,start,size",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "请求一个英雄的评论",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Ahri",
+                        "description": "Champion name",
+                        "name": "championID",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "name": "size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "name": "start",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.1.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/comment.CommentsDTO"
+                                            }
+                                        },
+                                        "msg": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/item": {
             "get": {
                 "description": "query @version,lang",
@@ -627,6 +786,58 @@
                 "win_rate": {
                     "description": "胜率 30%",
                     "type": "number"
+                }
+            }
+        },
+        "comment.Author": {
+            "type": "object",
+            "properties": {
+                "nickName": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.CommentsDTO": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/comment.Author"
+                },
+                "championID": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.postCommentParam": {
+            "type": "object",
+            "required": [
+                "championID",
+                "comment",
+                "version"
+            ],
+            "properties": {
+                "championID": {
+                    "description": "Champion name",
+                    "type": "string",
+                    "example": "Ahri"
+                },
+                "comment": {
+                    "type": "string",
+                    "example": "so cute"
+                },
+                "version": {
+                    "description": "Version",
+                    "type": "string",
+                    "example": "14.1.1"
                 }
             }
         },

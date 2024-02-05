@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"github.com/cralack/ChaosMetrics/server/model/usermodel"
+	"github.com/cralack/ChaosMetrics/server/model"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -35,9 +35,9 @@ func NewUserService() *UsrService {
 	}
 }
 
-func (s *UsrService) PreRegister(tar *usermodel.User) (string, error) {
+func (s *UsrService) PreRegister(tar *model.User) (string, error) {
 	var (
-		userDB = &usermodel.User{}
+		userDB = &model.User{}
 		err    error
 	)
 	if err = s.db.Where("email=?", tar.Email).First(userDB).Error; err != nil && !userDB.CreatedAt.IsZero() {
@@ -65,7 +65,7 @@ func (s *UsrService) VerifyRegister(token string) (bool, error) {
 	var err error
 	key := fmt.Sprintf("user:register-%s", token)
 	val := s.rdb.Get(context.Background(), key).Val()
-	var tar *usermodel.User
+	var tar *model.User
 	if err = json.Unmarshal([]byte(val), &tar); err != nil {
 		return false, err
 	}
@@ -86,8 +86,8 @@ func (s *UsrService) VerifyRegister(token string) (bool, error) {
 	return true, nil
 }
 
-func (s *UsrService) Login(usrname, passwd string) (*usermodel.User, error) {
-	var tarDB *usermodel.User
+func (s *UsrService) Login(usrname, passwd string) (*model.User, error) {
+	var tarDB *model.User
 	if err := s.db.Where("username=?", usrname).First(&tarDB).Error; err != nil {
 		return nil, err
 	}
@@ -97,8 +97,8 @@ func (s *UsrService) Login(usrname, passwd string) (*usermodel.User, error) {
 	return tarDB, nil
 }
 
-func (s *UsrService) GetUser(userID uint) (*usermodel.User, error) {
-	tar := &usermodel.User{}
+func (s *UsrService) GetUser(userID uint) (*model.User, error) {
+	tar := &model.User{}
 	tar.ID = userID
 	if err := s.db.Where("id=?", userID).First(&tar).Error; err != nil {
 		return nil, err
@@ -106,8 +106,8 @@ func (s *UsrService) GetUser(userID uint) (*usermodel.User, error) {
 	return tar, nil
 }
 
-func (s *UsrService) ChangePassword(src *usermodel.User, newPasswd string) (err error) {
-	var tar *usermodel.User
+func (s *UsrService) ChangePassword(src *model.User, newPasswd string) (err error) {
+	var tar *model.User
 	if err = global.ChaDB.Where("id=?", src.ID).First(&tar).Error; err != nil {
 		return err
 	}

@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	"github.com/cralack/ChaosMetrics/server/app/provider/user"
-	"github.com/cralack/ChaosMetrics/server/model/usermodel"
+	"github.com/cralack/ChaosMetrics/server/model"
 )
 
 func Test_Register(t *testing.T) {
 	serv := user.NewUserService()
 
-	usr1 := &usermodel.User{
+	usr1 := &model.User{
 		UserName: "snoop dogg",
 		Password: "123456",
 		Email:    "cralack@foxmail.com",
@@ -34,7 +34,7 @@ func Test_Register(t *testing.T) {
 		t.Log(err)
 	}
 	t.Log(ok)
-	usrDB := &usermodel.User{}
+	usrDB := &model.User{}
 	if err = db.Where("username=?", usr1.UserName).First(&usrDB).Error; err != nil {
 		t.Log(err)
 	}

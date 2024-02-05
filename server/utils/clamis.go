@@ -60,3 +60,17 @@ func GetUserUuid(ctx *gin.Context) uuid.UUID {
 		return waitUse.UUID
 	}
 }
+
+// GetUserID 从Gin的Context中获取从jwt解析出来的用户ID
+func GetUserID(ctx *gin.Context) uint {
+	if claims, exists := ctx.Get("claims"); !exists {
+		if cl, err := GetClaims(ctx); err != nil {
+			return 0
+		} else {
+			return cl.PrivateClaims.ID
+		}
+	} else {
+		waitUse := claims.(*request.CustomClaims)
+		return waitUse.PrivateClaims.ID
+	}
+}

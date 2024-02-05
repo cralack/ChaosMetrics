@@ -1,7 +1,7 @@
 package request
 
 import (
-	"github.com/cralack/ChaosMetrics/server/model/usermodel"
+	"github.com/cralack/ChaosMetrics/server/model"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
@@ -17,5 +17,5 @@ type PrivateClaims struct {
 	ID       uint
 	Username string
 	NickName string
-	Role     usermodel.Role
+	Role     model.Role
 }
