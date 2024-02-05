@@ -6,6 +6,9 @@
     <el-form-item label="Password">
       <el-input type="password" v-model="loginForm.password" placeholder="Password"></el-input>
     </el-form-item>
+    <el-form-item label="Emai">
+      <el-input type="text" v-model="loginForm.email" placeholder="Email"></el-input>
+    </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="login">Login</el-button>
     </el-form-item>
@@ -19,7 +22,8 @@ export default {
     return {
       loginForm: {
         username: '',
-        password: ''
+        password: '',
+        email:'',
       }
     };
   },
