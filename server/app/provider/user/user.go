@@ -91,7 +91,7 @@ func (s *UsrService) Login(usrname, passwd string) (*usermodel.User, error) {
 	if err := s.db.Where("username=?", usrname).First(&tarDB).Error; err != nil {
 		return nil, err
 	}
-	if ok := utils.BcryptCheck(tarDB.Password, passwd); !ok {
+	if ok := utils.BcryptCheck(passwd, tarDB.Password); !ok {
 		return nil, errors.New("wrong password")
 	}
 	return tarDB, nil
@@ -107,15 +107,15 @@ func (s *UsrService) GetUser(userID uint) (*usermodel.User, error) {
 }
 
 func (s *UsrService) ChangePassword(src *usermodel.User, newPasswd string) (err error) {
-	var des *usermodel.User
-	if err = global.ChaDB.Where("id=?", src.ID).First(&des).Error; err != nil {
+	var tar *usermodel.User
+	if err = global.ChaDB.Where("id=?", src.ID).First(&tar).Error; err != nil {
 		return err
 	}
 
-	if ok := utils.BcryptCheck(src.Password, des.Password); !ok {
+	if ok := utils.BcryptCheck(src.Password, tar.Password); !ok {
 		return errors.New("passwd check failed")
 	}
-	des.Password = utils.BcryptHash(newPasswd)
-	err = global.ChaDB.Save(&des).Error
+	tar.Password = utils.BcryptHash(newPasswd)
+	err = global.ChaDB.Save(&tar).Error
 	return err
 }

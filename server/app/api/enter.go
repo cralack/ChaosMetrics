@@ -39,7 +39,7 @@ func RegisterRoutes(r *gin.Engine) {
 	}
 
 	PrivateGroup := r.Group(global.ChaConf.System.RouterPrefix)
-	PrivateGroup.Use(middleware.JWTAuth())
+	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 
 	global.ChaLogger.Info("router register success")
 }

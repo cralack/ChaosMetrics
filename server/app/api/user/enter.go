@@ -10,11 +10,14 @@ type usrApi struct{}
 func InitUserRouter(router *gin.RouterGroup) {
 	api := usrApi{}
 	routerPath := "/user"
-	userRouter := router.Group(routerPath).Use()
+	baseGroup := router.Group(routerPath)
 	{
-		userRouter.POST("/register", api.Register)
-		userRouter.GET("/verify", api.Verify)
-		userRouter.POST("/login", api.Login)
-		userRouter.GET("/logout", middleware.JWTAuth(), api.Logout)
+		baseGroup.POST("/register", api.Register)
+		baseGroup.GET("/verify", api.Verify)
+		baseGroup.POST("/login", api.Login)
+	}
+	authnGroup := router.Group(routerPath).Use(middleware.JWTAuth())
+	{
+		authnGroup.GET("/logout", api.Logout)
 	}
 }
