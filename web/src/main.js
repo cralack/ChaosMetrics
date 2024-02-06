@@ -1,20 +1,20 @@
 import { createApp } from 'vue'
-// 引入封装的router
-import App from './App.vue'
-import { store } from '@/pinia'
-
-
-// 整合element-plus
+import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
-// 全局引入字体图标
-import * as ElIcons from '@element-plus/icons-vue'
+import 'virtual:windi.css'
+
+import App from './App.vue'
+import router from './router'
 
 const app = createApp(App)
-for (const name in ElIcons) {
-  app.component(name, (ElIcons)[name])
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
 }
-app
-  .use(ElementPlus)
-  .use(store)
-  .mount('#app')
+
+app.use(createPinia())
+app.use(router)
+app.use(ElementPlus)
+
+app.mount('#app')
