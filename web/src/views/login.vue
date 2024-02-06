@@ -15,23 +15,24 @@
       <el-col :md="8" class="right">
         <div>
           <h2 class="title">Welcome</h2>
-          <el-divider class="line" />
-          <el-form :model="form" class="w-[250px]">
-            <el-form-item>
+          <el-divider class="line"/>
+
+          <el-form :model="form" :rules="rules" ref="formRef" class="w-[250px]">
+            <el-form-item prop="username">
               <el-input v-model="form.username" class="w-[210px]" placeholder="username">
                 <template #prefix>
                   <el-icon class="el-input__icon">
-                    <user />
+                    <user/>
                   </el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
-            <el-form-item>
-              <el-input v-model="form.password" class="w-[210px]" placeholder="password">
+            <el-form-item prop="password">
+              <el-input type="password" show-password v-model="form.password" class="w-[210px]" placeholder="password">
                 <template #prefix>
                   <el-icon class="el-input__icon">
-                    <lock />
+                    <lock/>
                   </el-icon>
                 </template>
               </el-input>
@@ -59,11 +60,11 @@
   @apply flex items-center justify-center;
 }
 
-.left>div>div:first-child {
+.left > div > div:first-child {
   @apply font-bold text-5xl text-light-50 mb-4;
 }
 
-.left>div>div:nth-child(2) {
+.left > div > div:nth-child(2) {
   @apply text-light-50 mb-4;
 }
 
@@ -82,14 +83,30 @@
 
 <script setup>
 
-import { reactive } from 'vue'
+import { ref, reactive } from 'vue'
 
 const form = reactive({
   username: '',
   password: ''
 })
 
+const rules = {
+  username: [
+    { required: true, message: 'User name cannot be empty', trigger: 'blur' },
+    { min: 5, max: 12, message: 'Length should be 6 to 12', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: 'Password cannot be empty', trigger: 'blur' },
+    { min: 6, max: 12, message: 'Length should be 6 to 12', trigger: 'blur' }
+  ]
+}
+
+const formRef = ref(null)
+
 const onSubmit = () => {
+  formRef.value.validate((valid) => {
+    console.log(valid)
+  })
   console.log(form.username, '  ', form.password)
 }
 
