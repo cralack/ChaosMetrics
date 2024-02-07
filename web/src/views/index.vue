@@ -1,12 +1,12 @@
 <template>
   <div>
     Home
-    <pre>{{ cookie.getAll() }}</pre>
+    <pre>{{ getToken }}</pre>
     <el-button
       @click="goLogin"
     >Login</el-button>
     <el-button
-      @click="remove"
+      @click="removeToken"
     >Clear Cookie</el-button>
   </div>
 
@@ -14,15 +14,12 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useCookies } from '@vueuse/integrations/useCookies'
+import { removeToken, getToken } from '@/utils/auth'
 
 const router = useRouter()
-const cookie = useCookies()
 
 const goLogin = () => {
   router.push('/login')
 }
-const remove = () => {
-  cookie.remove('x-token')
-}
+
 </script>

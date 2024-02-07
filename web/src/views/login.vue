@@ -83,10 +83,9 @@
 import { ref, reactive } from 'vue'
 import { login } from '@/api/user'
 import { useRouter } from 'vue-router'
-import { useCookies } from '@vueuse/integrations/useCookies'
+import { setToken } from '@/utils/auth'
 
 const router = useRouter()
-const cookie = useCookies()
 
 const form = reactive({
   username: '',
@@ -120,7 +119,7 @@ const onSubmit = () => {
         switch (res.code) {
           case 0:
           // store token
-            cookie.set('x-token', res.data.token)
+            setToken(res.data.token)
             // jump back
             router.push('/')
             break

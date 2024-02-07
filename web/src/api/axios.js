@@ -1,28 +1,12 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import { useCookies } from '@vueuse/integrations/useCookies'
+import { getToken } from '@/utils/auth'
+import { successMessage, errorMessage } from '@/utils/message'
 
 const service = axios.create({
   baseURL: 'http://localhost:8080'
 })
-const successMessage = (str) => {
-  ElMessage({
-    showClose: true,
-    message: str,
-    type: 'success',
-  })
-}
-const errorMessage = (str) => {
-  ElMessage({
-    showClose: true,
-    message: str,
-    type: 'error',
-  })
-}
-
 service.interceptors.request.use(function(config) {
-  const cookie = useCookies()
-  const token = cookie.get('x-token')
+  const token = getToken()
   if (token) {
     config.headers.set('x-token', token)
   }
@@ -42,11 +26,7 @@ service.interceptors.response.use(function(response) {
   }
   return response.data
 }, function(error) {
-  ElMessage({
-    showClose: true,
-    message: error.response.data.msg,
-    type: 'error',
-  })
+  errorMessage(error.response.data.msg)
   return Promise.reject(error)
 })
 export default service
