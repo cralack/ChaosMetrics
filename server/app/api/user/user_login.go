@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/app/provider/user"
@@ -41,13 +42,15 @@ func (a *usrApi) Login(ctx *gin.Context) {
 		response.FailWithMessage("wrong param", ctx)
 		return
 	}
+	if global.ChaEnv != global.ProductEnv {
+		time.Sleep(time.Second * 3)
+	}
 	serv := user.NewUserService()
 	if tar, err = serv.Login(param.UserName, param.Password); err != nil {
-		response.FailWithDetailed(err, "login failed", ctx)
+		response.FailWithMessage(fmt.Sprintf("login failed,%s", err.Error()), ctx)
 		return
 	}
 	a.genToken(ctx, tar)
-	response.Ok(ctx)
 	return
 }
 

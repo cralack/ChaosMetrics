@@ -88,8 +88,8 @@ func (s *UsrService) VerifyRegister(token string) (bool, error) {
 
 func (s *UsrService) Login(usrname, passwd string) (*model.User, error) {
 	var tarDB *model.User
-	if err := s.db.Where("username=?", usrname).First(&tarDB).Error; err != nil {
-		return nil, err
+	if err := s.db.Where("username=?", usrname).First(&tarDB).Error; err != nil && tarDB.NickName == "" {
+		return nil, errors.New("user does not exist")
 	}
 	if ok := utils.BcryptCheck(passwd, tarDB.Password); !ok {
 		return nil, errors.New("wrong password")

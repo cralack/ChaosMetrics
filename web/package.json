@@ -2,7 +2,6 @@
   "name": "web",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,20 +10,22 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@vueuse/core": "^10.7.2",
+    "@vueuse/integrations": "^10.7.2",
+    "axios": "^1.6.7",
     "element-plus": "^2.5.5",
     "pinia": "^2.1.7",
     "sass": "^1.70.0",
+    "universal-cookie": "^6",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.23.10",
+    "@vitejs/plugin-legacy": "^4.1.0",
     "@vitejs/plugin-vue": "^5.0.3",
-    "eslint": "^8.56.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-vue": "^9.21.1",
+    "eslint": "^8.49.0",
+    "eslint-plugin-vue": "^9.15.1",
     "vite": "^5.0.11",
     "vite-plugin-windicss": "^1.9.3",
     "windicss": "^3.5.6"

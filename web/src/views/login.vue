@@ -1,54 +1,137 @@
 <template>
   <div>
     <el-row class="login-container">
-      <el-col :md="16" class="left">
+      <el-col
+        :md="16"
+        class="left"
+      >
         <div>
-          <div>
-            Chaos Metrics
-          </div>
-          <div>
-            League of Legends Personal Data Analysis Project
-          </div>
+          <div>Chaos Metrics</div>
+          <div>League of Legends Personal Data Analysis Project</div>
         </div>
       </el-col>
 
-      <el-col :md="8" class="right">
+      <el-col
+        :md="8"
+        class="right"
+      >
         <div>
           <h2 class="title">Welcome</h2>
-          <el-divider class="line"/>
+          <el-divider class="line" />
 
-          <el-form :model="form" :rules="rules" ref="formRef" class="w-[250px]">
+          <el-form
+            ref="loginForm"
+            :model="form"
+            :rules="rules"
+            class="w-[250px]"
+          >
             <el-form-item prop="username">
-              <el-input v-model="form.username" class="w-[210px]" placeholder="username">
+              <el-input
+                v-model="form.username"
+                class="w-[210px]"
+                placeholder="username"
+              >
                 <template #prefix>
                   <el-icon class="el-input__icon">
-                    <user/>
+                    <user />
                   </el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
             <el-form-item prop="password">
-              <el-input type="password" show-password v-model="form.password" class="w-[210px]" placeholder="password">
+              <el-input
+                v-model="form.password"
+                type="password"
+                show-password
+                class="w-[210px]"
+                placeholder="password"
+              >
                 <template #prefix>
                   <el-icon class="el-input__icon">
-                    <lock/>
+                    <lock />
                   </el-icon>
                 </template>
               </el-input>
             </el-form-item>
 
             <el-form-item>
-              <el-button type="primary" class="w-[100px]" @click="onSubmit">Login</el-button>
-              <el-button type="primary" class="w-[100px]">Register</el-button>
+              <el-button
+                type="primary"
+                class="w-[100px]"
+                :loading="loading"
+                @click="onSubmit"
+              >
+                Login
+              </el-button>
+              <el-button
+                type="primary"
+                class="w-[100px]"
+              >
+                Register
+              </el-button>
             </el-form-item>
-
           </el-form>
         </div>
       </el-col>
     </el-row>
   </div>
 </template>
+
+<script setup>
+
+import { ref, reactive } from 'vue'
+import { login } from '@/api/user'
+import { useRouter } from 'vue-router'
+import { useCookies } from '@vueuse/integrations/useCookies'
+
+const router = useRouter()
+const cookie = useCookies()
+
+const form = reactive({
+  username: '',
+  password: ''
+})
+
+const rules = {
+  username: [
+    { required: true, message: 'User name cannot be empty', trigger: 'blur' },
+    { min: 5, max: 12, message: 'Length should be 6 to 12', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: 'Password cannot be empty', trigger: 'blur' },
+    { min: 6, max: 12, message: 'Length should be 6 to 12', trigger: 'blur' }
+  ]
+}
+
+const loginForm = ref(null)
+const loading = ref(false)
+
+const onSubmit = () => {
+  loginForm.value.validate((valid) => {
+    if (!valid) {
+      return false
+    }
+    loading.value = true
+    console.log(loading)
+    login(form, 123)
+      .then(res => {
+      // elmessage status
+        switch (res.code) {
+          case 0:
+          // store token
+            cookie.set('x-token', res.data.token)
+            // jump back
+            router.push('/')
+            break
+        }
+      }).finally(() => {
+        loading.value = false
+      })
+    console.log(loading)
+  })
+}
+</script>
 
 <style scoped>
 .login-container {
@@ -80,34 +163,3 @@
   @apply h-[1px] w-52 bg-gray-200;
 }
 </style>
-
-<script setup>
-
-import { ref, reactive } from 'vue'
-
-const form = reactive({
-  username: '',
-  password: ''
-})
-
-const rules = {
-  username: [
-    { required: true, message: 'User name cannot be empty', trigger: 'blur' },
-    { min: 5, max: 12, message: 'Length should be 6 to 12', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: 'Password cannot be empty', trigger: 'blur' },
-    { min: 6, max: 12, message: 'Length should be 6 to 12', trigger: 'blur' }
-  ]
-}
-
-const formRef = ref(null)
-
-const onSubmit = () => {
-  formRef.value.validate((valid) => {
-    console.log(valid)
-  })
-  console.log(form.username, '  ', form.password)
-}
-
-</script>

@@ -1,21 +1,28 @@
 <template>
   <div>
     Home
+    <pre>{{ cookie.getAll() }}</pre>
+    <el-button
+      @click="goLogin"
+    >Login</el-button>
+    <el-button
+      @click="remove"
+    >Clear Cookie</el-button>
   </div>
-  <div>
-    <el-button @click="addCount">
-      {{ count }}
-    </el-button>
-  </div>
+
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { useRouter } from 'vue-router'
+import { useCookies } from '@vueuse/integrations/useCookies'
 
-let count = ref(1)
+const router = useRouter()
+const cookie = useCookies()
 
-function addCount() {
-  count.value++
-  console.log(count)
+const goLogin = () => {
+  router.push('/login')
+}
+const remove = () => {
+  cookie.remove('x-token')
 }
 </script>
