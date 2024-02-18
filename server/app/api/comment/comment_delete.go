@@ -17,8 +17,8 @@ type delCommentParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Comment
-//	@Param			delCommentParam	query		delCommentParam	true	"delete a comment"
-//	@Success		200				{object}	response.Response{msg=string}
+//	@Param			data	query		delCommentParam	true	"delete a comment"
+//	@Success		200		{object}	response.Response{msg=string}
 //	@Router			/comments [delete]
 func (a *cmntApi) DeleteComment(ctx *gin.Context) {
 	var (

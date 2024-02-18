@@ -23,8 +23,8 @@ type itemQueryParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Item
-//	@Param			itemQueryParam	query		itemQueryParam	true	"Query parameters for item"
-//	@Success		200				{object}	response.Response{data=riotmodel.ItemDTO}
+//	@Param			data	query		itemQueryParam	true	"Query parameters for item"
+//	@Success		200		{object}	response.Response{data=riotmodel.ItemDTO}
 //	@Router			/item [get]
 func (i *itemApi) QueryApi(ctx *gin.Context) {
 	var (

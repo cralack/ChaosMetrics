@@ -97,22 +97,23 @@ func (s *UsrService) Login(usrname, passwd string) (*model.User, error) {
 	return tarDB, nil
 }
 
-func (s *UsrService) GetUser(userID uint) (*model.User, error) {
+func (s *UsrService) GetUserIno(uuid uuid.UUID) (*model.User, error) {
 	tar := &model.User{}
-	tar.ID = userID
-	if err := s.db.Where("id=?", userID).First(&tar).Error; err != nil {
+	if err := s.db.Where("uuid=?", uuid).First(&tar).Error; err != nil {
 		return nil, err
 	}
+	tar.ID = 0
+	tar.Password = "******"
 	return tar, nil
 }
 
-func (s *UsrService) ChangePassword(src *model.User, newPasswd string) (err error) {
+func (s *UsrService) ChangePassword(id uint, oldPasswd, newPasswd string) (err error) {
 	var tar *model.User
-	if err = global.ChaDB.Where("id=?", src.ID).First(&tar).Error; err != nil {
+	if err = global.ChaDB.Where("id=?", id).First(&tar).Error; err != nil {
 		return err
 	}
 
-	if ok := utils.BcryptCheck(src.Password, tar.Password); !ok {
+	if ok := utils.BcryptCheck(oldPasswd, tar.Password); !ok {
 		return errors.New("passwd check failed")
 	}
 	tar.Password = utils.BcryptHash(newPasswd)

@@ -6,6 +6,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/cmd/master"
 	"github.com/cralack/ChaosMetrics/server/cmd/worker"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/internal/service/router"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -42,6 +43,7 @@ func AddCommands(root *cobra.Command) {
 	root.AddCommand(
 		master.Cmd,
 		worker.Cmd,
+		router.Cmd,
 		envCmd,
 	)
 }

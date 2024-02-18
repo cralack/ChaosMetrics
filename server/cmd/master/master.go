@@ -28,10 +28,9 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.Flags().StringVar(&masterId, "id", "", "set master id")
 	Cmd.Flags().StringVar(&podIP, "podip", "192.168.123.197", "set pod IP")
-	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8080", "set HTTP listen address")
-	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9090", "set GRPC listen address")
+	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8081", "set HTTP listen address")
+	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9091", "set GRPC listen address")
 	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
-	Cmd.Flags().StringVar(&PProfListenAddress, "token", "", "set riot API token")
 }
 
 func Run() {

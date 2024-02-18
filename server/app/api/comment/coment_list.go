@@ -22,8 +22,8 @@ type queryCommentParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Comment
-//	@Param			squeryCommentParam	query		queryCommentParam	true	"query a comments list"
-//	@Success		200					{object}	response.Response{data=[]CommentsDTO,msg=string}
+//	@Param			data	query		queryCommentParam	true	"query a comments list"
+//	@Success		200		{object}	response.Response{data=[]CommentsDTO,msg=string}
 //	@Router			/comments/list [get]
 func (a *cmntApi) QueryCommentList(ctx *gin.Context) {
 	var (

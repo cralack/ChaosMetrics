@@ -35,9 +35,9 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.Flags().StringVar(&workerID, "id", "", "set worker id")
 	Cmd.Flags().StringVar(&podIP, "podip", "192.168.123.197", "set pod IP")
-	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8080", "set HTTP listen address")
-	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9090", "set GRPC listen address")
-	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
+	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8082", "set HTTP listen address")
+	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9092", "set GRPC listen address")
+	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9982", "set GRPC listen address")
 	Cmd.Flags().StringVar(&region, "region", "AMERICAS", "set worker region")
 	Cmd.Flags().StringVar(&token, "token", "", "set worker token")
 }

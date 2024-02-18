@@ -204,7 +204,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Post a comment @ champion,version",
-                        "name": "postCommentParam",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -461,6 +461,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/changepasswd": {
+            "post": {
+                "security": [
+                    {
+                        "TokenAuth": []
+                    }
+                ],
+                "description": "change @passwd,newpasswd",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Service"
+                ],
+                "summary": "更改密码",
+                "parameters": [
+                    {
+                        "description": "login",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.changePasswordParam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "msg": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/user/info": {
+            "get": {
+                "security": [
+                    {
+                        "TokenAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Service"
+                ],
+                "summary": "获取用户信息",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        },
+                                        "msg": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/user/login": {
             "post": {
                 "description": "login @usrname,passwd",
@@ -509,7 +603,12 @@ const docTemplate = `{
         },
         "/user/logout": {
             "get": {
-                "description": "login @usrname,passwd",
+                "security": [
+                    {
+                        "TokenAuth": []
+                    }
+                ],
+                "description": "logout",
                 "consumes": [
                     "application/json"
                 ],
@@ -519,7 +618,7 @@ const docTemplate = `{
                 "tags": [
                     "User Service"
                 ],
-                "summary": "用户登陆",
+                "summary": "用户登出",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1155,6 +1254,23 @@ const docTemplate = `{
                 }
             }
         },
+        "user.changePasswordParam": {
+            "type": "object",
+            "required": [
+                "newPassword",
+                "password"
+            ],
+            "properties": {
+                "newPassword": {
+                    "description": "新密码",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "密码",
+                    "type": "string"
+                }
+            }
+        },
         "user.loginParam": {
             "type": "object",
             "required": [
@@ -1199,19 +1315,17 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
+        "TokenAuth": {
+            "type": "apiKey",
+            "name": "x-token",
+            "in": "header"
         }
-    },
-    "externalDocs": {
-        "description": "OpenAPI",
-        "url": "https://swagger.io/resources/open-api/"
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.8",
+	Version:          "0.9",
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},

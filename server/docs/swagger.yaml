@@ -366,6 +366,18 @@ definitions:
           type: string
         type: array
     type: object
+  user.changePasswordParam:
+    properties:
+      newPassword:
+        description: 新密码
+        type: string
+      password:
+        description: 密码
+        type: string
+    required:
+    - newPassword
+    - password
+    type: object
   user.loginParam:
     properties:
       password:
@@ -397,9 +409,6 @@ definitions:
     - password
     - username
     type: object
-externalDocs:
-  description: OpenAPI
-  url: https://swagger.io/resources/open-api/
 host: localhost:8080
 info:
   contact: {}
@@ -408,7 +417,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: ChaosMetrics API接口文档
-  version: "0.8"
+  version: "0.9"
 paths:
   /ARAM:
     get:
@@ -552,7 +561,7 @@ paths:
       parameters:
       - description: Post a comment @ champion,version
         in: body
-        name: postCommentParam
+        name: data
         required: true
         schema:
           $ref: '#/definitions/comment.postCommentParam'
@@ -689,6 +698,59 @@ paths:
       summary: 请求一个召唤师详情
       tags:
       - Summoner Detail
+  /user/changepasswd:
+    post:
+      consumes:
+      - application/json
+      description: change @passwd,newpasswd
+      parameters:
+      - description: login
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.changePasswordParam'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                msg:
+                  type: string
+              type: object
+      security:
+      - TokenAuth: []
+      summary: 更改密码
+      tags:
+      - User Service
+  /user/info:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+                msg:
+                  type: string
+              type: object
+      security:
+      - TokenAuth: []
+      summary: 获取用户信息
+      tags:
+      - User Service
   /user/login:
     post:
       consumes:
@@ -720,7 +782,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: login @usrname,passwd
+      description: logout
       produces:
       - application/json
       responses:
@@ -733,7 +795,9 @@ paths:
                 msg:
                   type: string
               type: object
-      summary: 用户登陆
+      security:
+      - TokenAuth: []
+      summary: 用户登出
       tags:
       - User Service
   /user/register:
@@ -789,6 +853,8 @@ paths:
       tags:
       - User Service
 securityDefinitions:
-  BasicAuth:
-    type: basic
+  TokenAuth:
+    in: header
+    name: x-token
+    type: apiKey
 swagger: "2.0"

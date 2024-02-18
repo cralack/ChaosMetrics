@@ -9,11 +9,12 @@ import (
 
 // Logout godoc
 //
-//	@Summary		用户登陆
-//	@Description	login @usrname,passwd
+//	@Summary		用户登出
+//	@Description	logout
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			User Service
+//	@Security		TokenAuth
 //	@Success		200	{object}	response.Response{msg=string}
 //	@Router			/user/logout [get]
 func (a *usrApi) Logout(ctx *gin.Context) {

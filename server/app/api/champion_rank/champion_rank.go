@@ -19,8 +19,8 @@ type championRankParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Champion Rank
-//	@Param			championRankParam	query		championRankParam	true	"Query champion rank list for aram"
-//	@Success		200					{object}	response.Response{data=[]anres.ChampionBrief}
+//	@Param			data	query		championRankParam	true	"Query champion rank list for aram"
+//	@Success		200		{object}	response.Response{data=[]anres.ChampionBrief}
 //	@Router			/ARAM [get]
 func (a *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
 	var (

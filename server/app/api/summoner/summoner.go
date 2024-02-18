@@ -18,8 +18,8 @@ type summonerQueryParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Summoner Detail
-//	@Param			summonerQueryParam	query		summonerQueryParam	true	"Query champion rank list for aram"
-//	@Success		200					{object}	response.Response{data=response.SummonerDTO}
+//	@Param			data	query		summonerQueryParam	true	"Query champion rank list for aram"
+//	@Success		200		{object}	response.Response{data=response.SummonerDTO}
 //	@Router			/summoner [get]
 func (a *sumnApi) QuerySummoner(ctx *gin.Context) {
 	var (

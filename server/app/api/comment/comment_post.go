@@ -21,8 +21,8 @@ type postCommentParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Comment
-//	@Param			postCommentParam	body		postCommentParam	true	"Post a comment @ champion,version"
-//	@Success		200					{object}	response.Response{msg=string}
+//	@Param			data	body		postCommentParam	true	"Post a comment @ champion,version"
+//	@Success		200		{object}	response.Response{msg=string}
 //	@Router			/comments [post]
 func (a *cmntApi) PostComment(ctx *gin.Context) {
 	var (

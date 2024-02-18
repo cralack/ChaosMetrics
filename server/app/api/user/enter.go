@@ -19,5 +19,7 @@ func InitUserRouter(router *gin.RouterGroup) {
 	authnGroup := router.Group(routerPath).Use(middleware.JWTAuth())
 	{
 		authnGroup.GET("/logout", api.Logout)
+		authnGroup.GET("/info", api.GetUserInfo)
+		authnGroup.POST("/changepasswd", api.ChangePasswd)
 	}
 }
