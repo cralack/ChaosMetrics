@@ -5,6 +5,7 @@ import { successMessage, errorMessage } from '@/utils/message'
 const service = axios.create({
   baseURL: 'http://localhost:8080'
 })
+
 service.interceptors.request.use(function(config) {
   const token = getToken()
   if (token) {

@@ -1,15 +1,24 @@
 <template>
-  <!-- <el-button class="btn">-->
-  <!--    Buffer-->
-  <!--  </el-button>-->
-  <RouterView></RouterView>
+  <div id="app">
+    <el-config-provider :locale="zhCn">
+      <router-view />
+    </el-config-provider>
+  </div>
 </template>
 
 <script setup>
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
+
+defineOptions({
+  name: 'App'
+})
 </script>
 
 <style>
-.btn {
-  @apply bg-blue-gray-500 text-light-200 px-4 py-1 rounded-xl hover: (bg-blue-gray-900 text-light-500) focus:(bg-gray-500);
+#app {
+  background: #eee;
+  height: 100vh;
+  overflow: hidden;
+  font-weight: 400 !important;
 }
 </style>
