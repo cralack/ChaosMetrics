@@ -81,11 +81,9 @@
 <script setup>
 
 import { ref, reactive } from 'vue'
-import { login } from '@/api/user'
-import { useRouter } from 'vue-router'
-import { setToken } from '@/utils/auth'
+import { useUserStore } from '@/store/user'
 
-const router = useRouter()
+const login = useUserStore().LoginIn
 
 const form = reactive({
   username: '',
@@ -113,21 +111,8 @@ const onSubmit = () => {
     }
     loading.value = true
     console.log(loading)
-    login(form, 123)
-      .then(res => {
-      // elmessage status
-        switch (res.code) {
-          case 0:
-          // store token
-            setToken(res.data.token)
-            // jump back
-            router.push('/')
-            break
-        }
-      }).finally(() => {
-        loading.value = false
-      })
-    console.log(loading)
+    login(form)
+    loading.value = false
   })
 }
 </script>

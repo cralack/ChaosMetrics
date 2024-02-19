@@ -10,7 +10,7 @@
     <!--    >Clear Cookie</el-button>-->
 
     <el-container class="min-h-screen bg-dark-200">
-      <el-aside class="w-1/5">
+      <el-aside class="max-w-50">
         <el-container class="min-h-screen ">
           <!--          logo-->
           <el-header
@@ -40,8 +40,6 @@
               text-color="#d1d5db"
               default-active="1"
               :router="true"
-              @open="handleOpen"
-              @close="handleClose"
             >
 
               <el-menu-item index="1">
@@ -56,6 +54,7 @@
               <el-menu-item index="4">
                 <span>Items</span>
               </el-menu-item>
+
             </el-menu>
           </el-main>
         </el-container>
@@ -71,10 +70,10 @@
         >
           <div>
             <el-button
-              v-if="!isLogin"
+              v-if="!store.isLogin"
               plain
               class="style-button"
-              @click="login"
+              @click="goLogin"
             >登陆
               <el-icon
                 class="el-icon--right"
@@ -86,7 +85,7 @@
             </el-button>
 
             <el-dropdown
-              v-if="isLogin"
+              v-if="store.isLogin"
               trigger="click"
             >
               <div class="flex items-center mr-3">
@@ -98,24 +97,36 @@
 
               <template #dropdown>
                 <el-dropdown-menu
-                  v-if="isLogin"
+                  v-if="store.isLogin"
                 >
                   <div class="allCenter text-base">{{ username }}</div>
                   <el-dropdown-item divided>
-                    <el-icon><Setting /></el-icon> 个人中心
+                    <el-icon>
+                      <Setting />
+                    </el-icon>
+                    个人中心
                   </el-dropdown-item>
                   <el-dropdown-item>
-                    <el-icon><StarFilled /></el-icon>收藏夹
+                    <el-icon>
+                      <StarFilled />
+                    </el-icon>
+                    收藏夹
                   </el-dropdown-item>
                   <el-dropdown-item>
-                    <el-icon><Message /></el-icon>信息
+                    <el-icon>
+                      <Message />
+                    </el-icon>
+                    信息
                   </el-dropdown-item>
 
                   <el-dropdown-item
                     divided
                     @click="logout"
                   >
-                    <el-icon>  <SwitchButton /></el-icon> 登出
+                    <el-icon>
+                      <SwitchButton />
+                    </el-icon>
+                    登出
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -127,8 +138,10 @@
         <el-main
           class="allCenter
          bg-blue-gray-500"
-        > {{ isLogin }}
-        </el-main></el-container>
+        >
+          <h1>{{ store.isLogin }}</h1><br>
+        </el-main>
+      </el-container>
       <el-container />
     </el-container>
   </div>
@@ -136,51 +149,41 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { removeToken } from '@/utils/auth'
+import logoImg from '@/assets/logo_inv.png'
+import { useUserStore } from '@/store/user'
+import { logout } from '@/api/user'
+
+const store = useUserStore()
 const router = useRouter()
 const username = ref('snoop')
-const isLogin = ref(false)
 
 const goLogin = () => {
   router.push('/login')
 }
 
-const login = () => {
-  isLogin.value = true
-  // goLogin()
-}
-
-const logout = () => {
-  removeToken()
-  isLogin.value = false
-}
-
-import logoImg from '@/assets/logo.png'
-import { ref } from 'vue'
-
-const handleOpen = (key, keyPath) => {
-  console.log(key, keyPath)
-}
-const handleClose = (key, keyPath) => {
-  console.log(key, keyPath)
-}
+// const goSwagger=()=>{
+//   window.open('http://localhost:8080/swagger/index.html')
+// }
 
 </script>
 
 <style>
-.allCenter{
+.allCenter {
   @apply flex items-center justify-center;
 }
-.el-menu{
-  border: 0!important;
+
+.el-menu {
+  border: 0 !important;
 }
 
-.style-button{
+.style-button {
   &.is-plain {
-    background-color:transparent;
-    color:#d1d5db;
+    background-color: transparent;
+    color: #d1d5db;
     border: transparent;
+
     &:hover {
       color: #ffd04b;
     }

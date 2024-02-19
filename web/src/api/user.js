@@ -7,7 +7,7 @@ export const login = (data) => {
     data: data
   })
 }
-export const logout = (data) => {
+export const logout = () => {
   return service({
     url: '/user/logout',
     method: 'get',
