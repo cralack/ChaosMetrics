@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/casbin/casbin/v2 v2.82.0
-	github.com/casbin/gorm-adapter/v3 v3.20.0
+	github.com/casbin/gorm-adapter/v3 v3.21.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
