@@ -86,8 +86,6 @@ func (a *Analyzer) Analyze() {
 	}
 	<-a.Exit
 	defer a.store()
-	// matchId := "TW2_81882122"
-	// a.AnalyzeSingleMatch(matchId)
 }
 
 func (a *Analyzer) loadItem(itemId int, version uint) (res *riotmodel.ItemDTO) {
@@ -132,14 +130,6 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 	)
 
 	loc, _ := utils.ConvertLocationToLoHoSTR(loCode)
-	// preload when begin
-	if err = a.db.Where("loc = ?", loc).Where("analyzed = ?", false).Preload(
-		"Participants").Find(&matches).Error; err != nil {
-		// or not
-		// if err = a.db.Where("loc = ?", loc).Where("analyzed = ?",
-		// 	false).Find(&matches).Error; err != nil {
-		a.logger.Error("load match from gorm db failed", zap.Error(err))
-	}
 
 	// count analyzed
 	var totalCount int64
@@ -148,38 +138,33 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 		a.logger.Error("count analyzed failed", zap.Error(err))
 		return
 	}
-
 	a.lock.Lock()
 	a.analyzedCount[loCode] += totalCount
 	a.lock.Unlock()
 
+	// count unanalyzed
+	if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
+		false).Count(&totalCount).Error; err != nil {
+		a.logger.Error("count analyzed failed", zap.Error(err))
+		return
+	}
 	// start counter
-	go a.counter(len(matches), loCode)
+	go a.counter(int(totalCount), loCode)
 
-	// chunk if oversize
-	if len(matches) > a.options.BatchSize {
-		totalSize := len(matches)
-		chunkSize := a.options.BatchSize
-		for i := 0; i < totalSize; i += chunkSize {
-			end := i + chunkSize
-			if end > totalSize {
-				end = totalSize
-			}
-			tmp := matches[i:end]
-			// preload and send matches
-			// if err := a.db.Preload("Participants").Find(&tmp).Error; err != nil {
-			// 	a.logger.Error("load participant failed", zap.Error(err))
-			// }
-			a.scheduler.Push(&scheduler.Task{
-				Type: anaKey,
-				Loc:  loc,
-				Data: tmp,
-			})
+	// chunk
+	totalSize := int(totalCount)
+	chunkSize := a.options.BatchSize
+	for i := 0; i < totalSize; i += chunkSize {
+		end := i + chunkSize
+		if end > totalSize {
+			end = totalSize
 		}
-	} else { // !oversize
-		// if err := a.db.Preload("Participants").Find(&matches).Error; err != nil {
-		// 	a.logger.Error("load participant failed", zap.Error(err))
-		// }
+		matches = make([]*riotmodel.MatchDB, 0, a.options.BatchSize)
+		if err = a.db.Offset(i).Limit(chunkSize).Where("loc = ?", loc).Where("analyzed = ?",
+			false).Where("analyzed = ?", false).Preload(
+			"Participants").Find(&matches).Error; err != nil {
+			a.logger.Error("load match failed", zap.Error(err))
+		}
 		a.scheduler.Push(&scheduler.Task{
 			Type: anaKey,
 			Loc:  loc,
@@ -262,16 +247,12 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 		return
 	}
 	var (
-		// tar     []*anres.ChampionDetail
 		has bool
-		// verIdx uint
-		// modeIdx riotmodel.GAMEMODE
 		err error
 	)
 	// get param
 	loCode := utils.ConvertLocStrToLocation(match.Loc)
 	curVersion := match.GameVersion
-	// verIdx, _ = utils.ConvertVersionToIdx(curVersion)
 
 	if err != nil {
 		a.logger.Error("wrong match version")

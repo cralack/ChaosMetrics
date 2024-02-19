@@ -18,7 +18,7 @@ var defaultOptions = &options{
 	Loc:       []riotmodel.LOCATION{riotmodel.TW2},                          // 默认地区为台湾
 	Mode:      []riotmodel.GAMEMODE{riotmodel.ARAM, riotmodel.CLASSIC},      // 默认模式为大乱斗
 	Lang:      []riotmodel.LANG{riotmodel.LANG_zh_CN, riotmodel.LANG_en_US}, // 默认中文、英文
-	BatchSize: 100,
+	BatchSize: 1000,
 	// LifeTime: -1, // cache forever
 }
 
