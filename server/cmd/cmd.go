@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/cralack/ChaosMetrics/server/cmd/master"
 	"github.com/cralack/ChaosMetrics/server/cmd/worker"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/internal/service/pumper"
 	"github.com/cralack/ChaosMetrics/server/internal/service/router"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -44,28 +43,29 @@ func AddCommands(root *cobra.Command) {
 		master.Cmd,
 		worker.Cmd,
 		router.Cmd,
+		pumper.Cmd,
 		envCmd,
 	)
 }
 
 func RunCmd() error {
 	AddCommands(rootCmd)
-	{ // debug master part
-		cmd, _, err := rootCmd.Find(os.Args[1:])
-		if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
-			arg := "master"
-			extraArg1 := "--id=4"
-			extraArg2 := "--http=:8084"
-			extraArg3 := "--grpc=:9094"
-			args := append([]string{arg, extraArg1, extraArg2, extraArg3}, os.Args[1:]...)
-			rootCmd.SetArgs(args)
-		}
-	}
+	// { // debug master part
+	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
+	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
+	// 		arg := "master"
+	// 		extraArg1 := "--id=4"
+	// 		extraArg2 := "--http=:8084"
+	// 		extraArg3 := "--grpc=:9094"
+	// 		args := append([]string{arg, extraArg1, extraArg2, extraArg3}, os.Args[1:]...)
+	// 		rootCmd.SetArgs(args)
+	// 	}
+	// }
 	// {
 	// 	// debug worker part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
 	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
-	// 		arg := "worker"
+	// 		arg := "pump"
 	// 		extraArg1 := "--id=1"
 	// 		args := append([]string{arg, extraArg1}, os.Args[1:]...)
 	// 		rootCmd.SetArgs(args)

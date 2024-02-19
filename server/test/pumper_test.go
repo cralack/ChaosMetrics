@@ -17,7 +17,6 @@ func Test_pumper_update(t *testing.T) {
 	)
 	p.StartEngine()
 	p.UpdateAll()
-	<-p.Exit
 }
 
 func Test_pumper_fetch_match_byId(t *testing.T) {

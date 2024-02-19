@@ -49,6 +49,8 @@ func (s *UsrService) PreRegister(tar *model.User) (string, error) {
 
 	tar.UUID = uuid.Must(uuid.NewRandom())
 	tar.Token = utils.GenerateRandomString(tokenLen)
+	tar.NickName = "nick" + utils.GenerateRandomString(12)
+	tar.Role = model.Civilian
 	key := fmt.Sprintf("user:register-%s", tar.Token)
 	if err = s.rdb.Set(context.Background(), key, tar, time.Hour*24).Err(); err != nil {
 		return "", err

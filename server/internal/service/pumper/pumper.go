@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"sync"
 	"time"
@@ -178,6 +179,7 @@ func (p *Pumper) UpdateAll() {
 	p.UpdateEntries()
 	p.UpdateSumoner()
 	p.UpdateMatch()
+	<-p.Exit
 }
 
 // core func
@@ -195,13 +197,13 @@ func (p *Pumper) fetch() {
 	)
 	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark1, p.stgy.TestEndMark2)
 	// catch panic
-	// defer func() {
-	// 	if err := recover(); err != nil {
-	// 		p.logger.Panic("fetcher panic",
-	// 			zap.Any("err", err),
-	// 			zap.String("stack", string(debug.Stack())))
-	// 	}
-	// }()
+	defer func() {
+		if err := recover(); err != nil {
+			p.logger.Error("fetcher panic",
+				zap.Any("err", err),
+				zap.String("stack", string(debug.Stack())))
+		}
+	}()
 
 	for {
 		req := p.scheduler.Pull()
