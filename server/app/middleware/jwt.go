@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"time"
 
 	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/cralack/ChaosMetrics/server/utils"
@@ -42,6 +43,7 @@ func JWTAuth() gin.HandlerFunc {
 		}
 
 		ctx.Set("claims", claims)
+		time.Sleep(time.Second / 2)
 		ctx.Next()
 	}
 }

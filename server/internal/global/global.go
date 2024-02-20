@@ -31,4 +31,5 @@ const (
 	MasterServiceName = "pumper.master"
 	TaskPath          = "/tasks"
 	ElectPath         = "/resources/election"
+	TokenKey          = "x-token"
 )

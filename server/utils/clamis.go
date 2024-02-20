@@ -15,7 +15,7 @@ func ClearToken(ctx *gin.Context) {
 	if err != nil {
 		host = ctx.Request.Host
 	}
-	ctx.SetCookie("x-token", "", -1,
+	ctx.SetCookie(global.TokenKey, "", -1,
 		"/", host, true, false)
 
 }
@@ -25,14 +25,14 @@ func SetToken(ctx *gin.Context, token string, maxAge int) {
 	if err != nil {
 		host = ctx.Request.Host
 	}
-	ctx.SetCookie("x-token", token, maxAge,
+	ctx.SetCookie(global.TokenKey, token, maxAge,
 		"/", host, true, false)
 }
 
 func GetToken(ctx *gin.Context) string {
-	token, _ := ctx.Cookie("x-token")
+	token, _ := ctx.Cookie(global.TokenKey)
 	if token == "" {
-		token = ctx.Request.Header.Get("x-token")
+		token = ctx.Request.Header.Get(global.TokenKey)
 	}
 	return token
 }

@@ -43,7 +43,7 @@ func (a *usrApi) Login(ctx *gin.Context) {
 		return
 	}
 	if global.ChaEnv != global.ProductEnv {
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second / 2)
 	}
 	serv := user.NewUserService()
 	if tar, err = serv.Login(param.UserName, param.Password); err != nil {

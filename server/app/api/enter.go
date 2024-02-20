@@ -25,7 +25,11 @@ func RegisterRoutes(r *gin.Engine) {
 		ginSwagger.WrapHandler(swaggerFiles.Handler))
 	global.ChaLogger.Info("register swagger handler")
 	// cors
-	r.Use(cors.Default())
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, global.TokenKey)
+	corsConfig.AllowAllOrigins = true
+	c := cors.New(corsConfig)
+	r.Use(c)
 
 	PublicGroup := r.Group(global.ChaConf.System.RouterPrefix)
 	{
