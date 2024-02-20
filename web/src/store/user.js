@@ -51,6 +51,7 @@ export const useUserStore = defineStore('user', () => {
   const setUserInfo = (val) => {
     userInfo.value = val
   }
+
   const GetUserInfo = async() => {
     const res = await getUserInfo()
     if (res.data.code === 0) {

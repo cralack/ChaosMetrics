@@ -139,7 +139,9 @@
           class="allCenter
          bg-blue-gray-500"
         >
-          <h1>{{ store.isLogin }}</h1><br>
+          <div>
+            {{ store .userInfo }}
+          </div>
         </el-main>
       </el-container>
       <el-container />
@@ -153,7 +155,6 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import logoImg from '@/assets/logo_inv.png'
 import { useUserStore } from '@/store/user'
-import { logout } from '@/api/user'
 
 const store = useUserStore()
 const router = useRouter()

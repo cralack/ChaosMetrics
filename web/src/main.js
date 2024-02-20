@@ -7,6 +7,8 @@ import 'virtual:windi.css'
 
 import App from './App.vue'
 import router from './router'
+import './permission'
+import 'nprogress/nprogress.css'
 
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
@@ -14,7 +16,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 app
-  .use(store)
   .use(router)
+  .use(store)
   .use(ElementPlus)
   .mount('#app')

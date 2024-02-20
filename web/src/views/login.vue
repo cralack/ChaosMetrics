@@ -80,7 +80,7 @@
 
 <script setup>
 
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/store/user'
 
 const login = useUserStore().LoginIn
@@ -116,6 +116,19 @@ const onSubmit = () => {
       })
   })
 }
+
+function onKeyUp(e) {
+  if (e.key === 'Enter') onSubmit()
+}
+
+onMounted(() => {
+  document.addEventListener('keyup', onKeyUp)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keyup', onKeyUp)
+})
+
 </script>
 
 <style scoped>
