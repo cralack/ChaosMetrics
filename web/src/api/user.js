@@ -22,7 +22,7 @@ export const register = (data) => {
   })
 }
 
-export const verifyRegister = () => {
+export const verifyRegister = (token) => {
   return service({
     url: '/user/verify',
     method: 'get',

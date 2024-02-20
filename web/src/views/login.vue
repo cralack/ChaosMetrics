@@ -110,9 +110,10 @@ const onSubmit = () => {
       return false
     }
     loading.value = true
-    console.log(loading)
     login(form)
-    loading.value = false
+      .finally(() => {
+        loading.value = false
+      })
   })
 }
 </script>

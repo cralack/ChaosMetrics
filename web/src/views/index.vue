@@ -121,7 +121,7 @@
 
                   <el-dropdown-item
                     divided
-                    @click="logout"
+                    @click="store.LoginOut"
                   >
                     <el-icon>
                       <SwitchButton />
