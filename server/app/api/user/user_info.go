@@ -34,5 +34,5 @@ func (a *usrApi) GetUserInfo(ctx *gin.Context) {
 		response.FailWithMessage("get user info failed", ctx)
 		return
 	}
-	response.OkWithDetailed(tar, "", ctx)
+	response.OkWithQuiet(tar, ctx)
 }

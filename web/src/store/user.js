@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { login, logout, getUserInfo } from '@/api/user'
 import { useRouter } from 'vue-router'
@@ -7,13 +7,14 @@ import { useRouter } from 'vue-router'
 export const useUserStore = defineStore('user', () => {
   const router = useRouter()
   const isLogin = computed(() => token.value !== '')
-  const userInfo = ref({
+  const userInfo = reactive({
     uuid: '',
     nickName: '',
     email: '',
-    role: {},
+    role: 0,
   })
 
+  const check = computed(() => userInfo.value.role * 10)
   const token = ref(getToken() || '')
   const settkn = (val) => {
     token.value = val
@@ -49,18 +50,23 @@ export const useUserStore = defineStore('user', () => {
     }
   }
   const setUserInfo = (val) => {
-    userInfo.value = val
+    userInfo.uuid = val.uuid
+    userInfo.nickName = val.NickName
+    userInfo.email = val.Email
+    userInfo.role = val.Role
   }
 
   const GetUserInfo = async() => {
     const res = await getUserInfo()
-    if (res.data.code === 0) {
-      setUserInfo(res.data.userInfo)
+    if (res.code === 1) {
+      console.log(res.data)
+      setUserInfo(res.data)
     }
     return res
   }
 
   return {
+    check,
     isLogin,
     userInfo,
     token,

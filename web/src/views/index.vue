@@ -1,14 +1,5 @@
 <template>
   <div>
-    <!--    Home-->
-    <!--    <pre>{{ getToken }}</pre>-->
-    <!--    <el-button-->
-    <!--      @click="goLogin"-->
-    <!--    >Login</el-button>-->
-    <!--    <el-button-->
-    <!--      @click="removeToken"-->
-    <!--    >Clear Cookie</el-button>-->
-
     <el-container class="min-h-screen bg-dark-200">
       <el-aside class="max-w-50">
         <el-container class="min-h-screen ">
@@ -99,7 +90,7 @@
                 <el-dropdown-menu
                   v-if="store.isLogin"
                 >
-                  <div class="allCenter text-base">{{ username }}</div>
+                  <div class="allCenter text-base mt-1 mb-1">{{ store.userInfo.nickName }}</div>
                   <el-dropdown-item divided>
                     <el-icon>
                       <Setting />
@@ -151,14 +142,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import logoImg from '@/assets/logo_inv.png'
 import { useUserStore } from '@/store/user'
 
 const store = useUserStore()
 const router = useRouter()
-const username = ref('snoop')
 
 const goLogin = () => {
   router.push('/login')

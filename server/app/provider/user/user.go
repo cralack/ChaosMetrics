@@ -41,16 +41,17 @@ func (s *UsrService) PreRegister(tar *model.User) (string, error) {
 		userDB = &model.User{}
 		err    error
 	)
-	if err = s.db.Where("email=?", tar.Email).First(userDB).Error; err != nil && !userDB.CreatedAt.IsZero() {
+	err = s.db.Where("email=?", tar.Email).First(userDB).Error
+	if err == nil && !userDB.CreatedAt.IsZero() {
 		return "", errors.New("email已经被注册，请重试")
 	}
-	if err = s.db.Where("username=?", tar.UserName).First(userDB).Error; err != nil && !userDB.CreatedAt.IsZero() {
+	err = s.db.Where("username=?", tar.UserName).First(userDB).Error
+	if err == nil && !userDB.CreatedAt.IsZero() {
 		return "", errors.New("用户名已经被注册，请重试")
 	}
 
 	tar.UUID = uuid.Must(uuid.NewRandom())
 	tar.Token = utils.GenerateRandomString(tokenLen)
-	tar.NickName = "nick" + utils.GenerateRandomString(12)
 	tar.Role = model.Civilian
 	key := fmt.Sprintf("user:register-%s", tar.Token)
 	if err = s.rdb.Set(context.Background(), key, tar, time.Hour*24).Err(); err != nil {

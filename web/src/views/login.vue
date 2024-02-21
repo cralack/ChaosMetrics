@@ -67,6 +67,7 @@
               <el-button
                 type="primary"
                 class="w-[100px]"
+                @click="goRegiser"
               >
                 Register
               </el-button>
@@ -82,6 +83,7 @@
 
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useUserStore } from '@/store/user'
+import router from '@/router'
 
 const login = useUserStore().LoginIn
 
@@ -129,6 +131,9 @@ onBeforeUnmount(() => {
   document.removeEventListener('keyup', onKeyUp)
 })
 
+const goRegiser = () => {
+  router.push('register')
+}
 </script>
 
 <style scoped>

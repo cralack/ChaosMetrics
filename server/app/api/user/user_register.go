@@ -9,7 +9,8 @@ import (
 )
 
 type registerParam struct {
-	UserName string `json:"username" example:"snoop" binding:"required"`
+	UserName string `json:"username" example:"snoopdogg" binding:"required"`
+	NickName string `json:"nickname" example:"snoop" binding:"required"`
 	Password string `json:"password" example:"123456" binding:"required,gte=6"`
 	Email    string `json:"email" example:"snoop@dogg.com" binding:"required,gte=6"`
 }
@@ -39,17 +40,20 @@ func (a *usrApi) Register(ctx *gin.Context) {
 	serv := user.NewUserService()
 	tar = &model.User{
 		UserName: param.UserName,
+		NickName: param.NickName,
 		Password: param.Password,
 		Email:    param.Email,
 	}
 	if token, err = serv.PreRegister(tar); err != nil {
-		response.FailWithDetailed(err, "register failed,try later", ctx)
+		response.FailWithMessage(err.Error(), ctx)
 		return
 	}
 	global.ChaLogger.Debug(token)
-	if err = serv.SendVerifyEmail(tar, token); err != nil {
-		response.FailWithMessage("send mail failed,try later", ctx)
-		return
+	if global.ChaEnv == global.ProductEnv {
+		if err = serv.SendVerifyEmail(tar, token); err != nil {
+			response.FailWithMessage("send mail failed,try later", ctx)
+			return
+		}
 	}
 	response.Ok(ctx)
 	return

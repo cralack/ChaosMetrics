@@ -13,6 +13,10 @@ router.beforeEach((to, from, next) => {
 })
 
 router.afterEach(() => {
+  const userStore = useUserStore()
+  if (userStore.isLogin) {
+    userStore.GetUserInfo()
+  }
   Nprogress.done()
 })
 

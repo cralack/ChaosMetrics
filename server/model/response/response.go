@@ -41,6 +41,9 @@ func OkWithData(data interface{}, ctx *gin.Context) {
 func OkWithDetailed(data interface{}, message string, ctx *gin.Context) {
 	Result(SUCCESS, data, message, ctx)
 }
+func OkWithQuiet(data interface{}, ctx *gin.Context) {
+	Result(1, data, "", ctx)
+}
 
 func Fail(ctx *gin.Context) {
 	Result(ERROR, map[string]interface{}{}, "操作失败", ctx)
