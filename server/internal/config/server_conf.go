@@ -5,6 +5,7 @@ import (
 )
 
 type SystemConf struct {
+	Domain            string        `mapstructure:"domain" yaml:"domain"`
 	ID                string        `mapstructure:"id" yaml:"id"`                                   // 服务ID
 	Name              string        `mapstructure:"name" yaml:"name"`                               // 服务名
 	GRPCListenAddress string        `mapstructure:"grpc_listen_address" yaml:"grpc_listen_address"` // gRPC监听地址

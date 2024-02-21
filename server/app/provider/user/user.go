@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
+	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"
 )
 
@@ -58,8 +59,21 @@ func (s *UsrService) PreRegister(tar *model.User) (string, error) {
 	return tar.Token, nil
 }
 
-func (s *UsrService) SendVerifyEmail(token string) error {
+func (s *UsrService) SendVerifyEmail(tar *model.User, token string) error {
+	conf := global.ChaConf.EmailConf
+	dialer := gomail.NewDialer(conf.Host, conf.Port, conf.Username, conf.Passwd)
 
+	message := gomail.NewMessage()
+	message.SetHeader("From", conf.Username)
+	message.SetAddressHeader("To", tar.Email, tar.NickName)
+	message.SetHeader("Subject", "Thanks for register")
+	link := fmt.Sprintf("%s/user/verify?token=%s", global.ChaConf.System.Domain, token)
+	message.SetBody("text/html", fmt.Sprintf("Click the following link to verify:<br><a href=\"%s\">here</a> ", link))
+
+	if err := dialer.DialAndSend(message); err != nil {
+		s.logger.Error("send message failed", zap.Error(err))
+		return err
+	}
 	return nil
 }
 
@@ -67,6 +81,9 @@ func (s *UsrService) VerifyRegister(token string) (bool, error) {
 	var err error
 	key := fmt.Sprintf("user:register-%s", token)
 	val := s.rdb.Get(context.Background(), key).Val()
+	if val == "" {
+		return false, errors.New("invalid token")
+	}
 	var tar *model.User
 	if err = json.Unmarshal([]byte(val), &tar); err != nil {
 		return false, err

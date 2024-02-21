@@ -63,6 +63,16 @@ func Viper() (*viper.Viper, error) {
 	if err = v.Unmarshal(conf); err != nil {
 		panic(err)
 	}
+
+	if conf.EmailConf.Passwd == "email_key" {
+		path := filepath.Join(conf.DirTree.WorkDir, conf.EmailConf.Passwd)
+		buff, err := os.ReadFile(path)
+		if err != nil {
+			global.ChaLogger.Error("load email client passwd failed", zap.Error(err))
+		}
+		conf.EmailConf.Passwd = string(buff)
+	}
+
 	switch conf.Env {
 	case "test":
 		global.ChaEnv = global.TestEnv

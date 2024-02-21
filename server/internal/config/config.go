@@ -9,6 +9,7 @@ type Root struct {
 	Fetcher   *FetcherConfig  `mapstructure:"fetcher"`
 	System    *SystemConf     `mapstructure:"system"`
 	JwtConf   *JwtConfig      `mapstructure:"jwt"`
+	EmailConf *EmailConf      `mapstructure:"smtp"`
 }
 type DirTree struct {
 	WorkDir string

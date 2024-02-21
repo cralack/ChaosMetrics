@@ -34,7 +34,7 @@ func (a *usrApi) Verify(ctx *gin.Context) {
 	serv := user.NewUserService()
 	ok, err = serv.VerifyRegister(param.Token)
 	if err != nil {
-		response.FailWithDetailed(err, "", ctx)
+		response.FailWithMessage(err.Error(), ctx)
 		return
 	}
 	if !ok {

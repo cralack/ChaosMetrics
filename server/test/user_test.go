@@ -4,7 +4,9 @@ import (
 	"testing"
 
 	"github.com/cralack/ChaosMetrics/server/app/provider/user"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model"
+	"gopkg.in/gomail.v2"
 )
 
 func Test_Register(t *testing.T) {
@@ -51,20 +53,19 @@ func Test_Register(t *testing.T) {
 	// get user
 	usrDB, err = serv.GetUserIno(usr1.UUID)
 	t.Log(usrDB.UUID == usr1.UUID)
+}
 
-	// // verify
-	// sess, err := serv.VerifyLogin(usr1.Token)
-	// if err != nil || sess == nil {
-	// 	t.Log(err)
-	// }
-	//
-	// // logout
-	// err = serv.Logout(usr1)
-	// if err != nil {
-	// 	t.Log(err)
-	// }
-	// sess, err = serv.VerifyLogin(usr1.Token)
-	// if err == nil || sess != nil {
-	// 	t.Log("?")
-	// }
+func Test_email(t *testing.T) {
+	conf := global.ChaConf.EmailConf
+	m := gomail.NewMessage()
+	m.SetHeader("From", conf.Username)
+	m.SetHeader("To", "cralack@foxmail.com")
+	m.SetHeader("Subject", "Hello!")
+	m.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
+	d := gomail.NewDialer(conf.Host, conf.Port, conf.Username, conf.Passwd)
+	d.SSL = true
+
+	if err := d.DialAndSend(m); err != nil {
+		t.Log(err)
+	}
 }

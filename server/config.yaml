@@ -52,6 +52,7 @@ redis:
   conn_max_idletime: 1h # 连接数空闲时长
 
 system:
+  domain: "localhost:8080"
   registry_address: "localhost:2379"
   register_ttl: 60
   register_interval: 15
@@ -63,3 +64,10 @@ jwt:
   expires_time: 1h
   buffer_time: 15m
   issuer: chaos
+
+smtp:
+  host: "smtp.163.com"
+  port: 465
+  from: "Chaos Metrics"
+  username: "cralack@163.com"
+  password: "email_key"

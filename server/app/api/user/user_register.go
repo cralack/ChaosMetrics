@@ -47,8 +47,8 @@ func (a *usrApi) Register(ctx *gin.Context) {
 		return
 	}
 	global.ChaLogger.Debug(token)
-	if err = serv.SendVerifyEmail(token); err != nil {
-		response.FailWithMessage("send mail ailed,try later", ctx)
+	if err = serv.SendVerifyEmail(tar, token); err != nil {
+		response.FailWithMessage("send mail failed,try later", ctx)
 		return
 	}
 	response.Ok(ctx)
