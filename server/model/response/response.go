@@ -14,6 +14,7 @@ type Response struct {
 
 const (
 	ERROR   = 4
+	QUIET   = 1
 	SUCCESS = 0
 )
 
@@ -42,7 +43,7 @@ func OkWithDetailed(data interface{}, message string, ctx *gin.Context) {
 	Result(SUCCESS, data, message, ctx)
 }
 func OkWithQuiet(data interface{}, ctx *gin.Context) {
-	Result(1, data, "", ctx)
+	Result(QUIET, data, "", ctx)
 }
 
 func Fail(ctx *gin.Context) {
