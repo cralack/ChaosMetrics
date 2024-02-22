@@ -14,8 +14,7 @@
                 :fit="'scale-down'"
               />
               <div class="allCenter text-gray-200">
-                <span>Chaos</span>
-                <span>Mertics</span>
+                <span>ChaosMertics</span>
               </div>
             </div>
           </el-header>
@@ -29,23 +28,16 @@
               active-text-color="#ffd04b"
               background-color="transparent"
               text-color="#d1d5db"
-              default-active="1"
+              default-active="classic"
               :router="true"
             >
 
-              <el-menu-item index="1">
+              <el-menu-item index="classic">
                 <span>Classic</span>
               </el-menu-item>
-              <el-menu-item index="2">
+              <el-menu-item index="aram">
                 <span>ARAM</span>
               </el-menu-item>
-              <el-menu-item index="3">
-                <span>Champions</span>
-              </el-menu-item>
-              <el-menu-item index="4">
-                <span>Items</span>
-              </el-menu-item>
-
             </el-menu>
           </el-main>
         </el-container>
@@ -130,8 +122,8 @@
           class="allCenter
          bg-blue-gray-500"
         >
-          <div>
-            {{ store .userInfo }}
+          <div class="main-content">
+            <RouterView />
           </div>
         </el-main>
       </el-container>

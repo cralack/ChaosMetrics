@@ -6,11 +6,27 @@ import About from '@/views/about.vue'
 import NotFound from '@/views/404.vue'
 import Register from '@/views/register.vue'
 import Verify from '@/views/verify.vue'
+import ARAM from '@/views/aram.vue'
+import CLASSIC from '@/views/classic.vue'
 
 const routes = [
   {
     path: '/',
-    component: Index
+    redirect: '/home',
+  },
+  {
+    path: '/home',
+    component: Index,
+    children: [
+      {
+        path: '/aram',
+        component: ARAM
+      },
+      {
+        path: '/classic',
+        component: CLASSIC
+      }
+    ]
   },
   {
     path: '/about',
@@ -32,7 +48,7 @@ const routes = [
     path: '/:pathMatch(.*)*',
     name: NotFound,
     component: NotFound
-  }
+  },
 ]
 
 const router = createRouter({
