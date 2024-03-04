@@ -25,7 +25,7 @@ require (
 	github.com/swaggo/swag v1.16.3
 	go-micro.dev/v4 v4.10.2
 	go.etcd.io/etcd/client/v3 v3.5.12
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.21.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240125205218-1f4bbc51befe
 	google.golang.org/grpc v1.62.0
