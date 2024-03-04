@@ -36,8 +36,8 @@ dependencies:
     specifier: ^3.4.20
     version: 3.4.20
   vue-router:
-    specifier: ^4.2.5
-    version: 4.2.5(vue@3.4.20)
+    specifier: ^4.3.0
+    version: 4.3.0(vue@3.4.20)
 
 devDependencies:
   '@babel/eslint-parser':
@@ -3653,8 +3653,8 @@ packages:
       - supports-color
     dev: true
 
-  /vue-router@4.2.5(vue@3.4.20):
-    resolution: {integrity: sha512-DIUpKcyg4+PTQKfFPX88UWhlagBEBEfJ5A8XDXRJLUnZOvcpMF8o/dnL90vpVkGaPbjvXazV/rC1qBKrZlFugw==}
+  /vue-router@4.3.0(vue@3.4.20):
+    resolution: {integrity: sha512-dqUcs8tUeG+ssgWhcPbjHvazML16Oga5w34uCUmsk7i0BcnskoLGwjpa15fqMr2Fa5JgVBrdL2MEgqz6XZ/6IQ==}
     peerDependencies:
       vue: ^3.2.0
     dependencies:
