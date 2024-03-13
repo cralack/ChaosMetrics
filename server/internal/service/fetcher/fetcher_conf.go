@@ -1,7 +1,6 @@
 package fetcher
 
 import (
-	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/utils"
 )
 
@@ -11,18 +10,6 @@ type Header struct {
 	ApiToken       string
 	Origin         string
 	UserAgent      string
-}
-
-var defaultFetcher = &BrowserFetcher{
-	requireRateLimiter: true,
-	logger:             global.ChaLogger,
-	timeout:            global.ChaConf.Fetcher.Timeout,
-	header: &Header{
-		AcceptLanguage: global.ChaConf.Fetcher.HeaderConfig.AcceptLanguage,
-		AcceptCharset:  global.ChaConf.Fetcher.HeaderConfig.AcceptCharset,
-		Origin:         global.ChaConf.Fetcher.HeaderConfig.Origin,
-		UserAgent:      global.ChaConf.Fetcher.HeaderConfig.UserAgent,
-	},
 }
 
 func WithRateLimiter(flag bool) func(*BrowserFetcher) {

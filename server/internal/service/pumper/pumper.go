@@ -84,7 +84,7 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 			global.ChaLogger.Error("get api key failed",
 				zap.Error(err))
 		}
-		stgy.Token = string(buff)
+		stgy.Token = utils.RemoveExtraLF(string(buff))
 	}
 
 	// setup etcd client

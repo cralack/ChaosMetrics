@@ -30,6 +30,18 @@ var _ Fetcher = &BrowserFetcher{}
 
 func NewBrowserFetcher(opts ...func(*BrowserFetcher)) *BrowserFetcher {
 	conf := global.ChaConf.Fetcher
+	var defaultFetcher = &BrowserFetcher{
+		requireRateLimiter: true,
+		logger:             global.ChaLogger,
+		timeout:            global.ChaConf.Fetcher.Timeout,
+		header: &Header{
+			AcceptLanguage: global.ChaConf.Fetcher.HeaderConfig.AcceptLanguage,
+			AcceptCharset:  global.ChaConf.Fetcher.HeaderConfig.AcceptCharset,
+			Origin:         global.ChaConf.Fetcher.HeaderConfig.Origin,
+			UserAgent:      global.ChaConf.Fetcher.HeaderConfig.UserAgent,
+		},
+	}
+
 	f := defaultFetcher
 
 	for _, opt := range opts {

@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
@@ -10,7 +11,7 @@ import (
 
 func Test_router(t *testing.T) {
 	prefix := global.ChaConf.System.RouterPrefix
-	logger.Debug(prefix)
+	logger.Debug(fmt.Sprintf("prifix:%s", prefix))
 
 	r := router.New()
 

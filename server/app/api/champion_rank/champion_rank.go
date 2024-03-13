@@ -70,6 +70,6 @@ func (a *championRankApi) QueryChampionRankCLASSIC(ctx *gin.Context) {
 		response.FailWithDetailed(err, "can not find CLASSIC champion rank list", ctx)
 		return
 	} else {
-		response.OkWithData(championRankList, ctx)
+		response.OkWithQuiet(championRankList, ctx)
 	}
 }

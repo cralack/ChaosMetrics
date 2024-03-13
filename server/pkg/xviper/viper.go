@@ -8,6 +8,7 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/internal/config"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/utils"
 	"go.uber.org/zap"
 
 	"github.com/fsnotify/fsnotify"
@@ -66,11 +67,11 @@ func Viper() (*viper.Viper, error) {
 
 	if conf.EmailConf.Passwd == "email_key" {
 		path := filepath.Join(conf.DirTree.WorkDir, conf.EmailConf.Passwd)
-		buff, err := os.ReadFile(path)
-		if err != nil {
-			global.ChaLogger.Error("load email client passwd failed", zap.Error(err))
+		buff, err2 := os.ReadFile(path)
+		if err2 != nil {
+			fmt.Println("load email client passwd failed")
 		}
-		conf.EmailConf.Passwd = string(buff)
+		conf.EmailConf.Passwd = utils.RemoveExtraLF(string(buff))
 	}
 
 	switch conf.Env {
