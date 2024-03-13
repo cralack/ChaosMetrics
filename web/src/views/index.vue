@@ -28,13 +28,10 @@
               active-text-color="#ffd04b"
               background-color="transparent"
               text-color="#d1d5db"
-              default-active="classic"
+              default-active="aram"
               :router="true"
             >
 
-              <el-menu-item index="classic">
-                <span>Classic</span>
-              </el-menu-item>
               <el-menu-item index="aram">
                 <span>ARAM</span>
               </el-menu-item>
