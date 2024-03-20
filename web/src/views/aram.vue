@@ -37,6 +37,7 @@
       <el-table
         :data="brief"
         :row-style="rowstyle"
+        @cell-click="cellclick"
       >
         <el-table-column
           type="index"
@@ -48,7 +49,19 @@
           prop="id"
           label="英雄"
           align="center"
-        />
+          width="200"
+          sortable
+        >
+          <template #default="{ row }">
+            <div style="display: flex; align-items: center">
+              <el-image
+                :src="logoImg"
+                style="width: 48px;height: 48px;"
+              />
+              <span style="margin-left: 10px">{{ row.id }}</span>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="win_rate"
           label="胜率"
@@ -103,19 +116,19 @@ const gameStore = useGameStore()
 const loc = ref('na1')
 const ver = ref()
 
-const brief = computed(() => gameStore.classicBrief)
+const brief = computed(() => gameStore.aramBrief)
 
 const options1 = LOCATION_OPTIONS
 
 onMounted(async() => {
   await gameStore.setVersions()
   ver.value = gameStore.gameversion[0]
-  await gameStore.setClassicBrief(loc.value, '14.1.1')
+  await gameStore.setARAMBrief(loc.value, ver.value)
 })
 
 const handleSelectChange = async() => {
-  await gameStore.setClassicBrief(loc.value, ver.value)
-  console.log(gameStore.classicBrief)
+  await gameStore.setARAMBrief(loc.value, ver.value)
+  console.log(gameStore.aramBrief)
 }
 
 const rowstyle = ({ rowIndex }) => {
@@ -125,6 +138,15 @@ const rowstyle = ({ rowIndex }) => {
     }
   }
 }
+
+const cellclick = (row, column, cell, event) => {
+  if (column.property === 'id') {
+    console.log(row.id)
+  }
+}
+
+import logoImg from '@/assets/logo_inv.png'
+
 </script>
 
 <style scoped>

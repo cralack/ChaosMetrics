@@ -1,76 +1,87 @@
 <template>
-  <div class="min-h-screen  min-w-screen">
-    <div class="flex items-center justify-center">
-      <el-form
-        ref="registerForm"
-        :model="form"
-        :rules="rules"
+  <div class="flex h-full w-full items-center justify-center">
+    <el-form
+      ref="registerForm"
+      :model="form"
+      :rules="rules"
+      class="w-full max-w-md"
+    >
+      <el-form-item
+        label="User Name"
+        prop="username"
       >
-        <el-form-item
-          label="User Name"
-          prop="username"
-        >
-          <el-input
-            v-model="form.username"
-            placeholder="johnysmith"
-          />
-        </el-form-item>
+        <el-input
+          v-model="form.username"
+          placeholder="johnysmith"
+        />
+      </el-form-item>
 
-        <el-form-item
-          label="Nick Name"
-          prop="nickname"
-        >
-          <el-input
-            v-model="form.nickname"
-            placeholder="John"
-          />
-        </el-form-item>
+      <el-form-item
+        label="Nick Name"
+        prop="nickname"
+      >
+        <el-input
+          v-model="form.nickname"
+          placeholder="John"
+        />
+      </el-form-item>
 
-        <el-form-item
-          label="email"
-          prop="email"
-        >
-          <el-input
-            v-model="form.email"
-            placeholder="xxx@abc.com"
-          />
-        </el-form-item>
+      <el-form-item
+        label="Email"
+        prop="email"
+      >
+        <el-input
+          v-model="form.email"
+          placeholder="xxx@abc.com"
+        />
+      </el-form-item>
 
-        <el-form-item
-          label="Password"
-          prop="password"
-        >
-          <el-input
-            v-model="form.password"
-            show-password
-            type="password"
-            placeholder="******"
-          />
-        </el-form-item>
+      <el-form-item
+        label="Password"
+        prop="password"
+      >
+        <el-input
+          v-model="form.password"
+          show-password
+          type="password"
+          placeholder="******"
+        />
+      </el-form-item>
 
-        <el-form-item
-          label="Confirm"
-          prop="checkpass"
-        >
-          <el-input
-            v-model="form.checkpass"
-            show-password
-            type="password"
-            placeholder="******"
-          />
-        </el-form-item>
+      <el-form-item
+        label="Confirm"
+        prop="checkpass"
+      >
+        <el-input
+          v-model="form.checkpass"
+          show-password
+          type="password"
+          placeholder="******"
+        />
+      </el-form-item>
 
-        <el-form-item>
+      <div class="flex gap-4">
+        <el-form-item class="w-120">
+          <el-button
+            type="info"
+            class="w-full"
+            @click="goHome"
+          >
+            Home
+          </el-button>
+        </el-form-item>
+        <el-form-item class="w-120">
           <el-button
             type="primary"
-            class="min-w-full"
+            class="w-full"
             :loading="loading"
             @click="onSubmit"
           >Register
           </el-button>
         </el-form-item>
-      </el-form>
-    </div>
+      </div>
+    </el-form>
+
   </div>
 </template>
 
@@ -108,6 +119,9 @@ const onSubmit = () => {
       })
   })
 }
+const goHome = () => {
+  router.push('/')
+}
 
 const validatePass2 = (rule, value, callback) => {
   if (value !== form.password) {
@@ -141,3 +155,7 @@ const rules = {
 }
 
 </script>
+
+<style scoped>
+
+</style>

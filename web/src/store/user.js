@@ -59,8 +59,9 @@ export const useUserStore = defineStore('user', () => {
   const GetUserInfo = async() => {
     const res = await getUserInfo()
     if (res.code === 1) {
-      console.log(res.data)
       setUserInfo(res.data)
+    } else {
+      await ClearStorage
     }
     return res
   }
