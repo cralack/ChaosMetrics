@@ -3,9 +3,11 @@ package common
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/response"
+	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,13 +22,13 @@ func (a *cmnApi) GetGameVersions(ctx *gin.Context) {
 		response.Fail(ctx)
 		return
 	}
-	idx := 0
+	majorVersion, _ := strconv.Atoi(versions[0][:2])
+	majorVersion *= 100
 	for i, v := range versions {
-		if v == "13.1.1" {
-			idx = i + 1
-			break
+		if ver, _ := utils.ConvertVersionToIdx(v); int(ver) <= majorVersion {
+			versions = versions[:i]
+			response.OkWithQuiet(versions, ctx)
+			return
 		}
 	}
-	versions = versions[:idx]
-	response.OkWithQuiet(versions, ctx)
 }

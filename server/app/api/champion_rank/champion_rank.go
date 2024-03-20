@@ -39,7 +39,7 @@ func (a *championRankApi) QueryChampionRankARAM(ctx *gin.Context) {
 		response.FailWithDetailed(err, "can not find ARAM champion rank list", ctx)
 		return
 	} else {
-		response.OkWithData(championRankList, ctx)
+		response.OkWithQuiet(championRankList, ctx)
 	}
 }
 

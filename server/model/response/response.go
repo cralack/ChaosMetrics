@@ -43,7 +43,7 @@ func OkWithDetailed(data interface{}, message string, ctx *gin.Context) {
 	Result(SUCCESS, data, message, ctx)
 }
 func OkWithQuiet(data interface{}, ctx *gin.Context) {
-	Result(QUIET, data, "", ctx)
+	Result(QUIET, data, "查询成功", ctx)
 }
 
 func Fail(ctx *gin.Context) {
