@@ -37,7 +37,6 @@
       <el-table
         :data="brief"
         :row-style="rowstyle"
-        @cell-click="cellclick"
       >
         <el-table-column
           type="index"
@@ -45,6 +44,7 @@
           align="center"
           width="60"
         />
+
         <el-table-column
           prop="id"
           label="英雄"
@@ -53,15 +53,19 @@
           sortable
         >
           <template #default="{ row }">
-            <div style="display: flex; align-items: center">
-              <el-image
-                :src="logoImg"
-                style="width: 48px;height: 48px;"
-              />
+            <div style="display: flex; align-items: center;">
+              <div style="width: 36px; height: 48px;" /> <!-- Transparent Spacer -->
+              <router-link :to="`/herodetail?hero=${row.id}&loc=${loc}&mode=aram`">
+                <el-image
+                  :src="`src/assets/datadragon/champion/${row.id}.png`"
+                  style="width: 48px; height: 48px;"
+                />
+              </router-link>
               <span style="margin-left: 10px">{{ row.id }}</span>
             </div>
           </template>
         </el-table-column>
+
         <el-table-column
           prop="win_rate"
           label="胜率"
@@ -87,9 +91,10 @@
           label="场均伤害"
           align="center"
           sortable
-        ><template #default="{ row }">
-          {{ (row.avg_damage_dealt ).toFixed(0) }}
-        </template>
+        >
+          <template #default="{ row }">
+            {{ (row.avg_damage_dealt).toFixed(0) }}
+          </template>
         </el-table-column>
         <el-table-column
           prop="avg_dead_time"
@@ -98,13 +103,14 @@
           sortable
         >
           <template #default="{ row }">
-            {{ (row.avg_dead_time ).toFixed() }}秒
+            {{ (row.avg_dead_time).toFixed() }}秒
           </template>
         </el-table-column>
 
       </el-table>
     </el-main>
-    <el-footer class="footer" /></div>
+    <el-footer class="footer" />
+  </div>
 </template>
 
 <script setup>
@@ -139,32 +145,29 @@ const rowstyle = ({ rowIndex }) => {
   }
 }
 
-const cellclick = (row, column, cell, event) => {
-  if (column.property === 'id') {
-    console.log(row.id)
-  }
-}
-
-import logoImg from '@/assets/logo_inv.png'
-
 </script>
 
 <style scoped>
-.container{
+.container {
   @apply w-full h-screen ;
 }
-.selector{
+
+.selector {
   @apply flex items-center justify-start gap-4 text-gray-300;
 }
-.selector .child{
+
+.selector .child {
   @apply w-30;
 }
-.table-container{
+
+.table-container {
   @apply w-screen-md;
 }
-.footer{
+
+.footer {
   @apply h-40;
 }
+
 .el-table {
   --el-table-border-color: #d1d5db;
   --el-table-border: transparent;

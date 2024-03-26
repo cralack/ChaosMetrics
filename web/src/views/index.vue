@@ -35,6 +35,9 @@
               <el-menu-item index="aram">
                 <span>ARAM</span>
               </el-menu-item>
+              <el-menu-item index="herodetail">
+                <span>Hero</span>
+              </el-menu-item>
             </el-menu>
           </el-main>
         </el-container>

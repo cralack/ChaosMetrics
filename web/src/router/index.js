@@ -8,6 +8,7 @@ import Register from '@/views/register.vue'
 import Verify from '@/views/verify.vue'
 import ARAM from '@/views/aram.vue'
 import CLASSIC from '@/views/classic.vue'
+import Hero from '@/views/hero.vue'
 
 const routes = [
   {
@@ -25,6 +26,10 @@ const routes = [
       {
         path: '/classic',
         component: CLASSIC
+      },
+      {
+        path: '/herodetail',
+        component: Hero
       }
     ]
   },
