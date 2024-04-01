@@ -13,7 +13,7 @@ dependencies:
     version: 10.9.0(vue@3.4.21)
   '@vueuse/integrations':
     specifier: ^10.9.0
-    version: 10.9.0(axios@1.6.8)(nprogress@0.2.0)(universal-cookie@7.1.0)(vue@3.4.21)
+    version: 10.9.0(axios@1.6.8)(nprogress@0.2.0)(universal-cookie@7.1.4)(vue@3.4.21)
   axios:
     specifier: ^1.6.8
     version: 1.6.8
@@ -31,7 +31,7 @@ dependencies:
     version: 1.72.0
   universal-cookie:
     specifier: ^7
-    version: 7.1.0
+    version: 7.1.4
   vue:
     specifier: ^3.4.21
     version: 3.4.21
@@ -1878,7 +1878,7 @@ packages:
       - vue
     dev: false
 
-  /@vueuse/integrations@10.9.0(axios@1.6.8)(nprogress@0.2.0)(universal-cookie@7.1.0)(vue@3.4.21):
+  /@vueuse/integrations@10.9.0(axios@1.6.8)(nprogress@0.2.0)(universal-cookie@7.1.4)(vue@3.4.21):
     resolution: {integrity: sha512-acK+A01AYdWSvL4BZmCoJAcyHJ6EqhmkQEXbQLwev1MY7NBnS+hcEMx/BzVoR9zKI+UqEPMD9u6PsyAuiTRT4Q==}
     peerDependencies:
       async-validator: '*'
@@ -1923,7 +1923,7 @@ packages:
       '@vueuse/shared': 10.9.0(vue@3.4.21)
       axios: 1.6.8
       nprogress: 0.2.0
-      universal-cookie: 7.1.0
+      universal-cookie: 7.1.4
       vue-demi: 0.14.7(vue@3.4.21)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -3293,8 +3293,8 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /universal-cookie@7.1.0:
-    resolution: {integrity: sha512-LCLHwP0whxTqkBYMptW1dzNS0xxIVJmU6c51N5CfPNheVxuJW7fVxPa6MUGX7boUSyOlpMveBO96hMs5Gee6Fg==}
+  /universal-cookie@7.1.4:
+    resolution: {integrity: sha512-Q+DVJsdykStWRMtXr2Pdj3EF98qZHUH/fXv/gwFz/unyToy1Ek1w5GsWt53Pf38tT8Gbcy5QNsj61Xe9TggP4g==}
     dependencies:
       '@types/cookie': 0.6.0
       cookie: 0.6.0
