@@ -27,8 +27,8 @@ dependencies:
     specifier: ^2.1.7
     version: 2.1.7(vue@3.4.21)
   sass:
-    specifier: ^1.72.0
-    version: 1.72.0
+    specifier: ^1.74.1
+    version: 1.74.1
   universal-cookie:
     specifier: ^7
     version: 7.1.4
@@ -57,7 +57,7 @@ devDependencies:
     version: 9.24.1(eslint@8.57.0)
   vite:
     specifier: ^5.2.7
-    version: 5.2.7(sass@1.72.0)(terser@5.27.0)
+    version: 5.2.7(sass@1.74.1)(terser@5.27.0)
   vite-plugin-windicss:
     specifier: ^1.9.3
     version: 1.9.3(vite@5.2.7)
@@ -1770,7 +1770,7 @@ packages:
       regenerator-runtime: 0.14.1
       systemjs: 6.14.3
       terser: 5.27.0
-      vite: 5.2.7(sass@1.72.0)(terser@5.27.0)
+      vite: 5.2.7(sass@1.74.1)(terser@5.27.0)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1782,7 +1782,7 @@ packages:
       vite: ^5.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 5.2.7(sass@1.72.0)(terser@5.27.0)
+      vite: 5.2.7(sass@1.74.1)(terser@5.27.0)
       vue: 3.4.21
     dev: true
 
@@ -3134,14 +3134,14 @@ packages:
       queue-microtask: 1.2.3
     dev: true
 
-  /sass@1.72.0:
-    resolution: {integrity: sha512-Gpczt3WA56Ly0Mn8Sl21Vj94s1axi9hDIzDFn9Ph9x3C3p4nNyvsqJoQyVXKou6cBlfFWEgRW4rT8Tb4i3XnVA==}
+  /sass@1.74.1:
+    resolution: {integrity: sha512-w0Z9p/rWZWelb88ISOLyvqTWGmtmu2QJICqDBGyNnfG4OUnPX9BBjjYIXUpXCMOOg5MQWNpqzt876la1fsTvUA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
       chokidar: 3.6.0
       immutable: 4.3.5
-      source-map-js: 1.0.2
+      source-map-js: 1.2.0
 
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -3167,10 +3167,6 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
     dev: true
-
-  /source-map-js@1.0.2:
-    resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
-    engines: {node: '>=0.10.0'}
 
   /source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
@@ -3319,13 +3315,13 @@ packages:
       '@windicss/plugin-utils': 1.9.3
       debug: 4.3.4
       kolorist: 1.8.0
-      vite: 5.2.7(sass@1.72.0)(terser@5.27.0)
+      vite: 5.2.7(sass@1.74.1)(terser@5.27.0)
       windicss: 3.5.6
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /vite@5.2.7(sass@1.72.0)(terser@5.27.0):
+  /vite@5.2.7(sass@1.74.1)(terser@5.27.0):
     resolution: {integrity: sha512-k14PWOKLI6pMaSzAuGtT+Cf0YmIx12z9YGon39onaJNy8DLBfBJrzg9FQEmkAM5lpHBZs9wksWAsyF/HkpEwJA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -3356,7 +3352,7 @@ packages:
       esbuild: 0.20.2
       postcss: 8.4.38
       rollup: 4.13.0
-      sass: 1.72.0
+      sass: 1.74.1
       terser: 5.27.0
     optionalDependencies:
       fsevents: 2.3.3
