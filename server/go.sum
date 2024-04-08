@@ -74,8 +74,6 @@ github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 h1:kkhsdkhsCv
 github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371/go.mod h1:EjAoLdwvbIOoOQr3ihjnSoLZRtE8azugULFRteWMNc0=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
-github.com/agiledragon/gomonkey/v2 v2.2.0 h1:QJWqpdEhGV/JJy70sZ/LDnhbSlMrqHAWHcNOjz1kyuI=
-github.com/agiledragon/gomonkey/v2 v2.2.0/go.mod h1:ap1AmDzcVOAz1YpeJ3TCzIgstoaWLA6jbbgxfB4w2iY=
 github.com/akamai/AkamaiOPEN-edgegrid-golang v1.1.0/go.mod h1:kX6YddBkXqqywAe8c9LyvgTCyFuZCTMF4cRPQhc3Fy8=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
@@ -113,8 +111,8 @@ github.com/bytedance/sonic v1.11.3/go.mod h1:iZcSUejdk5aukTND/Eu/ivjQuEL0Cu9/rf5
 github.com/c-bata/go-prompt v0.2.5/go.mod h1:vFnjEGDIIA/Lib7giyE4E9c50Lvl8j0S+7FVlAwDAVw=
 github.com/casbin/casbin/v2 v2.87.1 h1:7H+ENAfYt3HmZJVw++tJsxx/ko7WEHsfNzpOdYTkpYo=
 github.com/casbin/casbin/v2 v2.87.1/go.mod h1:jX8uoN4veP85O/n2674r2qtfSXI6myvxW85f6TH50fw=
-github.com/casbin/gorm-adapter/v3 v3.23.0 h1:+F6JSAYiWzE7XEWH+CCpP+6wyL3orVP8Fh6CZ0zT9fY=
-github.com/casbin/gorm-adapter/v3 v3.23.0/go.mod h1:z3kcgwp4og8xlFNAwMnapBEI5cxhsbmt2UWN6V66wuk=
+github.com/casbin/gorm-adapter/v3 v3.24.0 h1:WeLetCTkS1V4zpqF+UJ87PnDOYvdA8K3qp+T/Fj31+E=
+github.com/casbin/gorm-adapter/v3 v3.24.0/go.mod h1:aftWi0cla0CC1bHQVrSFzBcX/98IFK28AvuPppCQgTs=
 github.com/casbin/govaluate v1.1.0 h1:6xdCWIpE9CwHdZhlVQW+froUrCsjb6/ZYNcXODfLT+E=
 github.com/casbin/govaluate v1.1.0/go.mod h1:G/UnbIjZk/0uMNaLwZZmFQrR72tYRZWQkO70si/iR7A=
 github.com/cenkalti/backoff/v4 v4.1.0/go.mod h1:scbssz8iZGpm3xbr14ovlUdkxfGXNInqkPWOWmG2CLw=
