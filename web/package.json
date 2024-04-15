@@ -16,7 +16,7 @@
     "element-plus": "^2.6.3",
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
-    "sass": "^1.74.1",
+    "sass": "^1.75.0",
     "universal-cookie": "^7",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
