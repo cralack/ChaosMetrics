@@ -19,7 +19,7 @@
     "sass": "^1.75.0",
     "universal-cookie": "^7",
     "vue": "^3.4.22",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.24.1",
