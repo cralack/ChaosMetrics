@@ -155,10 +155,6 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 	totalSize := int(totalCount)
 	chunkSize := a.options.BatchSize
 	for i := 0; i < totalSize; i += chunkSize {
-		end := i + chunkSize
-		if end > totalSize {
-			end = totalSize
-		}
 		matches = make([]*riotmodel.MatchDB, 0, a.options.BatchSize)
 		if err = a.db.Offset(i).Limit(chunkSize).Where("loc = ?", loc).Where("analyzed = ?",
 			false).Where("analyzed = ?", false).Preload(
@@ -254,11 +250,6 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 	loCode := utils.ConvertLocStrToLocation(match.Loc)
 	curVersion := match.GameVersion
 
-	if err != nil {
-		a.logger.Error("wrong match version")
-		return
-	}
-
 	// count ban rate
 	if match.GameMode == "CLASSIC" {
 		var bans []int
@@ -303,7 +294,6 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 				Key:      template.Key,
 				Name:     template.Name,
 				Title:    template.Title,
-				Image:    template.Image,
 				GameMode: match.GameMode,
 				ItemWin: map[string]map[string]int{
 					"fir": {},
@@ -357,7 +347,7 @@ func (a *Analyzer) store() {
 			analyzed[idx] = make([]*anres.ChampionBrief, 0, 200)
 		}
 		analyzed[idx] = append(analyzed[idx], &anres.ChampionBrief{
-			Image:          cham.Image,
+			// Image:          cham.Image,
 			MetaName:       cham.MetaName,
 			WinRate:        cham.WinRate,
 			PickRate:       cham.PickRate,
@@ -513,6 +503,7 @@ func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
 	}
 }
 
+// return like lillia-1401-na1-aram
 func GetID(name, version, loc, mode string) string {
 	vidx, _ := utils.ConvertVersionToIdx(version)
 	if name == "" {

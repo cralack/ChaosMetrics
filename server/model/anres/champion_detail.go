@@ -2,21 +2,18 @@ package anres
 
 import (
 	"encoding/json"
-
-	"github.com/cralack/ChaosMetrics/server/model"
 )
 
 type ChampionDetail struct {
 	// basic info
-	ID       string       `json:"idx"`       // 存储key
-	Image    *model.Image `json:"image"`     // 图像
-	Loc      string       `json:"loc"`       // 对局服务器
-	Version  string       `json:"version"`   // 对局版本
-	MetaName string       `json:"id"`        // 英雄ID:Aatrox
-	Key      string       `json:"key"`       // 英雄Key:266
-	Name     string       `json:"name"`      // 英雄名称:暗裔剑魔
-	Title    string       `json:"title"`     // 英雄称号:亚托克斯
-	GameMode string       `json:"game_mode"` // 游戏模式
+	ID       string `json:"idx"`       // 存储key
+	Loc      string `json:"loc"`       // 对局服务器
+	Version  string `json:"version"`   // 对局版本
+	MetaName string `json:"id"`        // 英雄ID:Aatrox
+	Key      string `json:"key"`       // 英雄Key:266
+	Name     string `json:"name"`      // 英雄名称:暗裔剑魔
+	Title    string `json:"title"`     // 英雄称号:亚托克斯
+	GameMode string `json:"game_mode"` // 游戏模式
 	// statistical data
 	RankScore      float32 `json:"rank_score"`       // 英雄综合打分
 	TotalWin       float32 `json:"total_win"`        // 英雄胜利总数
