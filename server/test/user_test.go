@@ -51,7 +51,7 @@ func Test_Register(t *testing.T) {
 	usr1.Token = tarUsr.Token
 
 	// get user
-	usrDB, err = serv.GetUserIno(usr1.UUID)
+	usrDB, _ = serv.GetUserIno(usr1.UUID)
 	t.Log(usrDB.UUID == usr1.UUID)
 }
 

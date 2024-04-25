@@ -42,8 +42,8 @@ type Pumper struct {
 	etcdcli     *clientv3.Client
 	fetcher     fetcher.Fetcher
 	scheduler   scheduler.Scheduler
-	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerName]
-	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerName]
+	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
+	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
 	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
 	Exit        chan struct{}
 	out         chan *DBResult
@@ -338,7 +338,7 @@ func (p *Pumper) fetch() {
 			// get old & cur match list
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summoner %s's match list failed",
-					data.sumn.Name), zap.Error(err))
+					data.sumn.MetaSummonerID), zap.Error(err))
 				if req.Retry < p.stgy.Retry {
 					req.Retry++
 					p.scheduler.Push(req)
@@ -378,14 +378,14 @@ func (p *Pumper) fetch() {
 				}
 			}
 			p.logger.Debug(fmt.Sprintf("updating %s's match list @ %d,store %d matches",
-				summoner.Name, cnt, len(matches)))
+				summoner.MetaSummonerID, cnt, len(matches)))
 			if cnt == int(p.summonerIdx[loc]) {
 				p.rdb.HSet(context.Background(), "lastupdate", "pumper", time.Now().Unix())
 			}
 			if len(matches) == 0 {
 				continue
 			}
-			p.handleMatches(matches, summoner.Name)
+			p.handleMatches(matches, summoner.MetaSummonerID)
 		}
 	}
 }

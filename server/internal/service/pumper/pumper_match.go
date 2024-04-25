@@ -137,12 +137,13 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		matchTL *riotmodel.MatchTimelineDTO
 	)
 
-	sumName := req.Data.(*matchTask).sumn.Name
+	// sumID := req.Data.(*matchTask).sumn.MetaSummonerID
+	sumID := "Mudife"
 	// fetch match
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
 	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match %s failed",
-			sumName, matchID), zap.Error(err))
+			sumID, matchID), zap.Error(err))
 		if req.Retry < p.stgy.Retry {
 			req.Retry++
 			p.scheduler.Push(req)
@@ -151,7 +152,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	}
 	if err = json.Unmarshal(buff, &match); err != nil {
 		p.logger.Error(fmt.Sprintf("unmarshal %s's match %s json failed",
-			sumName, matchID), zap.Error(err))
+			sumID, matchID), zap.Error(err))
 		return
 	}
 	// remake || bot game
@@ -164,7 +165,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s/timeline", host, matchID)
 	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match timeline %s failed",
-			sumName, matchID), zap.Error(err))
+			sumID, matchID), zap.Error(err))
 		if req.Retry < p.stgy.Retry {
 			req.Retry++
 			p.scheduler.Push(req)
@@ -173,7 +174,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	}
 	if err = json.Unmarshal(buff, &matchTL); err != nil {
 		p.logger.Error(fmt.Sprintf("unmarshal %s's match %s json failed",
-			sumName, matchID), zap.Error(err))
+			sumID, matchID), zap.Error(err))
 		return
 	}
 
@@ -268,7 +269,6 @@ func (p *Pumper) FetchMatchByName(summonerName string, loc riotmodel.LOCATION) e
 	region = utils.ConvertLocationToRegionHost(loc)
 	sumn = p.LoadSingleSummoner(summonerName, locStr)
 	puuid = sumn.PUUID
-	url = fmt.Sprintf("")
 	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",

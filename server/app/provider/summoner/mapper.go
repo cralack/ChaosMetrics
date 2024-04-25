@@ -28,7 +28,7 @@ func (s *SumonerService) HandleSummoner(src *riotmodel.SummonerDTO) (des *respon
 		return nil
 	}
 	des = &response.SummonerDTO{
-		Name:          src.Name,
+		// Name:          src.Name,
 		Loc:           src.Loc,
 		ProfileIconID: src.ProfileIconID,
 		SummonerLevel: src.SummonerLevel,
@@ -36,16 +36,16 @@ func (s *SumonerService) HandleSummoner(src *riotmodel.SummonerDTO) (des *respon
 	// load entry from redis
 	{
 		key = fmt.Sprintf("/entry/%s", src.Loc)
-		field = fmt.Sprintf("%s@RANKED_SOLO_5x5", src.Name)
+		field = fmt.Sprintf("%s@RANKED_SOLO_5x5", src.MetaSummonerID)
 		buff = s.rdb.HGet(ctx, key, field).Val()
 		entry := &riotmodel.LeagueEntryDTO{}
-		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.SummonerName == src.Name {
+		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.SummonerID == src.MetaSummonerID {
 			des.SoloEntry = ConvertEntry(entry)
 		}
-		field = fmt.Sprintf("%s@RANKED_FLEX_SR", src.Name)
+		field = fmt.Sprintf("%s@RANKED_FLEX_SR", src.MetaSummonerID)
 		buff = s.rdb.HGet(ctx, key, field).Val()
 		entry = &riotmodel.LeagueEntryDTO{}
-		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.SummonerName == src.Name {
+		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.SummonerID == src.MetaSummonerID {
 			des.FlexEntry = ConvertEntry(entry)
 		}
 	}

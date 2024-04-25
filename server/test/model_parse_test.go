@@ -38,7 +38,6 @@ func Test_parse_summoners(t *testing.T) {
 		fmt.Println("ID:", summoner.ID)
 		fmt.Println("AccountID:", summoner.AccountID)
 		fmt.Println("PUUID:", summoner.PUUID)
-		fmt.Println("Name:", summoner.Name)
 		fmt.Println("ProfileIconID:", summoner.ProfileIconID)
 		fmt.Println("RevisionDate:", summoner.RevisionDate)
 		fmt.Println("SummonerLevel:", summoner.SummonerLevel)
@@ -284,7 +283,7 @@ func Test_parse_league(t *testing.T) {
 	})
 	n := 10
 	for i := 0; i < n; i++ {
-		fmt.Printf("summoner %s's LP is %d\n", entries[i].SummonerName, entries[i].LeaguePoints)
+		fmt.Printf("summoner %s's LP is %d\n", entries[i].SummonerID, entries[i].LeaguePoints)
 	}
 }
 

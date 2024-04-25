@@ -25,14 +25,3 @@ func Test_pumper_fetch_match_byId(t *testing.T) {
 	p, _ := pumper.NewPumper("1")
 	p.FetchMatchByID(nil, region, matchId)
 }
-
-func Test_pumper_fetch_single_summoner(t *testing.T) {
-	p, err := pumper.NewPumper("1",
-		pumper.WithLoc(riotmodel.NA1),
-	)
-	if err != nil {
-		t.Log(err)
-	}
-	go p.StartEngine()
-	p.LoadSingleSummoner("Pink HairDryer", "na1")
-}

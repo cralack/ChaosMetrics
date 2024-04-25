@@ -60,12 +60,9 @@ func (p *Pumper) loadSummoners(location riotmodel.LOCATION) {
 	tmp := make([]*riotmodel.SummonerDTO, 0, len(summoners))
 	if len(summoners) != 0 {
 		for _, s := range summoners {
-			if s.Name == "" {
-				continue
-			}
 			// assign to localmap
-			if _, has := p.sumnMap[loc][s.Name]; !has {
-				p.sumnMap[loc][s.Name] = s
+			if _, has := p.sumnMap[loc][s.MetaSummonerID]; !has {
+				p.sumnMap[loc][s.MetaSummonerID] = s
 			}
 			tmp = append(tmp, s)
 		} // assign to redis
@@ -103,32 +100,32 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 	// expand from entry
 	for _, entry := range p.entryMap[loc] {
 		curTier, curRank := ConvertStrToRank(entry.Tier, entry.Rank)
-		if _, has := p.sumnMap[loc][entry.SummonerName]; has ||
+		if _, has := p.sumnMap[loc][entry.SummonerID]; has ||
 			(curTier > p.stgy.TestEndMark1 || (curTier == p.stgy.TestEndMark1 && curRank > p.stgy.TestEndMark2)) {
 			continue
 		}
-		ogUrl := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s",
-			host, strings.ReplaceAll(entry.SummonerName, " ", "%20"))
+		ogUrl := fmt.Sprintf("%s/lol/summoner/v4/summoners/%s",
+			host, strings.ReplaceAll(entry.SummonerID, " ", "%20"))
 
 		p.scheduler.Push(&scheduler.Task{
 			Type: SummonerTypeKey,
 			Loc:  loc,
 			URL:  ogUrl,
 			Data: &summonerTask{
-				summonerBrief: fmt.Sprintf("%s@%s", entry.SummonerName, entry.SummonerID),
+				summonerBrief: fmt.Sprintf("%s", entry.SummonerID),
 			},
 		})
 	}
 	// expand from self
 	for _, sumn := range p.sumnMap[loc] {
 		if sumn.MetaSummonerID == "" {
-			ogUrl := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, sumn.Name)
+			ogUrl := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, sumn.MetaSummonerID)
 			p.scheduler.Push(&scheduler.Task{
 				Type: SummonerTypeKey,
 				Loc:  loc,
 				URL:  ogUrl,
 				Data: &summonerTask{
-					summonerBrief: sumn.Name,
+					summonerBrief: sumn.MetaSummonerID,
 				},
 			})
 		}
@@ -151,13 +148,13 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 	defer p.lock.Unlock()
 
 	for _, sumn := range summoners {
-		if s, has := p.sumnMap[loc][sumn.Name]; !has || s.ID < 1e9*uint(loCode) {
+		if s, has := p.sumnMap[loc][sumn.MetaSummonerID]; !has || s.ID < 1e9*uint(loCode) {
 			sumn.ID = p.summonerIdx[loCode]
 			p.summonerIdx[loCode]++
 		} else {
 			sumn.ID = s.ID
 		}
-		p.sumnMap[loc][sumn.Name] = sumn
+		p.sumnMap[loc][sumn.MetaSummonerID] = sumn
 		sumn.Loc = loc
 	}
 
@@ -193,7 +190,7 @@ func (p *Pumper) cacheSummoners(summoners []*riotmodel.SummonerDTO, loc string) 
 	pipe.Expire(ctx, key, p.stgy.LifeTime)
 	cmds := make([]*redis.IntCmd, 0, len(summoners))
 	for _, s := range summoners {
-		cmds = append(cmds, pipe.HSet(ctx, key, s.Name, s))
+		cmds = append(cmds, pipe.HSet(ctx, key, s.MetaSummonerID, s))
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
 		p.logger.Error("redis store summoner failed", zap.Error(err))
@@ -230,20 +227,20 @@ func (p *Pumper) summonerCounter(loc string) {
 }
 
 func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDTO) {
-	has := false
-	if res, has = p.sumnMap[loc][name]; has {
-		return res
-	}
-	// redis read
-	key := fmt.Sprintf("/summoner/%s", loc)
-	buff := p.rdb.HGet(context.Background(), key, name).Val()
-	if err := json.Unmarshal([]byte(buff), &res); err == nil && res.Name == name {
-		return res
-	}
+	// has := false
+	// if res, has = p.sumnMap[loc][name]; has {
+	// 	return res
+	// }
+	// // redis read
+	// key := fmt.Sprintf("/summoner/%s", loc)
+	// buff := p.rdb.HGet(context.Background(), key, sumID).Val()
+	// if err := json.Unmarshal([]byte(buff), &res); err == nil && res.MetaSummonerID == sumID {
+	// 	return res
+	// }
 
 	// db read
 	if err := p.db.Where("loc = ?", loc).Where("name = ?", name).First(&res).Preload(
-		clause.Associations).Error; err == nil && res.Name == name {
+		clause.Associations).Error; err == nil && res.MetaSummonerID == name {
 		return res
 	}
 
@@ -254,7 +251,7 @@ func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDT
 		p.logger.Error("wrong name or loc")
 		return nil
 	}
-	if err = json.Unmarshal(buffer, &res); err == nil && res.Name == name {
+	if err = json.Unmarshal(buffer, &res); err == nil && res.MetaSummonerID == name {
 		p.handleSummoner(loc, res)
 		return res
 	}

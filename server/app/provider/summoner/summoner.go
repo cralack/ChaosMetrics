@@ -55,7 +55,7 @@ func NewSumnService(params ...interface{}) *SumonerService {
 	}
 }
 
-func (s *SumonerService) QuerySummonerByName(name, loc string) *response.SummonerDTO {
+func (s *SumonerService) QuerySummonerByName(sumID, loc string) *response.SummonerDTO {
 	var (
 		res      *riotmodel.SummonerDTO
 		services []*registry.Service
@@ -64,14 +64,14 @@ func (s *SumonerService) QuerySummonerByName(name, loc string) *response.Summone
 	)
 	// query from redis
 	key := fmt.Sprintf("/summoner/%s", loc)
-	buff = s.rdb.HGet(context.Background(), key, name).Val()
-	if err = json.Unmarshal([]byte(buff), &res); err == nil && res.Name == name {
+	buff = s.rdb.HGet(context.Background(), key, sumID).Val()
+	if err = json.Unmarshal([]byte(buff), &res); err == nil && res.MetaSummonerID == sumID {
 		return s.HandleSummoner(res)
 	}
 
 	// query from db
 	if err = s.db.Where("loc=?", loc).Where("name=?",
-		name).Find(&res).Error; err == nil && res.Name == name {
+		sumID).Find(&res).Error; err == nil && res.MetaSummonerID == sumID {
 		return s.HandleSummoner(res)
 	}
 
@@ -88,7 +88,7 @@ func (s *SumonerService) QuerySummonerByName(name, loc string) *response.Summone
 		&publisher.TaskSpec{
 			Name:    "summoner_query_task",
 			Loc:     loc,
-			Sumname: name,
+			Sumname: sumID,
 			Type:    pumper.SummonerTypeKey,
 		},
 		client.WithAddress(addr),
