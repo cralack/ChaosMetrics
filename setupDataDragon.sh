@@ -33,7 +33,7 @@ if [ "$setupRequired" = true ] ; then
     # 检查是否已有下载文件
     if [ ! -f "$DOWNLOAD_FILE" ]; then
         echo "Downloading DataDragon assets..."
-        wget -q "${DOWNLOAD_URL}" -O "$DOWNLOAD_FILE"
+        wget "${DOWNLOAD_URL}" -O "$DOWNLOAD_FILE" -P
     else
         echo "Download file $DOWNLOAD_FILE already exists. Skipping download."
     fi
