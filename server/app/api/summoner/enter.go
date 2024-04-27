@@ -9,8 +9,8 @@ type sumnApi struct{}
 func InitSummonerRouter(router *gin.RouterGroup) {
 	api := sumnApi{}
 	routerPath := ""
-	summonerRouter := router.Group(routerPath)
+	routerGroup := router.Group(routerPath)
 	{
-		summonerRouter.GET("/summoner", api.QuerySummoner)
+		routerGroup.GET("/summoner", api.QuerySummoner)
 	}
 }

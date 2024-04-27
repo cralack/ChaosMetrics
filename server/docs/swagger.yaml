@@ -60,10 +60,6 @@ definitions:
       idx:
         description: basic info
         type: string
-      image:
-        allOf:
-        - $ref: '#/definitions/model.Image'
-        description: 图像
       item:
         additionalProperties:
           additionalProperties:
@@ -397,15 +393,19 @@ definitions:
         example: snoop@dogg.com
         minLength: 6
         type: string
+      nickname:
+        example: snoop
+        type: string
       password:
         example: "123456"
         minLength: 6
         type: string
       username:
-        example: snoop
+        example: snoopdogg
         type: string
     required:
     - email
+    - nickname
     - password
     - username
     type: object
@@ -453,7 +453,7 @@ paths:
               type: object
       summary: 请求一个ARAM英雄榜
       tags:
-      - Champion Rank
+      - Hero Rank
   /CLASSIC:
     get:
       consumes:
@@ -483,52 +483,7 @@ paths:
             type: array
       summary: 请求一个CLASSIC英雄榜
       tags:
-      - Champion Rank
-  /champion:
-    get:
-      consumes:
-      - application/json
-      description: query @name,version,loc,mode
-      parameters:
-      - default: na1
-        description: Region
-        in: query
-        name: loc
-        required: true
-        type: string
-      - default: CLASSIC
-        description: Game mode
-        in: query
-        name: mode
-        required: true
-        type: string
-      - default: Ahri
-        description: Champion name
-        in: query
-        name: name
-        required: true
-        type: string
-      - default: 14.1.1
-        description: Version
-        in: query
-        name: version
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/anres.ChampionDetail'
-              type: object
-      summary: 请求一个英雄详情
-      tags:
-      - Champion Detail
+      - Hero Rank
   /comments:
     delete:
       consumes:
@@ -626,6 +581,84 @@ paths:
       summary: 请求一个英雄的评论
       tags:
       - Comment
+  /hero:
+    get:
+      consumes:
+      - application/json
+      description: query @name,version,loc,mode
+      parameters:
+      - default: na1
+        description: Region
+        in: query
+        name: loc
+        required: true
+        type: string
+      - default: CLASSIC
+        description: Game mode
+        in: query
+        name: mode
+        required: true
+        type: string
+      - default: Ahri
+        description: Champion name
+        in: query
+        name: name
+        required: true
+        type: string
+      - default: 14.1.1
+        description: Version
+        in: query
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/anres.ChampionDetail'
+              type: object
+      summary: 请求一个英雄详情
+      tags:
+      - Hero Data
+  /hero_detail:
+    get:
+      consumes:
+      - application/json
+      description: query @name,version,lang
+      parameters:
+      - default: zh_CN
+        in: query
+        name: lang
+        required: true
+        type: string
+      - default: Ahri
+        description: Champion name
+        in: query
+        name: name
+        required: true
+        type: string
+      - default: 14.1.1
+        description: Version
+        in: query
+        name: version
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 请求一个英雄详细资料
+      tags:
+      - Hero Detail
   /item:
     get:
       consumes:

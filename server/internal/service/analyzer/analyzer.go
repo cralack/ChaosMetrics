@@ -503,7 +503,7 @@ func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
 	}
 }
 
-// return like lillia-1401-na1-aram
+// GetID return str like lillia-1401-na1-aram
 func GetID(name, version, loc, mode string) string {
 	vidx, _ := utils.ConvertVersionToIdx(version)
 	if name == "" {

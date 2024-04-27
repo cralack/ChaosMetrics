@@ -1,4 +1,4 @@
-package champion_detail
+package hero_data
 
 import (
 	"context"
@@ -11,19 +11,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type ChampionDetailService struct {
+type HeroDataService struct {
 	rdb   *redis.Client
 	rlock *sync.RWMutex
 }
 
-func NewChampionDetailService() *ChampionDetailService {
-	return &ChampionDetailService{
+func NewHeroDataService() *HeroDataService {
+	return &HeroDataService{
 		rdb:   global.ChaRDB,
 		rlock: &sync.RWMutex{},
 	}
 }
 
-func (s *ChampionDetailService) QueryChampionDetail(name, version, location, gamemode string) (*anres.ChampionDetail, error) {
+func (s *HeroDataService) QueryHeroData(name, version, location, gamemode string) (*anres.ChampionDetail, error) {
 	var (
 		res  *anres.ChampionDetail
 		err  error

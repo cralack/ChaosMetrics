@@ -29,7 +29,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Champion Rank"
+                    "Hero Rank"
                 ],
                 "summary": "请求一个ARAM英雄榜",
                 "parameters": [
@@ -85,7 +85,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Champion Rank"
+                    "Hero Rank"
                 ],
                 "summary": "请求一个CLASSIC英雄榜",
                 "parameters": [
@@ -114,75 +114,6 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/anres.ChampionBrief"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/champion": {
-            "get": {
-                "description": "query @name,version,loc,mode",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Champion Detail"
-                ],
-                "summary": "请求一个英雄详情",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "na1",
-                        "description": "Region",
-                        "name": "loc",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "CLASSIC",
-                        "description": "Game mode",
-                        "name": "mode",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "Ahri",
-                        "description": "Champion name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "14.1.1",
-                        "description": "Version",
-                        "name": "version",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/anres.ChampionDetail"
-                                        }
-                                    }
-                                }
-                            ]
                         }
                     }
                 }
@@ -342,6 +273,123 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/hero": {
+            "get": {
+                "description": "query @name,version,loc,mode",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hero Data"
+                ],
+                "summary": "请求一个英雄详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "na1",
+                        "description": "Region",
+                        "name": "loc",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "CLASSIC",
+                        "description": "Game mode",
+                        "name": "mode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Ahri",
+                        "description": "Champion name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.1.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/anres.ChampionDetail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/hero_detail": {
+            "get": {
+                "description": "query @name,version,lang",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hero Detail"
+                ],
+                "summary": "请求一个英雄详细资料",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh_CN",
+                        "name": "lang",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Ahri",
+                        "description": "Champion name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.1.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -816,14 +864,6 @@ const docTemplate = `{
                     "description": "basic info",
                     "type": "string"
                 },
-                "image": {
-                    "description": "图像",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/model.Image"
-                        }
-                    ]
-                },
                 "item": {
                     "description": "build winrate",
                     "type": "object",
@@ -1293,6 +1333,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "nickname",
                 "password",
                 "username"
             ],
@@ -1302,6 +1343,10 @@ const docTemplate = `{
                     "minLength": 6,
                     "example": "snoop@dogg.com"
                 },
+                "nickname": {
+                    "type": "string",
+                    "example": "snoop"
+                },
                 "password": {
                     "type": "string",
                     "minLength": 6,
@@ -1309,7 +1354,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "example": "snoop"
+                    "example": "snoopdogg"
                 }
             }
         }

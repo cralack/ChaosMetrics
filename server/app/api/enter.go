@@ -3,10 +3,11 @@ package api
 import (
 	"net/http"
 
-	"github.com/cralack/ChaosMetrics/server/app/api/champion_detail"
-	"github.com/cralack/ChaosMetrics/server/app/api/champion_rank"
 	"github.com/cralack/ChaosMetrics/server/app/api/comment"
 	"github.com/cralack/ChaosMetrics/server/app/api/common"
+	"github.com/cralack/ChaosMetrics/server/app/api/hero_data"
+	"github.com/cralack/ChaosMetrics/server/app/api/hero_detail"
+	"github.com/cralack/ChaosMetrics/server/app/api/hero_rank"
 	"github.com/cralack/ChaosMetrics/server/app/api/item"
 	"github.com/cralack/ChaosMetrics/server/app/api/summoner"
 	"github.com/cralack/ChaosMetrics/server/app/api/user"
@@ -38,8 +39,9 @@ func RegisterRoutes(r *gin.Engine) {
 			ctx.JSON(http.StatusOK, "ok")
 		})
 		item.InitItemRouter(PublicGroup)
-		champion_rank.InitChampionRankRouter(PublicGroup)
-		champion_detail.InitChampionRankRouter(PublicGroup)
+		hero_rank.InitHeroRankRouter(PublicGroup)
+		hero_detail.InitHeroDetailRouter(PublicGroup)
+		hero_data.InitHeroDataRouter(PublicGroup)
 		summoner.InitSummonerRouter(PublicGroup)
 		user.InitUserRouter(PublicGroup)
 		common.InitCommonAPI(PublicGroup)

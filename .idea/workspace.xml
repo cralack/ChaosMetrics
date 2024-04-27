@@ -4,11 +4,36 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1eb0ad49-4fd0-402b-8466-fa387a95e25d" name="更改" comment="" />
+    <list default="true" id="1eb0ad49-4fd0-402b-8466-fa387a95e25d" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/server/app/api/hero_detail/enter.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/app/api/hero_detail/hero_detail.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/app/provider/hero_detail/hero_detail.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/api/champion_detail/champion_detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_data/hero_data.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/api/champion_detail/enger.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_data/enger.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/api/champion_rank/champion_rank.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_rank/hero_rank.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/api/champion_rank/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_rank/enter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/api/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/enter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/api/item/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/item/enter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/api/summoner/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/summoner/enter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/provider/champion_detail/champion_detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/provider/hero_data/hero_data.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/app/provider/champion_rank/champion_rank.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/provider/hero_rank/hero_rank.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/server/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/internal/service/analyzer/analyzer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/internal/service/analyzer/analyzer.go" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
   </component>
   <component name="GOROOT" url="file:///usr/lib/go-1.21" />
   <component name="Git.Settings">
@@ -18,12 +43,16 @@
   &quot;associatedIndex&quot;: 1
 }</component>
   <component name="ProjectId" id="2f8KLsNFrM1N01n2vMPLCJsrxsd" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
@@ -32,11 +61,11 @@
     "git-widget-placeholder": "master",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/home/hong/Go/src/ChaosMetrics",
+    "last_opened_file_path": "/home/hong/Desktop/ChaosMetrics",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+    "settings.editor.selected.configurable": "preferences.keymap"
   },
   "keyToStringList": {
     "DatabaseDriversLRU": [

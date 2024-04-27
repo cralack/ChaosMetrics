@@ -1,4 +1,4 @@
-package champion_rank
+package hero_rank
 
 import (
 	"context"
@@ -12,19 +12,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type ChampionRankService struct {
+type HeroRankService struct {
 	rdb   *redis.Client
 	rlock *sync.RWMutex
 }
 
-func NewChampionRankService() *ChampionRankService {
-	return &ChampionRankService{
+func NewHeroRankService() *HeroRankService {
+	return &HeroRankService{
 		rdb:   global.ChaRDB,
 		rlock: &sync.RWMutex{},
 	}
 }
 
-func (s *ChampionRankService) QueryChampionRank(version, location, gamemode string) ([]*anres.ChampionBrief, error) {
+func (s *HeroRankService) QueryHeroRank(version, location, gamemode string) ([]*anres.ChampionBrief, error) {
 	var (
 		res  []*anres.ChampionBrief
 		err  error

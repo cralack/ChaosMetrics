@@ -9,8 +9,8 @@ type itemApi struct{}
 func InitItemRouter(router *gin.RouterGroup) {
 	api := itemApi{}
 	routerPath := ""
-	itemRouter := router.Group(routerPath)
+	routerGroup := router.Group(routerPath)
 	{
-		itemRouter.GET("/item", api.QueryApi)
+		routerGroup.GET("/item", api.QueryApi)
 	}
 }

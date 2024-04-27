@@ -1,43 +1,43 @@
-package champion_detail
+package hero_data
 
 import (
 	"sort"
 
-	"github.com/cralack/ChaosMetrics/server/app/provider/champion_detail"
+	"github.com/cralack/ChaosMetrics/server/app/provider/hero_data"
 	"github.com/cralack/ChaosMetrics/server/model/anres"
 	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/gin-gonic/gin"
 )
 
-type championDetailParam struct {
+type heroDataParam struct {
 	Name    string `form:"name" default:"Ahri" binding:"required"`      // Champion name
 	Loc     string `form:"loc" default:"na1" binding:"required"`        // Region
 	Version string `form:"version" default:"14.1.1" binding:"required"` // Version
 	Mode    string `form:"mode" default:"CLASSIC" binding:"required"`   // Game mode
 }
 
-// QueryChampionDetail godoc
+// QueryHeroData godoc
 //
 //	@Summary		请求一个英雄详情
 //	@Description	query @name,version,loc,mode
 //	@Accept			application/json
 //	@Produce		application/json
-//	@Tags			Champion Detail
-//	@Param			data	query		championDetailParam	true	"Query champion rank list for aram"
+//	@Tags			Hero Data
+//	@Param			data	query		heroDataParam	true	"Query champion rank list for aram"
 //	@Success		200		{object}	response.Response{data=anres.ChampionDetail}
-//	@Router			/champion [get]
-func (a *championDetailApi) QueryChampionDetail(ctx *gin.Context) {
+//	@Router			/hero [get]
+func (a *heroDataApi) QueryHeroData(ctx *gin.Context) {
 	var (
-		param    championDetailParam
+		param    heroDataParam
 		champion *anres.ChampionDetail
 		err      error
 	)
-	championRankService := champion_detail.NewChampionDetailService()
+	heroDataServ := hero_data.NewHeroDataService()
 	if err = ctx.ShouldBindQuery(&param); err != nil {
 		response.FailWithMessage("wrong param", ctx)
 		return
 	}
-	if champion, err = championRankService.QueryChampionDetail(
+	if champion, err = heroDataServ.QueryHeroData(
 		param.Name, param.Version, param.Loc, param.Mode); err != nil {
 		response.FailWithDetailed(err, "can not find champion", ctx)
 		return
