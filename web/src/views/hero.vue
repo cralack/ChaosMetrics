@@ -81,7 +81,9 @@
             :key="index"
             class="mx-0.5"
           >
-            <el-icon><SemiSelect /></el-icon>
+            <div v-if="index%2===1">
+              <el-icon><SemiSelect /></el-icon>
+            </div>
           </div>
         </div>
         <div class="flex items-center">
@@ -187,6 +189,9 @@ const getSpellImageUrl = (spell) => {
 
 // 获取被动技能图片 URL 的方法
 const getPassiveImageUrl = (passive) => {
+  if (heroName.value === 'Fiddlesticks') {
+    return 'src/assets/datadragon/passive/FiddleSticksP.png'
+  }
   return `src/assets/datadragon/passive/${passive.image.full}`
 }
 
@@ -195,6 +200,9 @@ const getTagImageUrl = (tag) => {
 }
 
 const heroImage = computed(() => {
+  if (heroName.value === 'Fiddlesticks') {
+    return 'src/assets/datadragon/champion_og/loading/' + 'FiddleSticks' + '_0.jpg'
+  }
   return 'src/assets/datadragon/champion_og/loading/' + heroName.value + '_0.jpg'
 })
 

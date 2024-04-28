@@ -1,11 +1,14 @@
 package utils
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
@@ -193,4 +196,26 @@ func _(que string) riotmodel.QUECODE {
 	default:
 		return 999
 	}
+}
+
+func GetCurMajorVersions() []string {
+	res := global.ChaRDB.HGet(context.Background(), "/version", "versions")
+	if res.Err() != nil {
+		global.ChaLogger.Error(res.Err().Error())
+		return []string{}
+	}
+	versions := make([]string, 0)
+	if err := json.Unmarshal([]byte(res.Val()), &versions); err != nil {
+		global.ChaLogger.Error(err.Error())
+		return []string{}
+	}
+	majorVersion, _ := strconv.Atoi(versions[0][:2])
+	majorVersion *= 100
+	for i, v := range versions {
+		if ver, _ := ConvertVersionToIdx(v); int(ver) <= majorVersion {
+			versions = versions[:i]
+			break
+		}
+	}
+	return versions
 }

@@ -1,6 +1,8 @@
 package test
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"testing"
@@ -55,4 +57,33 @@ func TestName(t *testing.T) {
 		t.Log(err)
 	}
 	t.Log(string(buff))
+}
+
+func Test_getCham(t *testing.T) {
+	var (
+		buff string
+		err  error
+		ctx  = context.Background()
+	)
+	buff = rdb.HGet(ctx, "/championlist", "1401").Val()
+	keys := make([]string, 0)
+	if err = json.Unmarshal([]byte(buff), &keys); err != nil {
+		t.Log(err)
+	}
+	for i := range keys {
+		keys[i] += "@1401"
+	}
+
+	values := rdb.HMGet(ctx, "/champions/zh_CN", keys...).Val()
+
+	chams := make([]*riotmodel.ChampionDTO, 0, len(keys))
+	for _, v := range values {
+		var cham *riotmodel.ChampionDTO
+		if err = json.Unmarshal([]byte(v.(string)), &cham); v == nil || err != nil {
+			t.Log(err)
+			continue
+		}
+		chams = append(chams, cham)
+	}
+	t.Log(len(chams))
 }

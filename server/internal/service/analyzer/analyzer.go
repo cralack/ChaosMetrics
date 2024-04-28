@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
@@ -27,7 +28,7 @@ type Analyzer struct {
 	logger    *zap.Logger
 	db        *gorm.DB
 	rdb       *redis.Client
-	lock      *sync.Mutex
+	lock      *sync.RWMutex
 	scheduler scheduler.Scheduler
 	Exit      chan struct{}
 
@@ -54,12 +55,15 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 	if err := json.Unmarshal([]byte(buff), &idxMap); err != nil {
 		global.ChaLogger.Error("failed to parse idx map", zap.Error(err))
 	}
+	if len(stgy.Versions) == 0 {
+		stgy.Versions = utils.GetCurMajorVersions()
+	}
 
 	return &Analyzer{
 		logger:        global.ChaLogger,
 		db:            global.ChaDB,
 		rdb:           global.ChaRDB,
-		lock:          &sync.Mutex{},
+		lock:          &sync.RWMutex{},
 		scheduler:     scheduler.NewSchdule(),
 		Exit:          make(chan struct{}),
 		curVersion:    global.ChaRDB.HGet(context.Background(), "/version", "cur").Val(),
@@ -82,8 +86,18 @@ func (a *Analyzer) Analyze() {
 
 	a.loadChampionTemplate()
 	for _, loc := range a.options.Loc {
-		a.loadMatch(loc)
+		var total int64 = 1
+		// start counter
+		go a.counter(&total, loc)
+		for _, ver := range a.options.Versions {
+			a.loadMatch(loc, ver, &total)
+		}
 	}
+
+	a.scheduler.Push(&scheduler.Task{
+		Type: "finish",
+		Data: nil,
+	})
 	<-a.Exit
 	defer a.store()
 }
@@ -123,33 +137,35 @@ func (a *Analyzer) loadItem(itemId int, version uint) (res *riotmodel.ItemDTO) {
 	return
 }
 
-func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
+func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION, ver string, total *int64) {
 	var (
 		err     error
 		matches []*riotmodel.MatchDB
 	)
 
+	vers := strings.Split(ver, ".")
+	if len(vers) < 2 {
+		return
+	}
+	ver = fmt.Sprintf("%s.%s%%", vers[0], vers[1])
 	loc, _ := utils.ConvertLocationToLoHoSTR(loCode)
 
 	// count analyzed
 	var totalCount int64
 	if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
-		true).Count(&totalCount).Error; err != nil {
+		true).Where("game_version LIKE ?", ver).Count(&totalCount).Error; err != nil {
 		a.logger.Error("count analyzed failed", zap.Error(err))
 		return
 	}
-	a.lock.Lock()
-	a.analyzedCount[loCode] += totalCount
-	a.lock.Unlock()
+	atomic.AddInt64(&a.analyzedCount[loCode], totalCount)
 
 	// count unanalyzed
 	if err = a.db.Model(&riotmodel.MatchDB{}).Where("analyzed = ?",
-		false).Count(&totalCount).Error; err != nil {
+		false).Where("game_version LIKE ?", ver).Count(&totalCount).Error; err != nil {
 		a.logger.Error("count analyzed failed", zap.Error(err))
 		return
 	}
-	// start counter
-	go a.counter(int(totalCount), loCode)
+	atomic.AddInt64(total, totalCount)
 
 	// chunk
 	totalSize := int(totalCount)
@@ -157,7 +173,7 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 	for i := 0; i < totalSize; i += chunkSize {
 		matches = make([]*riotmodel.MatchDB, 0, a.options.BatchSize)
 		if err = a.db.Offset(i).Limit(chunkSize).Where("loc = ?", loc).Where("analyzed = ?",
-			false).Where("analyzed = ?", false).Preload(
+			false).Where("game_version LIKE ?", ver).Preload(
 			"Participants").Find(&matches).Error; err != nil {
 			a.logger.Error("load match failed", zap.Error(err))
 		}
@@ -168,10 +184,6 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION) {
 		})
 	}
 
-	a.scheduler.Push(&scheduler.Task{
-		Type: "finish",
-		Data: nil,
-	})
 	return
 }
 
@@ -290,7 +302,7 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 			tmp = &anres.ChampionDetail{
 				Loc:      match.Loc,
 				Version:  curVersion,
-				MetaName: keyName,
+				MetaName: template.ID,
 				Key:      template.Key,
 				Name:     template.Name,
 				Title:    template.Title,
@@ -485,21 +497,25 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 	return nil
 }
 
-func (a *Analyzer) counter(total int, loc riotmodel.LOCATION) {
+func (a *Analyzer) counter(total *int64, loc riotmodel.LOCATION) {
 	var (
 		cur  int64
 		rate float32
 	)
-	ticker := time.NewTicker(time.Second * 5)
+	ticker := time.NewTicker(time.Second * 1)
+	timer := time.NewTicker(time.Millisecond * 100)
 
 	for {
-		// count
-		cur = a.analyzedCount[loc]
-		rate = float32(cur) / float32(total)
-		a.logger.Info(fmt.Sprintf("analyzed %05.02f%% (%d/%d) match", rate*100, cur, total))
-		// store
-		// a.store()
-		<-ticker.C
+		select {
+		case <-timer.C:
+			cur = a.analyzedCount[loc]
+			if cur >= *total {
+				return
+			}
+		case <-ticker.C:
+			rate = float32(cur) / float32(*total)
+			a.logger.Info(fmt.Sprintf("analyzed %05.02f%% (%d/%d) match", rate*100, cur, *total+1))
+		}
 	}
 }
 

@@ -3,12 +3,14 @@ package analyzer
 import (
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/cralack/ChaosMetrics/server/utils"
 )
 
 type options struct {
 	Loc       []riotmodel.LOCATION // 地区列表
 	Mode      []riotmodel.GAMEMODE // 游戏模式
 	Lang      []riotmodel.LANG     // 语言
+	Versions  []string
 	BatchSize int
 }
 
@@ -19,6 +21,7 @@ var defaultOptions = &options{
 	Mode:      []riotmodel.GAMEMODE{riotmodel.ARAM, riotmodel.CLASSIC},      // 默认模式为大乱斗
 	Lang:      []riotmodel.LANG{riotmodel.LANG_zh_CN, riotmodel.LANG_en_US}, // 默认中文、英文
 	BatchSize: 1000,
+	Versions:  make([]string, 0),
 	// LifeTime: -1, // cache forever
 }
 
@@ -47,5 +50,17 @@ func WithMode(mode ...riotmodel.GAMEMODE) Option {
 			tmp = append(tmp, m)
 		}
 		stgy.Mode = tmp
+	}
+}
+
+func WithVersions(versions ...string) Option {
+	return func(stgy *options) {
+		for _, ver := range versions {
+			if ver == "all" {
+				stgy.Versions = utils.GetCurMajorVersions()
+				return
+			}
+		}
+		stgy.Versions = versions
 	}
 }
