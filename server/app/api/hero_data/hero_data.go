@@ -46,7 +46,7 @@ func (a *heroDataApi) QueryHeroData(ctx *gin.Context) {
 			champion.ItemWin[key] = ShrinkMap(champion.ItemWin[key])
 		}
 		champion.PerkWin = ShrinkMap(champion.PerkWin)
-		response.OkWithData(champion, ctx)
+		response.OkWithQuiet(champion, ctx)
 	}
 }
 

@@ -4,24 +4,8 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1eb0ad49-4fd0-402b-8466-fa387a95e25d" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/server/app/api/hero_detail/enter.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/app/api/hero_detail/hero_detail.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/app/provider/hero_detail/hero_detail.go" afterDir="false" />
+    <list default="true" id="1eb0ad49-4fd0-402b-8466-fa387a95e25d" name="更改" comment="feat(ui): completed left half of hero details page in frontend">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/api/champion_detail/champion_detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_data/hero_data.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/api/champion_detail/enger.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_data/enger.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/api/champion_rank/champion_rank.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_rank/hero_rank.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/api/champion_rank/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/hero_rank/enter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/api/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/enter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/api/item/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/item/enter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/api/summoner/enter.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/api/summoner/enter.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/provider/champion_detail/champion_detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/provider/hero_data/hero_data.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/app/provider/champion_rank/champion_rank.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/app/provider/hero_rank/hero_rank.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/docs/docs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/docs/swagger.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/server/docs/swagger.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/internal/service/analyzer/analyzer.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/internal/service/analyzer/analyzer.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +18,9 @@
         <option value="Go File" />
       </list>
     </option>
+  </component>
+  <component name="FormatOnSaveOptions">
+    <option name="myFormatOnlyChangedLines" value="true" />
   </component>
   <component name="GOROOT" url="file:///usr/lib/go-1.21" />
   <component name="Git.Settings">
@@ -50,39 +37,138 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "master",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/home/hong/Desktop/ChaosMetrics",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Node.js.vite.config.js.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/hong/Desktop/ChaosMetrics&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.standard&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.stylelint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.standard&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.stylelint&quot;: &quot;&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.build.executor&quot;: &quot;Run&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;npm.lint.executor&quot;: &quot;Run&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;actions.on.save&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/opt/webstorm/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "redis",
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;redis&quot;,
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
+  <component name="RunManager" selected="npm.dev">
+    <configuration name="build" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/web/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="build" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/web/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="lint" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/web/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="lint" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.dev" />
+        <item itemvalue="npm.lint" />
+        <item itemvalue="npm.build" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-gosdk-33c477a475b1-b97fc8a1e17c-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-241.14494.238" />
-        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-GO-241.14494.238" />
+        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-WS-241.15989.105" />
       </set>
     </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="1eb0ad49-4fd0-402b-8466-fa387a95e25d" name="更改" comment="feat(api): added endpoint for querying hero details in backend" />
+      <created>1714204422731</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1714204422731</updated>
+      <workItem from="1714204424034" duration="33000" />
+      <workItem from="1714204466655" duration="45000" />
+      <workItem from="1714204973791" duration="52000" />
+      <workItem from="1714286889544" duration="11027000" />
+    </task>
+    <task id="LOCAL-00001" summary="feat(ui): completed left half of hero details page in frontend">
+      <option name="closed" value="true" />
+      <created>1714296510828</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1714296510828</updated>
+    </task>
+    <task id="LOCAL-00002" summary="feat(ui): completed left half of hero details page in frontend">
+      <option name="closed" value="true" />
+      <created>1714296544100</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1714296544100</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat(ui): completed left half of hero details page in frontend">
+      <option name="closed" value="true" />
+      <created>1714297904676</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1714297904676</updated>
+    </task>
+    <task id="LOCAL-00004" summary="feat(ui): completed left half of hero details page in frontend">
+      <option name="closed" value="true" />
+      <created>1714314668825</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1714314668825</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
@@ -91,7 +177,24 @@
     <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
     <option featureType="dependencySupport" implementationName="javascript:npm:vue" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="feat(api): added endpoint for querying hero details in backend" />
+    <MESSAGE value="feat(ui): completed left half of hero details page in frontend" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(ui): completed left half of hero details page in frontend" />
+  </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/web/src/views/hero.vue</url>
+          <line>104</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

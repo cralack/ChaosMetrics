@@ -28,15 +28,27 @@ export const getARAMChampionRankBrief = (loc, version) => {
   })
 }
 
-export const getChampionDetail = (name, loc, mode, version) => {
+export const getHeroData = (name, loc, mode, version) => {
   return service({
-    url: '/champion',
+    url: '/hero',
     method: 'get',
     params: {
       name,
       loc,
       mode,
       version,
+    }
+  })
+}
+
+export const getHeroDetail = (name, version, lang) => {
+  return service({
+    url: '/hero_detail',
+    method: 'get',
+    params: {
+      name,
+      version,
+      lang
     }
   })
 }

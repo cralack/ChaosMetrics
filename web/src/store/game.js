@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getGameVersion, getARAMChampionRankBrief, getClassicChampionRankBrief, getChampionDetail } from '@/api/game'
+import { getARAMChampionRankBrief, getClassicChampionRankBrief, getGameVersion } from '@/api/game'
 
 export const useGameStore = defineStore('game', () => {
   const gameversion = ref()
@@ -29,12 +29,12 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  const setHeroDetail = async(name, loc, mode, version) => {
-    const res = await getChampionDetail(name, loc, mode, version)
-    if (res.code === 0) {
-      detail.value = res.data
-    }
-  }
+  // const setHeroDetail = async(name, loc, mode, version) => {
+  //   const res = await getChampionDetail(name, loc, mode, version)
+  //   if (res.code === 0) {
+  //     detail.value = res.data
+  //   }
+  // }
 
   return {
     gameversion,
@@ -44,6 +44,5 @@ export const useGameStore = defineStore('game', () => {
     setVersions,
     setARAMBrief,
     setClassicBrief,
-    setHeroDetail,
   }
 })

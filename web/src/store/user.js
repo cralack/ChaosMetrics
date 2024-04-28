@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
-import { getToken, setToken, removeToken } from '@/utils/auth'
-import { login, logout, getUserInfo } from '@/api/user'
+import { getToken, removeToken, setToken } from '@/utils/auth'
+import { getUserInfo, login, logout } from '@/api/user'
 import { useRouter } from 'vue-router'
 
 export const useUserStore = defineStore('user', () => {
   const router = useRouter()
+  const lang = ref('zh_CN')
   const isLogin = computed(() => token.value !== '')
   const userInfo = reactive({
     uuid: '',
@@ -68,6 +69,7 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     check,
+    lang,
     isLogin,
     userInfo,
     token,
