@@ -10,3 +10,5 @@
 /inspectionProfiles/Project_Default.xml
 /vcs.xml
 /watcherTasks.xml
+/dataSources.xml
+/jsLinters/eslint.xml

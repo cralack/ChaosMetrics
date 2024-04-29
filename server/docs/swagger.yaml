@@ -362,6 +362,43 @@ definitions:
           type: string
         type: array
     type: object
+  riotmodel.Perk:
+    properties:
+      icon:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      slots:
+        items:
+          $ref: '#/definitions/riotmodel.Slot'
+        type: array
+    type: object
+  riotmodel.Rune:
+    properties:
+      icon:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      longDesc:
+        type: string
+      name:
+        type: string
+      shortDesc:
+        type: string
+    type: object
+  riotmodel.Slot:
+    properties:
+      runes:
+        items:
+          $ref: '#/definitions/riotmodel.Rune'
+        type: array
+    type: object
   user.changePasswordParam:
     properties:
       newPassword:
@@ -581,6 +618,32 @@ paths:
       summary: 请求一个英雄的评论
       tags:
       - Comment
+  /gameversion:
+    get:
+      consumes:
+      - application/json
+      description: 获取与当前大版本号相关的版本列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 请求当前大版本号下的版本列表
+      tags:
+      - Common Game Data
   /hero:
     get:
       consumes:
@@ -698,6 +761,43 @@ paths:
       summary: 请求一个物品详情
       tags:
       - Item
+  /perks:
+    get:
+      consumes:
+      - application/json
+      description: 根据提供的版本和语言信息，查询并返回符文数据
+      parameters:
+      - default: zh_CN
+        in: query
+        name: lang
+        required: true
+        type: string
+      - default: 14.5.1
+        description: Version
+        in: query
+        name: version
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/riotmodel.Perk'
+                  type: array
+              type: object
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 请求特定版本和语言的符文数据
+      tags:
+      - Common Game Data
   /summoner:
     get:
       consumes:

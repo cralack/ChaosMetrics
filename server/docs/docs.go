@@ -278,6 +278,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/gameversion": {
+            "get": {
+                "description": "获取与当前大版本号相关的版本列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common Game Data"
+                ],
+                "summary": "请求当前大版本号下的版本列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/hero": {
             "get": {
                 "description": "query @name,version,loc,mode",
@@ -451,6 +495,66 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/perks": {
+            "get": {
+                "description": "根据提供的版本和语言信息，查询并返回符文数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common Game Data"
+                ],
+                "summary": "请求特定版本和语言的符文数据",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "zh_CN",
+                        "name": "lang",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.5.1",
+                        "description": "Version",
+                        "name": "version",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/riotmodel.Perk"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -1290,6 +1394,63 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
+                    }
+                }
+            }
+        },
+        "riotmodel.Perk": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "slots": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/riotmodel.Slot"
+                    }
+                }
+            }
+        },
+        "riotmodel.Rune": {
+            "type": "object",
+            "properties": {
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "longDesc": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "shortDesc": {
+                    "type": "string"
+                }
+            }
+        },
+        "riotmodel.Slot": {
+            "type": "object",
+            "properties": {
+                "runes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/riotmodel.Rune"
                     }
                 }
             }
