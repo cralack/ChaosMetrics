@@ -16,3 +16,8 @@ func Test_get_IP(t *testing.T) {
 	}
 
 }
+
+func Test_removeHTMLTags(t *testing.T) {
+	desc := `+9 <lol-uikit-tooltipped-keyword key='LinkTooltip_Description_Adaptive'><font color='#48C4B7'>适应之力</font></lol-uikit-tooltipped-keyword>`
+	t.Log(utils.RemoveHTMLTags(desc))
+}
