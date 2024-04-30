@@ -405,9 +405,6 @@ const heroImage = computed(() => {
   @apply flex w-full;
 }
 
-.temp{
-  @apply bg-gray-200;
-}
 .left-container {
   @apply w-60;
 }
@@ -421,7 +418,7 @@ const heroImage = computed(() => {
 }
 
 .talent-container {
-  @apply min-h-xs bg-pink-300;
+  @apply min-h-xs;
 }
 
 .talent-container .pri{
@@ -464,7 +461,6 @@ const heroImage = computed(() => {
 
 .hero-image {
   @apply w-full;
-  filter: grayscale(100%);
 }
 
 .my-divider {
