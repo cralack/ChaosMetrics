@@ -4,7 +4,9 @@
       v-if="hero"
       class="container"
     >
-      <el-aside class="left-container">
+      <el-aside
+        class="left-container"
+      >
         <el-tooltip
           placement="bottom"
           effect="dark"
@@ -57,7 +59,7 @@
             >
               <template #content>
                 <div class="tooltip-content">
-                  <h3>{{ spell.name + " "+"快捷键:" + getSkillShortId(spell.id) }}</h3>
+                  <h3>{{ spell.name + " " + "快捷键:" + getSkillShortId(spell.id) }}</h3>
                   <el-divider class="my-divider" />
                   <span>技能消耗 ：{{ spell.costBurn }}</span><br>
                   <span>冷却时间(秒）：{{ spell.cooldownBurn }}</span><br>
@@ -82,7 +84,9 @@
             class="mx-0.5"
           >
             <div v-if="index%2===1">
-              <el-icon><SemiSelect /></el-icon>
+              <el-icon>
+                <SemiSelect />
+              </el-icon>
             </div>
           </div>
         </div>
@@ -115,7 +119,7 @@
           <el-divider class="my-divider" />
           <h2 class="text-bg">场均数据-</h2>
           <h3 class="text-bg">KDA: {{ (heroData?.avg_kda ?? 0).toFixed(2) }} </h3>
-          <h3 class="text-bg">参战率: {{ (heroData?.avg_kp*100 ?? 0).toFixed(2) }} </h3>
+          <h3 class="text-bg">参战率: {{ (heroData?.avg_kp * 100 ?? 0).toFixed(2) }} </h3>
           <h3 class="text-bg">伤害: {{ (heroData?.avg_damage_dealt ?? 0).toFixed(0) }} </h3>
           <h3 class="text-bg">承伤: {{ (heroData?.avg_damage_taken ?? 0).toFixed(0) }} </h3>
           <h3 class="text-bg">控制时长: {{ (heroData?.avg_time_ccing ?? 0).toFixed(0) }} </h3>
@@ -127,8 +131,94 @@
         </div>
         <el-divider class="my-divider" />
       </el-aside>
+
       <el-main class="main-container">
-        Main
+        <div class="talent-container">
+          <div
+            v-for="(view,index) in perkViews"
+            :key="index"
+          >
+            <el-row>
+              <el-col
+                :span="11"
+                class="pri"
+              >
+                <div
+                  v-for="item in view.pri"
+                  :key="item.id"
+                  class="rune"
+                >
+                  <el-tooltip
+                    effect="dark"
+                    placement="bottom"
+                    :disabled="item.id % 100 === 0"
+                  >
+                    <template #content>
+                      <div
+                        class="tooltip-content"
+                      >
+                        <h4>{{ item.name }}</h4>
+                        <el-divider class="my-divider" />
+                        <span>{{ item.description }}</span>
+                      </div>
+                    </template>
+                    <el-image
+                      :src="getPerkImageUrl(item)"
+                      :alt="item.name"
+                      class="rune-icon"
+                    />
+                  </el-tooltip>
+                </div>
+              </el-col>
+            </el-row>
+            <el-row
+              class="flex items-center"
+            >
+              <el-col
+                class="sub"
+                :span="7"
+              >
+                <div
+                  v-for="item in view.sub"
+                  :key="item.id"
+                  class="rune"
+                >
+                  <el-tooltip
+                    effect="dark"
+                    placement="bottom"
+                  >
+                    <template #content>
+                      <div class="tooltip-content">
+                        <h4>{{ item.name }}</h4>
+                        <el-divider class="my-divider" />
+                        <span>{{ item.description }}</span>
+                      </div>
+                    </template>
+                    <el-image
+                      :src="getPerkImageUrl(item)"
+                      :alt="item.name"
+                      class="rune-icon"
+                    />
+                  </el-tooltip>
+                </div>
+              </el-col>
+              <el-col
+                class="stat"
+                :span="4"
+              >
+                <div
+                  v-for="item in view.stat"
+                  :key="item.id"
+                >
+                  <el-image
+                    class="stat-icon"
+                    :src="getStatImageUrl(item.id)"
+                  />
+                </div>
+              </el-col>
+            </el-row>
+          </div>
+        </div>
       </el-main>
     </el-container>
 
@@ -140,7 +230,7 @@ import { useRoute } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
 import { useGameStore } from '@/store/game'
 import { useUserStore } from '@/store/user'
-import { getHeroData, getHeroDetail } from '@/api/game'
+import { getHeroData, getHeroDetail, getPerks } from '@/api/game'
 
 const userStore = useUserStore()
 const gameStore = useGameStore()
@@ -152,6 +242,10 @@ const version = ref()
 const hero = ref()
 const heroData = ref()
 
+const perksData = ref([])
+const perkWinRates = ref({})
+const perkViews = ref([])
+
 onMounted(async() => {
   const route = useRoute()
   await gameStore.setVersions()
@@ -161,12 +255,18 @@ onMounted(async() => {
   loc.value = route.query.loc
   version.value = gameStore.gameversion[0]
 
-  await setHero()
-  console.log(hero.value)
-  console.log(heroData.value)
+  await setData()
+  if (perksData.value.length > 0 && heroData.value) {
+    processPerkWinRates()
+  }
+
+  perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
+
+  console.log(perkViews.value)
+  console.log(perkWinRates.value)
 })
 
-const setHero = async() => {
+const setData = async() => {
   const res = await getHeroDetail(heroName.value, version.value, userStore.lang)
   if (res.code === 1) {
     hero.value = res.data
@@ -176,9 +276,14 @@ const setHero = async() => {
   if (res1.code === 1) {
     heroData.value = res1.data
   }
+
+  const res2 = await getPerks(version.value, userStore.lang)
+  if (res2.code === 1) {
+    perksData.value = res2.data
+  }
 }
 
-function getSkillShortId(skillId) {
+const getSkillShortId = (skillId) => {
   return skillId.replace(hero.value.id, '')
 }
 
@@ -199,6 +304,93 @@ const getTagImageUrl = (tag) => {
   return `src/assets/tags/${tag}.png`
 }
 
+const getPerkImageUrl = (perk) => {
+  return `src/assets/datadragon/${perk.icon}`
+}
+
+const statModIcons = {
+  5001: 'StatModsHealthScalingIcon.png',
+  5002: 'StatModsArmorIcon.png',
+  5003: 'StatModsMagicResIcon.png',
+  5005: 'StatModsAttackSpeedIcon.png',
+  5007: 'StatModsCDRScalingIcon.png',
+  5008: 'StatModsAdaptiveForceIcon.png',
+  5010: 'StatModsMovementSpeedIcon.png',
+  5011: 'StatModsHealthPlusIcon.png',
+  5013: 'StatModsTenacityIcon.png'
+}
+
+const getStatImageUrl = (id) => {
+  return `src/assets/datadragon/perk-images/StatMods/${statModIcons[id]}`
+}
+
+const processPerkWinRates = () => {
+  const winData = heroData.value.perk
+
+  let winDataArray = Object.entries(winData).map(([key, wins]) => {
+    const [priWithLabel, subWithLabel, statWithLabel] = key.split(' ')
+    const pri = priWithLabel.replace('pri:', '').split(',').map(Number)
+    const sub = subWithLabel.replace('sub:', '').split(',').map(Number)
+    const stat = statWithLabel.replace('stat:', '').split(',').map(Number)
+    return { pri, sub, stat, wins }
+  })
+
+  winDataArray.sort((a, b) => b.wins - a.wins)
+  winDataArray = winDataArray.slice(0, 3)
+  perkWinRates.value = winDataArray.map(perkData => {
+    return {
+      pri: perkData.pri,
+      sub: perkData.sub,
+      stats: perkData.stat,
+      wins: perkData.wins,
+    }
+  })
+}
+
+const getRunesDetails = (ids) => {
+  const details = []
+  ids.forEach(id => {
+    perksData.value.forEach(style => {
+      if (style.id === id) {
+        // 添加顶级分类信息
+        details.push({
+          id: style.id,
+          key: style.key,
+          icon: style.icon,
+          description: style.name
+        })
+      }
+      style.slots.forEach(slot => {
+        const rune = slot.runes.find(rune => rune.id === id)
+        if (rune) {
+          details.push({
+            id: rune.id,
+            key: rune.key,
+            icon: rune.icon,
+            name: rune.name,
+            description: rune.shortDesc
+          })
+        }
+      })
+    })
+  })
+  return details
+}
+
+const setPerkView = (perk) => {
+  return {
+    win: perk.wins,
+    pri: getRunesDetails(perk.pri),
+    sub: getRunesDetails(perk.sub),
+    stat: perk.stats.map(statId => {
+      return {
+        id: statId,
+        description: `Stat detail for ${statId}`
+      }
+    })
+  }
+}
+
 const heroImage = computed(() => {
   if (heroName.value === 'Fiddlesticks') {
     return 'src/assets/datadragon/champion_og/loading/' + 'FiddleSticks' + '_0.jpg'
@@ -213,6 +405,9 @@ const heroImage = computed(() => {
   @apply flex w-full;
 }
 
+.temp{
+  @apply bg-gray-200;
+}
 .left-container {
   @apply w-60;
 }
@@ -225,12 +420,37 @@ const heroImage = computed(() => {
   @apply flex items-center mt-1;
 }
 
+.talent-container {
+  @apply min-h-xs bg-pink-300;
+}
+
+.talent-container .pri{
+  @apply  mx-4 mt-4;
+}
+.talent-container .sub{
+  @apply ml-4;
+}
+.talent-container .stat{
+  @apply flex items-center;
+}
+.rune {
+  @apply inline-flex flex-col items-center m-2;
+}
+
+.stat-icon {
+  @apply w-6 h-6;
+}
+
+.rune-icon {
+  @apply w-8 mb-1;
+}
+
 .skill-icon {
   @apply flex items-center mx-1 w-6 border-2 border-black;
   border-radius: 4px;
 }
 
-.tag-icon{
+.tag-icon {
   @apply w-6 mx-0.5;
 }
 
@@ -244,6 +464,7 @@ const heroImage = computed(() => {
 
 .hero-image {
   @apply w-full;
+  filter: grayscale(100%);
 }
 
 .my-divider {

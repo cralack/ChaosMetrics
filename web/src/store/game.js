@@ -6,7 +6,6 @@ export const useGameStore = defineStore('game', () => {
   const gameversion = ref()
   const classicBrief = ref([])
   const aramBrief = ref([])
-  const detail = ref([])
 
   const setVersions = async() => {
     const res = await getGameVersion()
@@ -29,18 +28,10 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  // const setHeroDetail = async(name, loc, mode, version) => {
-  //   const res = await getChampionDetail(name, loc, mode, version)
-  //   if (res.code === 0) {
-  //     detail.value = res.data
-  //   }
-  // }
-
   return {
     gameversion,
     aramBrief,
     classicBrief,
-    detail,
     setVersions,
     setARAMBrief,
     setClassicBrief,

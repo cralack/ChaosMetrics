@@ -52,3 +52,14 @@ export const getHeroDetail = (name, version, lang) => {
     }
   })
 }
+
+export const getPerks = (version, lang) => {
+  return service({
+    url: 'perks',
+    method: 'get',
+    params: {
+      version,
+      lang
+    }
+  })
+}
