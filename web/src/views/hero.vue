@@ -135,17 +135,17 @@
       <el-main class="main-container">
         <div class="talent-container">
           <div
-            v-for="(view,index) in perkViews"
-            :key="index"
+            v-for="view in perkViews"
+            :key="view.id"
           >
             <el-row>
               <el-col
-                :span="11"
+                :span="12"
                 class="pri"
               >
                 <div
-                  v-for="item in view.pri"
-                  :key="item.id"
+                  v-for="(item,index) in view.pri"
+                  :key="index"
                   class="rune"
                 >
                   <el-tooltip
@@ -166,8 +166,17 @@
                       :src="getPerkImageUrl(item)"
                       :alt="item.name"
                       class="rune-icon"
+                      :class="{ 'larger-icon': index === 1 }"
                     />
                   </el-tooltip>
+                </div>
+              </el-col>
+              <el-col
+                :span="4"
+                class="pick-rate"
+              >
+                <div>
+                  登场: {{ view.pick }}
                 </div>
               </el-col>
             </el-row>
@@ -176,7 +185,7 @@
             >
               <el-col
                 class="sub"
-                :span="7"
+                :span="8"
               >
                 <div
                   v-for="item in view.sub"
@@ -214,6 +223,14 @@
                     class="stat-icon"
                     :src="getStatImageUrl(item.id)"
                   />
+                </div>
+              </el-col>
+              <el-col
+                :span="4"
+                class="win-rate"
+              >
+                <div>
+                  胜场: {{ view.wins }}
                 </div>
               </el-col>
             </el-row>
@@ -261,25 +278,35 @@ onMounted(async() => {
   }
 
   perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
-
-  console.log(perkViews.value)
-  console.log(perkWinRates.value)
 })
 
 const setData = async() => {
-  const res = await getHeroDetail(heroName.value, version.value, userStore.lang)
-  if (res.code === 1) {
-    hero.value = res.data
-  }
+  try {
+    const [resHeroDetail, resHeroData, resPerks] = await Promise.all([
+      getHeroDetail(heroName.value, version.value, userStore.lang),
+      getHeroData(heroName.value, loc.value, mode.value, version.value),
+      getPerks(version.value, userStore.lang)
+    ])
 
-  const res1 = await getHeroData(heroName.value, loc.value, mode.value, version.value)
-  if (res1.code === 1) {
-    heroData.value = res1.data
-  }
+    if (resHeroDetail.code === 1) {
+      hero.value = resHeroDetail.data
+    } else {
+      console.error('Failed to fetch hero details', resHeroDetail.message)
+    }
 
-  const res2 = await getPerks(version.value, userStore.lang)
-  if (res2.code === 1) {
-    perksData.value = res2.data
+    if (resHeroData.code === 1) {
+      heroData.value = resHeroData.data
+    } else {
+      console.error('Failed to fetch hero data', resHeroData.message)
+    }
+
+    if (resPerks.code === 1) {
+      perksData.value = resPerks.data
+    } else {
+      console.error('Failed to fetch perks', resPerks.message)
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error)
   }
 }
 
@@ -379,7 +406,8 @@ const getRunesDetails = (ids) => {
 
 const setPerkView = (perk) => {
   return {
-    win: perk.wins,
+    picks: 0,
+    wins: perk.wins,
     pri: getRunesDetails(perk.pri),
     sub: getRunesDetails(perk.sub),
     stat: perk.stats.map(statId => {
@@ -421,32 +449,43 @@ const heroImage = computed(() => {
   @apply min-h-xs;
 }
 
-.talent-container .pri{
-  @apply  mx-4 mt-4;
+.talent-container .pri {
+  @apply mx-4 flex items-end ;
 }
-.talent-container .sub{
+
+.talent-container .sub {
   @apply ml-4;
 }
-.talent-container .stat{
+
+.talent-container .stat {
   @apply flex items-center;
 }
+
+.talent-container .pick-rate {
+  @apply text-center flex items-center h-12 mt-4;
+}
+
+.talent-container .win-rate {
+  @apply text-center flex items-center ml-4;
+}
+
 .rune {
   @apply inline-flex flex-col items-center m-2;
-}
-
-.stat-icon {
-  @apply w-6 h-6;
-}
-
-.rune-icon {
-  @apply w-8 mb-1;
 }
 
 .skill-icon {
   @apply flex items-center mx-1 w-6 border-2 border-black;
   border-radius: 4px;
 }
-
+.rune-icon {
+  @apply w-8 mb-1;
+}
+.larger-icon{
+  @apply w-12;
+}
+.stat-icon {
+  @apply w-6 h-6;
+}
 .tag-icon {
   @apply w-6 mx-0.5;
 }
