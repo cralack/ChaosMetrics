@@ -135,17 +135,18 @@
       <el-main class="main-container">
         <div class="talent-container">
           <div
-            v-for="view in perkViews"
-            :key="view.id"
+            v-for="(view, index) in perkViews"
+            :key="index"
           >
+            <span>{{ view.id }}</span>
             <el-row>
               <el-col
                 :span="12"
                 class="pri"
               >
                 <div
-                  v-for="(item,index) in view.pri"
-                  :key="index"
+                  v-for="(item,subIndex) in view.pri"
+                  :key="subIndex"
                   class="rune"
                 >
                   <el-tooltip
@@ -166,7 +167,7 @@
                       :src="getPerkImageUrl(item)"
                       :alt="item.name"
                       class="rune-icon"
-                      :class="{ 'larger-icon': index === 1 }"
+                      :class="{ 'larger-icon': subIndex === 1 }"
                     />
                   </el-tooltip>
                 </div>
@@ -234,6 +235,10 @@
                 </div>
               </el-col>
             </el-row>
+            <el-divider
+              v-if="index !== perkViews.length - 1"
+              class="my-divider"
+            />
           </div>
         </div>
       </el-main>
@@ -276,7 +281,6 @@ onMounted(async() => {
   if (perksData.value.length > 0 && heroData.value) {
     processPerkWinRates()
   }
-
   perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
 })
 
@@ -438,7 +442,7 @@ const heroImage = computed(() => {
 }
 
 .main-container {
-  @apply w-xl bg-gray-600;
+  @apply w-xl;
 }
 
 .skills-container {
@@ -446,7 +450,7 @@ const heroImage = computed(() => {
 }
 
 .talent-container {
-  @apply min-h-xs;
+  @apply min-h-xs bg-gray-600;
 }
 
 .talent-container .pri {
@@ -477,15 +481,19 @@ const heroImage = computed(() => {
   @apply flex items-center mx-1 w-6 border-2 border-black;
   border-radius: 4px;
 }
+
 .rune-icon {
   @apply w-8 mb-1;
 }
-.larger-icon{
+
+.larger-icon {
   @apply w-12;
 }
+
 .stat-icon {
   @apply w-6 h-6;
 }
+
 .tag-icon {
   @apply w-6 mx-0.5;
 }
