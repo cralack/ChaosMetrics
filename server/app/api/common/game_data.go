@@ -32,7 +32,7 @@ func (a *cmnApi) GetGameVersions(ctx *gin.Context) {
 	response.OkWithQuiet(res, ctx)
 }
 
-type QueryPerksParam struct {
+type QueryParam struct {
 	Version string `form:"version" default:"14.5.1"` // Version
 	Lang    string `form:"lang"  default:"zh_CN" binding:"required"`
 }
@@ -44,14 +44,14 @@ type QueryPerksParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Common Game Data
-//	@Param			data	query		QueryPerksParam	true	"Query Perks"
+//	@Param			data	query		QueryParam	true	"Query Perks"
 //	@Success		200		{object}	response.Response{data=[]riotmodel.Perk}
 //	@Failure		default	{object}	response.Response
 //	@Router			/perks [get]
 func (a *cmnApi) GetPerksData(ctx *gin.Context) {
 	perks := make([]*riotmodel.Perk, 0, 5)
 	keys := []string{"8000", "8100", "8200", "8300", "8400"}
-	var param QueryPerksParam
+	var param QueryParam
 	if err := ctx.ShouldBindQuery(&param); err != nil {
 		response.FailWithMessage(err.Error(), ctx)
 		return
@@ -77,4 +77,41 @@ func (a *cmnApi) GetPerksData(ctx *gin.Context) {
 	}
 
 	response.OkWithQuiet(perks, ctx)
+}
+
+// GetSpellData 依据游戏版本和语言获取召唤师技能数据。
+//
+//	@Summary		请求特定版本和语言的召唤师技能
+//	@Description	根据提供的版本和语言信息，查询并返回召唤师技能
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Tags			Common Game Data
+//	@Param			data	query		QueryParam	true	"Query Spells"
+//	@Success		200		{object}	response.Response{data}
+//	@Failure		default	{object}	response.Response
+//	@Router			/spells [get]
+func (a *cmnApi) GetSpellData(ctx *gin.Context) {
+	var (
+		param  QueryParam
+		res    *riotmodel.SpellList
+		spells = make([]*riotmodel.SummonerSpell, 0)
+	)
+
+	if err := ctx.ShouldBindQuery(&param); err != nil {
+		response.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	vidx, _ := utils.ConvertVersionToIdx(param.Version)
+	values := global.ChaRDB.HGet(context.Background(), "/spells/", fmt.Sprintf("%d@%s", vidx, param.Lang)).Val()
+	if err := json.Unmarshal([]byte(values), &res); err != nil {
+		response.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	for _, v := range res.Data {
+		v.Effect = nil
+		v.EffectBurn = nil
+		v.Vars = nil
+		spells = append(spells, v)
+	}
+	response.OkWithQuiet(spells, ctx)
 }

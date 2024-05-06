@@ -251,6 +251,9 @@ func (a *Analyzer) handleMatches() {
 }
 
 func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
+	if match.GameMode == "ONEFORALL" {
+		return
+	}
 	if match.GameMode == "CHERRY" || len(match.Participants) == 0 {
 		return
 	}
@@ -466,6 +469,7 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 		spell = fmt.Sprintf("%d,%d", par.Summoner2Id, par.Summoner1Id)
 	}
 
+	// todo:
 	// count
 	if par.Win {
 		tar.TotalWin++

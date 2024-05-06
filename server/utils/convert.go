@@ -209,6 +209,9 @@ func GetCurMajorVersions() []string {
 		global.ChaLogger.Error(err.Error())
 		return []string{}
 	}
+	if len(versions) <= 0 {
+		return []string{}
+	}
 	majorVersion, _ := strconv.Atoi(versions[0][:2])
 	majorVersion *= 100
 	for i, v := range versions {

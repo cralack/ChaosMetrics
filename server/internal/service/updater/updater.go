@@ -34,6 +34,9 @@ func NewRiotUpdater(opts ...Option) *Updater {
 	for _, opt := range opts {
 		opt(stgy)
 	}
+	if vers := utils.GetCurMajorVersions(); len(vers) > 0 && stgy.EndMark == "" {
+		stgy.EndMark = vers[len(vers)-1]
+	}
 
 	return &Updater{
 		logger: global.ChaLogger,
@@ -55,6 +58,7 @@ func (u *Updater) UpdateAll() {
 			u.logger.Info(curVer)
 			u.UpdatePerks(curVer)
 			u.UpdateItems(curVer)
+			u.UpdateSpell(curVer)
 			u.UpdateChampions(curVer)
 		} else {
 			u.rdb.HSet(context.Background(), "/lastupdate", "updater", time.Now().Unix())
@@ -256,9 +260,9 @@ func (u *Updater) UpdateItems(version string) {
 			cmds = append(cmds, pipe.HSet(ctx, key, fmt.Sprintf("%s@%d", id, vIdx), item))
 		}
 
-		if _, err := pipe.Exec(ctx); err != nil {
+		if _, err2 := pipe.Exec(ctx); err2 != nil {
 			flag = true
-			u.logger.Error("redis store items failed", zap.Error(err))
+			u.logger.Error("redis store items failed", zap.Error(err2))
 		}
 	}
 	if !flag {
@@ -275,7 +279,6 @@ func (u *Updater) UpdatePerks(version string) {
 		key   string
 		vIdx  uint
 		perks []*riotmodel.Perk
-		// perkDetails []*riotmodel.PerkDetail
 	)
 	if version == "" {
 		u.logger.Error("wrong version")
@@ -327,6 +330,42 @@ func (u *Updater) UpdatePerks(version string) {
 		// }
 	}
 	u.logger.Info("all perk update done")
+}
+
+func (u *Updater) UpdateSpell(version string) {
+	var (
+		buff      []byte
+		url       string
+		err       error
+		key       string
+		vIdx      uint
+		spellList *riotmodel.SpellList
+	)
+	if version == "" {
+		u.logger.Error("wrong version")
+	}
+	vIdx, err = utils.ConvertVersionToIdx(version)
+	ctx := context.Background()
+	for _, langCode := range u.stgy.Lang {
+		lang := utils.ConvertLangToLangStr(langCode)
+		key = fmt.Sprintf("/spells/")
+		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
+		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/summoner.json",
+			version, lang)
+		if buff, err = u.fetcher.Get(url); err != nil {
+			u.logger.Error("get  spell failed", zap.Error(err))
+			continue
+		}
+		if err = json.Unmarshal(buff, &spellList); err != nil {
+			u.logger.Error("unmarshal json to item list failed", zap.Error(err))
+			continue
+		}
+
+		if err = u.rdb.HSet(ctx, key, fmt.Sprintf("%d@%s", vIdx, lang), spellList).Err(); err != nil {
+			u.logger.Error("redis store spell failed", zap.Error(err))
+		}
+	}
+	u.logger.Info(fmt.Sprintf("all %s's summoner spell fetch done", version))
 }
 
 func isEnd(curVersion, endMark string) bool {
