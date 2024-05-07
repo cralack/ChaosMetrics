@@ -29,10 +29,15 @@ type ChampionDetail struct {
 	AvgVisionScore float32 `json:"avg_vision_score"` // 场均视野得分 3%
 	AvgDeadTime    float32 `json:"avg_dead_time"`    // 场均死亡时长
 	// build winrate
-	ItemWin  map[string]map[string]int `json:"item"`
-	PerkWin  map[string]int            `json:"perk"`
-	SkillWin map[string]int            `json:"skill"`
-	SpellWin map[string]int            `json:"spell"`
+	ItemWin  map[string]map[string]*Stats `json:"item"`  // ItemWin[item][fir][pick,win]
+	PerkWin  map[string]*Stats            `json:"perk"`  // PerkWin[perk][pick,win]
+	SkillWin map[string]*Stats            `json:"skill"` // SkillWin[skill][pick,win]
+	SpellWin map[string]*Stats            `json:"spell"` // SpellWin[spell][pick,win]
+}
+
+type Stats struct {
+	Picks int `json:"picks"`
+	Wins  int `json:"wins"`
 }
 
 func (c *ChampionDetail) TableName() string {

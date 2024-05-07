@@ -90,10 +90,10 @@ const (
 type GAMEMODE uint
 
 const (
-	CLASSIC   GAMEMODE = iota // 召唤师峡谷 mapid:11
-	ARAM                      // 大乱斗 mapid:12
-	CHERRY                    // 斗魂竞技场 mapid:30
-	ONEFORALL                 // 镜像模式 mapid:11
+	CLASSIC GAMEMODE = iota // 召唤师峡谷 mapid:11
+	ARAM                    // 大乱斗 mapid:12
+	CHERRY                  // 斗魂竞技场 mapid:30
+	// ONEFORALL                 // 镜像模式 mapid:11
 	// NEXUSBLITZ                  // 扭曲丛林？ mapid:21
 	// CONVERGENCE                 // ??? mapid:22
 )

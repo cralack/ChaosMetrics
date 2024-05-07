@@ -23,8 +23,8 @@ type heroDataParam struct {
 //	@Accept			application/json
 //	@Produce		application/json
 //	@Tags			Hero Data
-//	@Param			data	query		heroDataParam	true	"Query champion rank list for aram"
-//	@Success		200		{object}	response.Response{data=anres.ChampionDetail}
+//	@Param			key	query		heroDataParam	true	"Query champion rank list for aram"
+//	@Success		200		{object}	response.Response{key=anres.ChampionDetail}
 //	@Router			/hero [get]
 func (a *heroDataApi) QueryHeroData(ctx *gin.Context) {
 	var (
@@ -46,33 +46,33 @@ func (a *heroDataApi) QueryHeroData(ctx *gin.Context) {
 			champion.ItemWin[key] = ShrinkMap(champion.ItemWin[key])
 		}
 		champion.PerkWin = ShrinkMap(champion.PerkWin)
+		champion.SkillWin = ShrinkMap(champion.SkillWin)
 		response.OkWithQuiet(champion, ctx)
 	}
 }
 
-func ShrinkMap(src map[string]int) (des map[string]int) {
+func ShrinkMap(src map[string]*anres.Stats) (des map[string]*anres.Stats) {
 	if len(src) < 10 {
-		return
+		return src
 	}
 	type node struct {
-		data string
-		idx  int
+		key  string
+		stat *anres.Stats
 	}
 	tmp := make([]*node, 0, len(src))
 	for k, v := range src {
 		tmp = append(tmp, &node{
-			data: k,
-			idx:  v,
+			key:  k,
+			stat: v,
 		})
 	}
 	sort.Slice(tmp, func(i, j int) bool {
-		return tmp[i].idx > tmp[j].idx
+		return tmp[i].stat.Wins > tmp[j].stat.Wins
 	})
 	tmp = tmp[:10]
-	des = make(map[string]int)
+	des = map[string]*anres.Stats{}
 	for _, n := range tmp {
-		des[n.data] = n.idx
+		des[n.key] = n.stat
 	}
-
 	return
 }

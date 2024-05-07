@@ -251,10 +251,7 @@ func (a *Analyzer) handleMatches() {
 }
 
 func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
-	if match.GameMode == "ONEFORALL" {
-		return
-	}
-	if match.GameMode == "CHERRY" || len(match.Participants) == 0 {
+	if match.GameMode == "CHERRY" || match.GameMode == "ONEFORALL" || len(match.Participants) == 0 {
 		return
 	}
 	var (
@@ -310,15 +307,15 @@ func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
 				Name:     template.Name,
 				Title:    template.Title,
 				GameMode: match.GameMode,
-				ItemWin: map[string]map[string]int{
-					"fir": {},
-					"tri": {},
-					"oth": {},
-					"sho": {},
+				ItemWin: map[string]map[string]*anres.Stats{
+					"fir": make(map[string]*anres.Stats),
+					"tri": make(map[string]*anres.Stats),
+					"oth": make(map[string]*anres.Stats),
+					"sho": make(map[string]*anres.Stats),
 				},
-				PerkWin:  make(map[string]int),
-				SkillWin: make(map[string]int),
-				SpellWin: make(map[string]int),
+				PerkWin:  make(map[string]*anres.Stats),
+				SkillWin: make(map[string]*anres.Stats),
+				SpellWin: make(map[string]*anres.Stats),
 			}
 			tmp.ID = tarId
 		}
@@ -399,11 +396,11 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 		triItems     []string
 		otheItems    []string
 		shoe         string
-		skillBuild   []byte
-		spell        string
-		err          error
-		judge        Judger
-		item         *riotmodel.ItemDTO
+		// skillBuild   []byte
+		spell string
+		err   error
+		judge Judger
+		item  *riotmodel.ItemDTO
 	)
 	// init val
 	if verIdx, err = utils.ConvertVersionToIdx(tar.Version); err != nil {
@@ -450,18 +447,7 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 			shoe = strconv.Itoa(it.ItemID)
 		}
 	}
-	// parse skill build
-	if err = json.Unmarshal([]byte(par.Build.Skill), &par.Build.SkillOrder); err != nil {
-		return errors.New("unmarshal skill failed" + err.Error())
-	}
-	skiMap := map[int]byte{1: 'Q', 2: 'W', 3: 'E'}
-	ski := make([]int, 5)
-	for _, s := range par.Build.SkillOrder {
-		ski[s]++
-		if ski[s] == 5 {
-			skillBuild = append(skillBuild, skiMap[s])
-		}
-	}
+
 	// summoner spell
 	if par.Summoner1Id < par.Summoner2Id {
 		spell = fmt.Sprintf("%d,%d", par.Summoner1Id, par.Summoner2Id)
@@ -469,21 +455,49 @@ func (a *Analyzer) handleAnares(tar *anres.ChampionDetail, par *riotmodel.Partic
 		spell = fmt.Sprintf("%d,%d", par.Summoner2Id, par.Summoner1Id)
 	}
 
-	// todo:
+	startItemOrder := strings.Join(startItem, ",")
+	triItemOrder := strings.Join(triItems, ",")
+
+	if tar.PerkWin[par.Build.Perk] == nil {
+		tar.PerkWin[par.Build.Perk] = &anres.Stats{}
+	}
+	tar.PerkWin[par.Build.Perk].Picks++
+	itemCategories := []string{"fir", "tri", "sho"}
+	itemOrders := []string{startItemOrder, triItemOrder, shoe}
+	for i, cat := range itemCategories {
+		if tar.ItemWin[cat][itemOrders[i]] == nil {
+			tar.ItemWin[cat][itemOrders[i]] = &anres.Stats{}
+		}
+		tar.ItemWin[cat][itemOrders[i]].Picks++
+	}
+
+	for _, oth := range otheItems {
+		if tar.ItemWin["oth"][oth] == nil {
+			tar.ItemWin["oth"][oth] = &anres.Stats{}
+		}
+		tar.ItemWin["oth"][oth].Picks++
+	}
+	if tar.SkillWin[par.Build.Skill] == nil {
+		tar.SkillWin[par.Build.Skill] = &anres.Stats{}
+	}
+	tar.SkillWin[par.Build.Skill].Picks++
+	if tar.SpellWin[spell] == nil {
+		tar.SpellWin[spell] = &anres.Stats{}
+	}
+	tar.SpellWin[spell].Picks++
+
 	// count
 	if par.Win {
 		tar.TotalWin++
-		tar.PerkWin[par.Build.Perk]++
-		tar.ItemWin["fir"][strings.Join(startItem, ",")]++
-		tar.ItemWin["tri"][strings.Join(triItems, ",")]++
+		tar.PerkWin[par.Build.Perk].Wins++
+		tar.ItemWin["fir"][startItemOrder].Wins++
+		tar.ItemWin["tri"][triItemOrder].Wins++
 		for _, oth := range otheItems {
-			tar.ItemWin["oth"][oth]++
+			tar.ItemWin["oth"][oth].Wins++
 		}
-		tar.ItemWin["sho"][shoe]++
-		if len(skillBuild) > 0 {
-			tar.SkillWin[string(skillBuild)]++
-		}
-		tar.SpellWin[spell]++
+		tar.ItemWin["sho"][shoe].Wins++
+		tar.SkillWin[par.Build.Skill].Wins++
+		tar.SpellWin[spell].Wins++
 	}
 
 	tar.WinRate = tar.TotalWin / (tar.TotalPlayed + 1)
