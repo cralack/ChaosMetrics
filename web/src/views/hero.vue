@@ -138,7 +138,6 @@
             v-for="(view, index) in perkViews"
             :key="index"
           >
-            <span>{{ view.id }}</span>
             <el-row>
               <el-col
                 :span="12"
@@ -158,9 +157,9 @@
                       <div
                         class="tooltip-content"
                       >
-                        <h4>{{ item.name }}</h4>
+                        <el-text type="warning">{{ item.name }}</el-text>
                         <el-divider class="my-divider" />
-                        <span>{{ item.description }}</span>
+                        <el-text>{{ item.description }}</el-text>
                       </div>
                     </template>
                     <el-image
@@ -173,12 +172,13 @@
                 </div>
               </el-col>
               <el-col
-                :span="4"
+                :span="6"
                 class="pick-rate"
               >
-                <div>
-                  登场: {{ view.pick }}
-                </div>
+                <el-text
+                  size="large"
+                  type="warning"
+                >登场: {{ (view.picks / heroData.total_played * 100).toFixed(1) }}%</el-text>
               </el-col>
             </el-row>
             <el-row
@@ -199,9 +199,9 @@
                   >
                     <template #content>
                       <div class="tooltip-content">
-                        <h4>{{ item.name }}</h4>
+                        <el-text type="warning">{{ item.name }}</el-text>
                         <el-divider class="my-divider" />
-                        <span>{{ item.description }}</span>
+                        <el-text>{{ item.description }}</el-text>
                       </div>
                     </template>
                     <el-image
@@ -227,12 +227,15 @@
                 </div>
               </el-col>
               <el-col
-                :span="4"
+                :span="6"
                 class="win-rate"
               >
-                <div>
-                  胜场: {{ view.wins }}
-                </div>
+                <el-text
+                  size="large"
+                  type="warning"
+                >
+                  胜场: {{ (view.wins / view.picks * 100).toFixed(1) }}%
+                </el-text>
               </el-col>
             </el-row>
             <el-divider
@@ -241,6 +244,49 @@
             />
           </div>
         </div>
+        <div class="spell-container">
+          <el-row :gutter="20">
+            <el-space
+              :size="'default'"
+              :spacer="spacer"
+            >
+              <el-col
+                v-for="spell in matchedSpells"
+                :key="spell.id"
+                :span="24"
+                class="spell-col"
+              >
+                <div
+                  v-for="detail in spell.details"
+                  :key="detail.id"
+                  class="flex items-center"
+                >
+                  <el-tooltip>
+                    <template #content>
+                      <div class="tooltip-content">
+                        <el-text>{{ detail.name }}</el-text>
+                        <el-divider class="my-divider" />
+                        <el-text> {{ detail.description }}</el-text>
+                      </div>
+                    </template>
+                    <el-image
+                      class="mx-1"
+                      style="width: 40px"
+                      fit="cover"
+                      :src="getSpellImageUrl(detail)"
+                    />
+                  </el-tooltip>
+                </div>
+                <div class="mx-2">
+                  <el-text type="warning">登场率:{{ (spell.picks / heroData.total_played * 100).toFixed(1) }}%</el-text><br>
+                  <el-text type="warning">胜率:{{ (spell.wins / spell.picks * 100).toFixed(1) }}%</el-text>
+                </div>
+
+              </el-col>
+            </el-space>
+          </el-row>
+        </div>
+        <div class="item-container"><el-text>item</el-text></div>
       </el-main>
     </el-container>
 
@@ -249,10 +295,11 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, h } from 'vue'
 import { useGameStore } from '@/store/game'
 import { useUserStore } from '@/store/user'
-import { getHeroData, getHeroDetail, getPerks } from '@/api/game'
+import { getHeroData, getHeroDetail, getPerks, getSpells } from '@/api/game'
+import { ElDivider } from 'element-plus'
 
 const userStore = useUserStore()
 const gameStore = useGameStore()
@@ -264,9 +311,12 @@ const version = ref()
 const hero = ref()
 const heroData = ref()
 
-const perksData = ref([])
+const perks = ref([])
 const perkWinRates = ref({})
 const perkViews = ref([])
+
+const spells = ref([])
+const matchedSpells = ref([])
 
 onMounted(async() => {
   const route = useRoute()
@@ -278,18 +328,22 @@ onMounted(async() => {
   version.value = gameStore.gameversion[0]
 
   await setData()
-  if (perksData.value.length > 0 && heroData.value) {
+  if (perks.value.length > 0 && heroData.value) {
     processPerkWinRates()
   }
+  getMatchedSpells()
+  console.log(matchedSpells.value)
+
   perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
 })
 
 const setData = async() => {
   try {
-    const [resHeroDetail, resHeroData, resPerks] = await Promise.all([
+    const [resHeroDetail, resHeroData, resPerks, resSpells] = await Promise.all([
       getHeroDetail(heroName.value, version.value, userStore.lang),
       getHeroData(heroName.value, loc.value, mode.value, version.value),
-      getPerks(version.value, userStore.lang)
+      getPerks(version.value, userStore.lang),
+      getSpells(version.value, userStore.lang)
     ])
 
     if (resHeroDetail.code === 1) {
@@ -305,9 +359,14 @@ const setData = async() => {
     }
 
     if (resPerks.code === 1) {
-      perksData.value = resPerks.data
+      perks.value = resPerks.data
     } else {
       console.error('Failed to fetch perks', resPerks.message)
+    }
+    if (resSpells.code === 1) {
+      spells.value = resSpells.data
+    } else {
+      console.error('Failed to fetch perks', resSpells.message)
     }
   } catch (error) {
     console.error('Error fetching data:', error)
@@ -358,22 +417,23 @@ const getStatImageUrl = (id) => {
 const processPerkWinRates = () => {
   const winData = heroData.value.perk
 
-  let winDataArray = Object.entries(winData).map(([key, wins]) => {
+  let winDataArray = Object.entries(winData).map(([key, wp]) => {
     const [priWithLabel, subWithLabel, statWithLabel] = key.split(' ')
     const pri = priWithLabel.replace('pri:', '').split(',').map(Number)
     const sub = subWithLabel.replace('sub:', '').split(',').map(Number)
     const stat = statWithLabel.replace('stat:', '').split(',').map(Number)
-    return { pri, sub, stat, wins }
+    return { pri, sub, stat, wp }
   })
 
-  winDataArray.sort((a, b) => b.wins - a.wins)
+  winDataArray.sort((a, b) => b.wp.wins - a.wp.wins)
   winDataArray = winDataArray.slice(0, 3)
   perkWinRates.value = winDataArray.map(perkData => {
     return {
       pri: perkData.pri,
       sub: perkData.sub,
       stats: perkData.stat,
-      wins: perkData.wins,
+      wins: perkData.wp.wins,
+      picks: perkData.wp.picks,
     }
   })
 }
@@ -381,7 +441,7 @@ const processPerkWinRates = () => {
 const getRunesDetails = (ids) => {
   const details = []
   ids.forEach(id => {
-    perksData.value.forEach(style => {
+    perks.value.forEach(style => {
       if (style.id === id) {
         // 添加顶级分类信息
         details.push({
@@ -410,7 +470,7 @@ const getRunesDetails = (ids) => {
 
 const setPerkView = (perk) => {
   return {
-    picks: 0,
+    picks: perk.picks,
     wins: perk.wins,
     pri: getRunesDetails(perk.pri),
     sub: getRunesDetails(perk.sub),
@@ -430,6 +490,22 @@ const heroImage = computed(() => {
   return 'src/assets/datadragon/champion_og/loading/' + heroName.value + '_0.jpg'
 })
 
+const getMatchedSpells = () => {
+  matchedSpells.value = Object.entries(heroData.value.spell).map(([key, stats]) => {
+    const spellIds = key.split(',').map(id => id.trim())
+    const spellDetails = spellIds.map(spellId => spells.value.find(spell => spell.key === spellId))
+    return {
+      spellIds: spellIds,
+      details: spellDetails.filter(Boolean),
+      picks: stats.picks,
+      wins: stats.wins
+    }
+  })
+    .sort((a, b) => b.wins - a.wins)
+    .slice(0, 2)
+}
+
+const spacer = h(ElDivider, { direction: 'vertical' })
 </script>
 
 <style scoped>
@@ -466,11 +542,19 @@ const heroImage = computed(() => {
 }
 
 .talent-container .pick-rate {
-  @apply text-center flex items-center h-12 mt-4;
+  @apply text-center flex items-start h-12 mt-4 ml-22;
 }
 
 .talent-container .win-rate {
-  @apply text-center flex items-center ml-4;
+  @apply text-center flex items-center ml-26 mb-6;
+}
+
+.spell-container {
+  @apply p-4 mt-2 bg-gray-600 flex jusity-center items-center ;
+}
+
+.spell-col {
+  @apply flex my-1 mx-2 ;
 }
 
 .rune {
