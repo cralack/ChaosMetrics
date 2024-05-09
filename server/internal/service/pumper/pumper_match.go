@@ -137,8 +137,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		matchTL *riotmodel.MatchTimelineDTO
 	)
 
-	// sumID := req.Data.(*matchTask).sumn.MetaSummonerID
-	sumID := "Mudife"
+	sumID := req.Data.(*matchTask).sumn.MetaSummonerID
 	// fetch match
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
 	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
