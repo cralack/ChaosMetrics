@@ -332,9 +332,8 @@ onMounted(async() => {
     processPerkWinRates()
   }
   getMatchedSpells()
-  console.log(matchedSpells.value)
-
   perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
+  console.log(heroData.value)
 })
 
 const setData = async() => {
@@ -399,14 +398,14 @@ const getPerkImageUrl = (perk) => {
 }
 
 const statModIcons = {
-  5001: 'StatModsHealthScalingIcon.png',
+  5001: 'StatModsHealthPlusIcon.png',
   5002: 'StatModsArmorIcon.png',
   5003: 'StatModsMagicResIcon.png',
   5005: 'StatModsAttackSpeedIcon.png',
   5007: 'StatModsCDRScalingIcon.png',
   5008: 'StatModsAdaptiveForceIcon.png',
   5010: 'StatModsMovementSpeedIcon.png',
-  5011: 'StatModsHealthPlusIcon.png',
+  5011: 'StatModsHealthScalingIcon.png',
   5013: 'StatModsTenacityIcon.png'
 }
 
