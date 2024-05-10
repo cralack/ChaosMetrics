@@ -8,7 +8,6 @@ import (
 	"github.com/cralack/ChaosMetrics/server/app/api/hero_data"
 	"github.com/cralack/ChaosMetrics/server/app/api/hero_detail"
 	"github.com/cralack/ChaosMetrics/server/app/api/hero_rank"
-	"github.com/cralack/ChaosMetrics/server/app/api/item"
 	"github.com/cralack/ChaosMetrics/server/app/api/summoner"
 	"github.com/cralack/ChaosMetrics/server/app/api/user"
 	"github.com/cralack/ChaosMetrics/server/app/middleware"
@@ -38,7 +37,6 @@ func RegisterRoutes(r *gin.Engine) {
 		PublicGroup.GET("/health", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, "ok")
 		})
-		item.InitItemRouter(PublicGroup)
 		hero_rank.InitHeroRankRouter(PublicGroup)
 		hero_detail.InitHeroDetailRouter(PublicGroup)
 		hero_data.InitHeroDataRouter(PublicGroup)

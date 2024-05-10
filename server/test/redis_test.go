@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/cralack/ChaosMetrics/server/app/provider/summoner"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/redis/go-redis/v9"
 )
@@ -53,5 +54,16 @@ func Test_query(t *testing.T) {
 	s := summoner.NewSumnService()
 	if sumn := s.QuerySummonerByName("na1", "xyaaaz"); sumn != nil {
 		t.Log(sumn.Name)
+	}
+}
+
+func Test_item_list(t *testing.T) {
+	var (
+		res []*riotmodel.ItemDTO
+		err error
+	)
+	values := global.ChaRDB.HGet(context.Background(), "/items", "1401-aram-zh_CN").Val()
+	if err = json.Unmarshal([]byte(values), &res); err != nil {
+		t.Log(err)
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/response"
@@ -33,8 +34,9 @@ func (a *cmnApi) GetGameVersions(ctx *gin.Context) {
 }
 
 type QueryParam struct {
-	Version string `form:"version" default:"14.5.1"` // Version
+	Version string `form:"version" default:"14.5.1" binding:"required"` // Version
 	Lang    string `form:"lang"  default:"zh_CN" binding:"required"`
+	Mode    string `form:"mode" default:"CLASSIC"` // Game mode
 }
 
 // GetPerksData 依据游戏版本和语言获取符文数据。
@@ -114,4 +116,48 @@ func (a *cmnApi) GetSpellData(ctx *gin.Context) {
 		spells = append(spells, v)
 	}
 	response.OkWithQuiet(spells, ctx)
+}
+
+// GetItemListData 依据游戏版本、模式以及语言获取物品列表详情。
+//
+//	@Summary		请求特定版本和模式的物品列表
+//	@Description	根据提供的版本,模式和语言信息，查询并返回物品列表
+//	@Accept			application/json
+//	@Produce		application/json
+//	@Tags			Common Game Data
+//	@Param			data	query		QueryParam	true	"Query Items"
+//	@Success		200		{object}	response.Response{data=[]response.Item}
+//	@Failure		default	{object}	response.Response
+//	@Router			/items [get]
+func (a *cmnApi) GetItemListData(ctx *gin.Context) {
+	var (
+		param QueryParam
+		res   []*response.Item
+		err   error
+	)
+	if err = ctx.ShouldBindQuery(&param); err != nil {
+		response.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	vidx, _ := utils.ConvertVersionToIdx(param.Version)
+	mode := strings.ToLower(param.Mode)
+	values := global.ChaRDB.HGet(context.Background(), "/items", fmt.Sprintf("%d-%s-%s", vidx, mode, param.Lang)).Val()
+	items := make([]*riotmodel.ItemDTO, 0)
+	if err = json.Unmarshal([]byte(values), &items); err != nil {
+		response.FailWithMessage(err.Error(), ctx)
+		return
+	}
+	for _, v := range items {
+		res = append(res, &response.Item{
+			ID:          v.ID,
+			Name:        v.Name,
+			Description: v.Description,
+			Colloq:      v.Colloq,
+			From:        v.From,
+			Image:       v.Image.Full,
+			Gold:        v.Gold.Total,
+			Depth:       v.Depth,
+		})
+	}
+	response.OkWithQuiet(res, ctx)
 }

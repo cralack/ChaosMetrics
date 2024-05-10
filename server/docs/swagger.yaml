@@ -63,7 +63,7 @@ definitions:
       item:
         additionalProperties:
           additionalProperties:
-            type: integer
+            $ref: '#/definitions/anres.Stats'
           type: object
         description: build winrate
         type: object
@@ -78,7 +78,8 @@ definitions:
         type: string
       perk:
         additionalProperties:
-          type: integer
+          $ref: '#/definitions/anres.Stats'
+        description: PerkWin[perk][pick,win]
         type: object
       pick_rate:
         description: 登场率 15%
@@ -88,11 +89,13 @@ definitions:
         type: number
       skill:
         additionalProperties:
-          type: integer
+          $ref: '#/definitions/anres.Stats'
+        description: SkillWin[skill][pick,win]
         type: object
       spell:
         additionalProperties:
-          type: integer
+          $ref: '#/definitions/anres.Stats'
+        description: SpellWin[spell][pick,win]
         type: object
       title:
         description: 英雄称号:亚托克斯
@@ -109,6 +112,13 @@ definitions:
       win_rate:
         description: 胜率 30%
         type: number
+    type: object
+  anres.Stats:
+    properties:
+      picks:
+        type: integer
+      wins:
+        type: integer
     type: object
   comment.Author:
     properties:
@@ -190,6 +200,27 @@ definitions:
       wins:
         description: 胜场次数（召唤师峡谷）
         type: integer
+    type: object
+  response.Item:
+    properties:
+      colloq:
+        type: string
+      depth:
+        type: integer
+      description:
+        type: string
+      from:
+        items:
+          type: string
+        type: array
+      gold:
+        type: integer
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
     type: object
   response.MatchDTO:
     properties:
@@ -311,56 +342,6 @@ definitions:
         $ref: '#/definitions/response.EntryDTO'
       summonerLevel:
         type: integer
-    type: object
-  riotmodel.GoldInfo:
-    properties:
-      base:
-        type: integer
-      purchasable:
-        type: boolean
-      sell:
-        type: integer
-      total:
-        type: integer
-    type: object
-  riotmodel.ItemDTO:
-    properties:
-      colloq:
-        type: string
-      depth:
-        type: integer
-      description:
-        type: string
-      from:
-        items:
-          type: string
-        type: array
-      gold:
-        $ref: '#/definitions/riotmodel.GoldInfo'
-      id:
-        type: string
-      image:
-        $ref: '#/definitions/model.Image'
-      into:
-        items:
-          type: string
-        type: array
-      maps:
-        additionalProperties:
-          type: boolean
-        type: object
-      name:
-        type: string
-      plaintext:
-        type: string
-      stats:
-        additionalProperties:
-          type: number
-        type: object
-      tags:
-        items:
-          type: string
-        type: array
     type: object
   riotmodel.Perk:
     properties:
@@ -683,7 +664,7 @@ paths:
             allOf:
             - $ref: '#/definitions/response.Response'
             - properties:
-                data:
+                key:
                   $ref: '#/definitions/anres.ChampionDetail'
               type: object
       summary: 请求一个英雄详情
@@ -722,25 +703,23 @@ paths:
       summary: 请求一个英雄详细资料
       tags:
       - Hero Detail
-  /item:
+  /items:
     get:
       consumes:
       - application/json
-      description: query @version,lang
+      description: 根据提供的版本,模式和语言信息，查询并返回物品列表
       parameters:
-      - default: "2010"
-        description: The ID of the item
-        in: query
-        name: itemid
-        required: true
-        type: string
       - default: zh_CN
-        description: Language
         in: query
         name: lang
         required: true
         type: string
-      - default: 13.8.1
+      - default: CLASSIC
+        description: Game mode
+        in: query
+        name: mode
+        type: string
+      - default: 14.5.1
         description: Version
         in: query
         name: version
@@ -756,11 +735,17 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/riotmodel.ItemDTO'
+                  items:
+                    $ref: '#/definitions/response.Item'
+                  type: array
               type: object
-      summary: 请求一个物品详情
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 请求特定版本和模式的物品列表
       tags:
-      - Item
+      - Common Game Data
   /perks:
     get:
       consumes:
@@ -772,10 +757,16 @@ paths:
         name: lang
         required: true
         type: string
+      - default: CLASSIC
+        description: Game mode
+        in: query
+        name: mode
+        type: string
       - default: 14.5.1
         description: Version
         in: query
         name: version
+        required: true
         type: string
       produces:
       - application/json
@@ -809,10 +800,16 @@ paths:
         name: lang
         required: true
         type: string
+      - default: CLASSIC
+        description: Game mode
+        in: query
+        name: mode
+        type: string
       - default: 14.5.1
         description: Version
         in: query
         name: version
+        required: true
         type: string
       produces:
       - application/json

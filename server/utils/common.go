@@ -14,10 +14,17 @@ func RemoveExtraLF(str string) string {
 }
 
 func RemoveHTMLTags(input string) string {
-	r, err := regexp.Compile("<.*?>")
+	// 将所有 <br> 和 <br/> 标签转换为换行符 \n
+	brReplacer, err := regexp.Compile(`(?i)<br\s*/?>`)
 	if err != nil {
-		// Handle regexp compilation error.
-		panic(err)
+		panic(err) // Handle regexp compilation error for <br> tags.
 	}
-	return r.ReplaceAllString(input, "")
+	input = brReplacer.ReplaceAllString(input, "\n")
+
+	// 编译正则表达式以匹配所有HTML标签
+	tagReplacer, err := regexp.Compile("<.*?>")
+	if err != nil {
+		panic(err) // Handle regexp compilation error for general HTML tags.
+	}
+	return tagReplacer.ReplaceAllString(input, "")
 }

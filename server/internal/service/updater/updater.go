@@ -230,16 +230,18 @@ func (u *Updater) UpdateItems(version string) {
 		flag     bool
 		vIdx     uint
 		itemList *riotmodel.ItemList
+		items    map[string][]*riotmodel.ItemDTO // [ver-mode-lang]
 	)
 	if version == "" {
 		u.logger.Error("wrong version")
 	}
 	vIdx, err = utils.ConvertVersionToIdx(version)
+	items = make(map[string][]*riotmodel.ItemDTO)
+	key := "/items"
 
 	ctx := context.Background()
 	for _, langCode := range u.stgy.Lang {
 		lang := utils.ConvertLangToLangStr(langCode)
-		key := fmt.Sprintf("/items/%s", lang)
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/item.json",
 			version, lang)
@@ -253,16 +255,33 @@ func (u *Updater) UpdateItems(version string) {
 			u.logger.Error("unmarshal json to item list failed", zap.Error(err))
 			continue
 		}
-		pipe := u.rdb.Pipeline()
-		cmds := make([]*redis.IntCmd, 0, len(itemList.Data))
-		for id, item := range itemList.Data {
-			item.ID = id
-			cmds = append(cmds, pipe.HSet(ctx, key, fmt.Sprintf("%s@%d", id, vIdx), item))
+		for k, it := range itemList.Data {
+			it.ID = k
+			it.Description = utils.RemoveHTMLTags(it.Description)
+			if it.Maps["11"] {
+				tk := fmt.Sprintf("%d-classic-%s", vIdx, lang)
+				items[tk] = append(items[tk], it)
+			}
+			if it.Maps["12"] {
+				tk := fmt.Sprintf("%d-aram-%s", vIdx, lang)
+				items[tk] = append(items[tk], it)
+			}
+			if it.Maps["30"] {
+				tk := fmt.Sprintf("%d-cherry-%s", vIdx, lang)
+				items[tk] = append(items[tk], it)
+			}
 		}
-
-		if _, err2 := pipe.Exec(ctx); err2 != nil {
+	}
+	for k, its := range items {
+		if buff, err = json.Marshal(its); err != nil {
 			flag = true
-			u.logger.Error("redis store items failed", zap.Error(err2))
+			u.logger.Error("marshal item list failed", zap.Error(err))
+			continue
+		}
+		if err = u.rdb.HSet(ctx, key, k, buff).Err(); err != nil {
+			flag = true
+			u.logger.Error("cache item list failed", zap.Error(err))
+			continue
 		}
 	}
 	if !flag {

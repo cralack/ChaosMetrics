@@ -11,4 +11,5 @@ func InitCommonAPI(router *gin.RouterGroup) {
 	router.GET("/gameversion", api.GetGameVersions)
 	router.GET("/perks", api.GetPerksData)
 	router.GET("/spells", api.GetSpellData)
+	router.GET("/items", api.GetItemListData)
 }

@@ -380,7 +380,7 @@ const docTemplate = `{
                                 {
                                     "type": "object",
                                     "properties": {
-                                        "data": {
+                                        "key": {
                                             "$ref": "#/definitions/anres.ChampionDetail"
                                         }
                                     }
@@ -439,9 +439,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/item": {
+        "/items": {
             "get": {
-                "description": "query @version,lang",
+                "description": "根据提供的版本,模式和语言信息，查询并返回物品列表",
                 "consumes": [
                     "application/json"
                 ],
@@ -449,29 +449,27 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Item"
+                    "Common Game Data"
                 ],
-                "summary": "请求一个物品详情",
+                "summary": "请求特定版本和模式的物品列表",
                 "parameters": [
                     {
                         "type": "string",
-                        "default": "2010",
-                        "description": "The ID of the item",
-                        "name": "itemid",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "default": "zh_CN",
-                        "description": "Language",
                         "name": "lang",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "default": "13.8.1",
+                        "default": "CLASSIC",
+                        "description": "Game mode",
+                        "name": "mode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "14.5.1",
                         "description": "Version",
                         "name": "version",
                         "in": "query",
@@ -490,11 +488,20 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/riotmodel.ItemDTO"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.Item"
+                                            }
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -523,10 +530,18 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "default": "CLASSIC",
+                        "description": "Game mode",
+                        "name": "mode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "default": "14.5.1",
                         "description": "Version",
                         "name": "version",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -583,10 +598,18 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "default": "CLASSIC",
+                        "description": "Game mode",
+                        "name": "mode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "default": "14.5.1",
                         "description": "Version",
                         "name": "version",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1019,7 +1042,7 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "object",
                         "additionalProperties": {
-                            "type": "integer"
+                            "$ref": "#/definitions/anres.Stats"
                         }
                     }
                 },
@@ -1036,9 +1059,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "perk": {
+                    "description": "PerkWin[perk][pick,win]",
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer"
+                        "$ref": "#/definitions/anres.Stats"
                     }
                 },
                 "pick_rate": {
@@ -1050,15 +1074,17 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "skill": {
+                    "description": "SkillWin[skill][pick,win]",
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer"
+                        "$ref": "#/definitions/anres.Stats"
                     }
                 },
                 "spell": {
+                    "description": "SpellWin[spell][pick,win]",
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer"
+                        "$ref": "#/definitions/anres.Stats"
                     }
                 },
                 "title": {
@@ -1080,6 +1106,17 @@ const docTemplate = `{
                 "win_rate": {
                     "description": "胜率 30%",
                     "type": "number"
+                }
+            }
+        },
+        "anres.Stats": {
+            "type": "object",
+            "properties": {
+                "picks": {
+                    "type": "integer"
+                },
+                "wins": {
+                    "type": "integer"
                 }
             }
         },
@@ -1194,6 +1231,38 @@ const docTemplate = `{
                 "wins": {
                     "description": "胜场次数（召唤师峡谷）",
                     "type": "integer"
+                }
+            }
+        },
+        "response.Item": {
+            "type": "object",
+            "properties": {
+                "colloq": {
+                    "type": "string"
+                },
+                "depth": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "gold": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1364,82 +1433,6 @@ const docTemplate = `{
                 },
                 "summonerLevel": {
                     "type": "integer"
-                }
-            }
-        },
-        "riotmodel.GoldInfo": {
-            "type": "object",
-            "properties": {
-                "base": {
-                    "type": "integer"
-                },
-                "purchasable": {
-                    "type": "boolean"
-                },
-                "sell": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "riotmodel.ItemDTO": {
-            "type": "object",
-            "properties": {
-                "colloq": {
-                    "type": "string"
-                },
-                "depth": {
-                    "type": "integer"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "from": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "gold": {
-                    "$ref": "#/definitions/riotmodel.GoldInfo"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "image": {
-                    "$ref": "#/definitions/model.Image"
-                },
-                "into": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "maps": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "boolean"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                },
-                "plaintext": {
-                    "type": "string"
-                },
-                "stats": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "number"
-                    }
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },
