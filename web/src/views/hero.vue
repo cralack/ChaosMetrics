@@ -178,7 +178,8 @@
                 <el-text
                   size="large"
                   type="warning"
-                >登场: {{ (view.picks / heroData.total_played * 100).toFixed(1) }}%</el-text>
+                >登场: {{ (view.picks / heroData.total_played * 100).toFixed(1) }}%
+                </el-text>
               </el-col>
             </el-row>
             <el-row
@@ -278,7 +279,8 @@
                   </el-tooltip>
                 </div>
                 <div class="mx-2">
-                  <el-text type="warning">登场率:{{ (spell.picks / heroData.total_played * 100).toFixed(1) }}%</el-text><br>
+                  <el-text type="warning">登场率:{{ (spell.picks / heroData.total_played * 100).toFixed(1) }}%</el-text>
+                  <br>
                   <el-text type="warning">胜率:{{ (spell.wins / spell.picks * 100).toFixed(1) }}%</el-text>
                 </div>
 
@@ -286,7 +288,9 @@
             </el-space>
           </el-row>
         </div>
-        <div class="item-container"><el-text>item</el-text></div>
+        <div class="item-container">
+          <el-text>item</el-text>
+        </div>
       </el-main>
     </el-container>
 
