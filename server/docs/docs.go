@@ -1237,6 +1237,9 @@ const docTemplate = `{
         "response.Item": {
             "type": "object",
             "properties": {
+                "base_gold": {
+                    "type": "integer"
+                },
                 "colloq": {
                     "type": "string"
                 },
@@ -1252,9 +1255,6 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "gold": {
-                    "type": "integer"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -1263,6 +1263,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "total_gold": {
+                    "type": "integer"
                 }
             }
         },

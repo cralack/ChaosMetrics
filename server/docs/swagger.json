@@ -1231,6 +1231,9 @@
         "response.Item": {
             "type": "object",
             "properties": {
+                "base_gold": {
+                    "type": "integer"
+                },
                 "colloq": {
                     "type": "string"
                 },
@@ -1246,9 +1249,6 @@
                         "type": "string"
                     }
                 },
-                "gold": {
-                    "type": "integer"
-                },
                 "id": {
                     "type": "string"
                 },
@@ -1257,6 +1257,9 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "total_gold": {
+                    "type": "integer"
                 }
             }
         },

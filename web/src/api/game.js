@@ -74,3 +74,15 @@ export const getSpells = (version, lang) => {
     }
   })
 }
+
+export const getItems = (version, lang, mode) => {
+  return service({
+    url: '/items',
+    method: 'get',
+    params: {
+      version,
+      lang,
+      mode
+    }
+  })
+}

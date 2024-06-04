@@ -144,27 +144,27 @@
                 class="pri"
               >
                 <div
-                  v-for="(item,subIndex) in view.pri"
+                  v-for="(priItem,subIndex) in view.pri"
                   :key="subIndex"
                   class="rune"
                 >
                   <el-tooltip
                     effect="dark"
                     placement="bottom"
-                    :disabled="item.id % 100 === 0"
+                    :disabled="priItem.id % 100 === 0"
                   >
                     <template #content>
                       <div
                         class="tooltip-content"
                       >
-                        <el-text type="warning">{{ item.name }}</el-text>
+                        <el-text type="warning">{{ priItem.name }}</el-text>
                         <el-divider class="my-divider" />
-                        <el-text>{{ item.description }}</el-text>
+                        <el-text>{{ priItem.description }}</el-text>
                       </div>
                     </template>
                     <el-image
-                      :src="getPerkImageUrl(item)"
-                      :alt="item.name"
+                      :src="getPerkImageUrl(priItem)"
+                      :alt="priItem.name"
                       class="rune-icon"
                       :class="{ 'larger-icon': subIndex === 1 }"
                     />
@@ -190,24 +190,25 @@
                 :span="8"
               >
                 <div
-                  v-for="item in view.sub"
-                  :key="item.id"
+                  v-for="subItem in view.sub"
+                  :key="subItem.id"
                   class="rune"
                 >
                   <el-tooltip
                     effect="dark"
                     placement="bottom"
+                    :disabled="subItem.id % 100 === 0"
                   >
                     <template #content>
                       <div class="tooltip-content">
-                        <el-text type="warning">{{ item.name }}</el-text>
+                        <el-text type="warning">{{ subItem.name }}</el-text>
                         <el-divider class="my-divider" />
-                        <el-text>{{ item.description }}</el-text>
+                        <el-text>{{ subItem.description }}</el-text>
                       </div>
                     </template>
                     <el-image
-                      :src="getPerkImageUrl(item)"
-                      :alt="item.name"
+                      :src="getPerkImageUrl(subItem)"
+                      :alt="subItem.name"
                       class="rune-icon"
                     />
                   </el-tooltip>
@@ -218,12 +219,12 @@
                 :span="4"
               >
                 <div
-                  v-for="item in view.stat"
-                  :key="item.id"
+                  v-for="statItem in view.stat"
+                  :key="statItem.id"
                 >
                   <el-image
                     class="stat-icon"
-                    :src="getStatImageUrl(item.id)"
+                    :src="getStatImageUrl(statItem.id)"
                   />
                 </div>
               </el-col>
@@ -289,8 +290,37 @@
           </el-row>
         </div>
         <div class="item-container">
-          <el-text>item</el-text>
+          <div v-if="item">
+            <el-tooltip>
+              <template #content>
+                <div
+                  class="tooltip-content"
+                  style="white-space: pre-wrap"
+                >
+                  <el-text
+                    size="large"
+                    type="warning"
+                  >{{ item.name }}
+                  </el-text><br>
+                  <el-text
+                    size="small"
+                  >价格：{{ item.total_gold }}({{ item.base_gold }})
+                  </el-text>
+                  <el-divider class="my-divider" />
+                  <el-text> {{ item.description }}</el-text>
+                  <el-divider class="my-divider" />
+                </div>
+              </template>
+              <el-image
+                class="mx-1"
+                style="width: 40px"
+                fit="cover"
+                :src="getItemsImageUrl(item)"
+              />
+            </el-tooltip>
+          </div>
         </div>
+
       </el-main>
     </el-container>
 
@@ -302,7 +332,7 @@ import { useRoute } from 'vue-router'
 import { computed, onMounted, ref, h } from 'vue'
 import { useGameStore } from '@/store/game'
 import { useUserStore } from '@/store/user'
-import { getHeroData, getHeroDetail, getPerks, getSpells } from '@/api/game'
+import { getHeroData, getHeroDetail, getPerks, getSpells, getItems } from '@/api/game'
 import { ElDivider } from 'element-plus'
 
 const userStore = useUserStore()
@@ -322,6 +352,10 @@ const perkViews = ref([])
 const spells = ref([])
 const matchedSpells = ref([])
 
+const items = ref([])
+const itemID = ref('6610')
+const item = ref()
+
 onMounted(async() => {
   const route = useRoute()
   await gameStore.setVersions()
@@ -337,16 +371,18 @@ onMounted(async() => {
   }
   getMatchedSpells()
   perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
-  console.log(heroData.value)
+  item.value = items.value.find(i => i.id === itemID.value)
+  console.log(item.value)
 })
 
 const setData = async() => {
   try {
-    const [resHeroDetail, resHeroData, resPerks, resSpells] = await Promise.all([
+    const [resHeroDetail, resHeroData, resPerks, resSpells, resItems] = await Promise.all([
       getHeroDetail(heroName.value, version.value, userStore.lang),
       getHeroData(heroName.value, loc.value, mode.value, version.value),
       getPerks(version.value, userStore.lang),
-      getSpells(version.value, userStore.lang)
+      getSpells(version.value, userStore.lang),
+      getItems(version.value, userStore.lang, mode.value),
     ])
 
     if (resHeroDetail.code === 1) {
@@ -366,10 +402,17 @@ const setData = async() => {
     } else {
       console.error('Failed to fetch perks', resPerks.message)
     }
+
     if (resSpells.code === 1) {
       spells.value = resSpells.data
     } else {
       console.error('Failed to fetch perks', resSpells.message)
+    }
+
+    if (resItems.code === 1) {
+      items.value = resItems.data
+    } else {
+      console.error('Failed to fetch perks', resItems.message)
     }
   } catch (error) {
     console.error('Error fetching data:', error)
@@ -383,6 +426,10 @@ const getSkillShortId = (skillId) => {
 // 获取技能图片 URL 的方法
 const getSpellImageUrl = (spell) => {
   return `src/assets/datadragon/spell/${spell.image.full}`
+}
+
+const getItemsImageUrl = (item) => {
+  return `src/assets/datadragon/item/${item.image}`
 }
 
 // 获取被动技能图片 URL 的方法
@@ -600,4 +647,29 @@ const spacer = h(ElDivider, { direction: 'vertical' })
 .my-divider {
   @apply my-2 mx-0;
 }
+
+.item-container {
+  @apply p-4 mt-2 bg-gray-600 flex flex-col items-start;
+}
+
+.item-view {
+  @apply flex items-center my-2;
+}
+
+.item-icons {
+  @apply flex items-center mr-4;
+}
+
+.item-icon {
+  @apply w-8 h-8 mx-1;
+}
+
+.item-stats {
+  @apply flex flex-col items-start;
+}
+
+.text-bg {
+  @apply text-start text-gray-700 mx-1;
+}
+
 </style>

@@ -203,6 +203,8 @@ definitions:
     type: object
   response.Item:
     properties:
+      base_gold:
+        type: integer
       colloq:
         type: string
       depth:
@@ -213,14 +215,14 @@ definitions:
         items:
           type: string
         type: array
-      gold:
-        type: integer
       id:
         type: string
       image:
         type: string
       name:
         type: string
+      total_gold:
+        type: integer
     type: object
   response.MatchDTO:
     properties:

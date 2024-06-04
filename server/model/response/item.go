@@ -7,6 +7,7 @@ type Item struct {
 	Colloq      string   `json:"colloq"`
 	From        []string `json:"from"`
 	Image       string   `json:"image"`
-	Gold        int      `json:"gold"`
+	BaseGold    int      `json:"base_gold"`
+	TotalGold   int      `json:"total_gold"`
 	Depth       int      `json:"depth"`
 }

@@ -24,7 +24,7 @@ type heroDataParam struct {
 //	@Produce		application/json
 //	@Tags			Hero Data
 //	@Param			key	query		heroDataParam	true	"Query champion rank list for aram"
-//	@Success		200		{object}	response.Response{key=anres.ChampionDetail}
+//	@Success		200	{object}	response.Response{key=anres.ChampionDetail}
 //	@Router			/hero [get]
 func (a *heroDataApi) QueryHeroData(ctx *gin.Context) {
 	var (

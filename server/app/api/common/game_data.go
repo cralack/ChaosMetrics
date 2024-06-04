@@ -155,7 +155,8 @@ func (a *cmnApi) GetItemListData(ctx *gin.Context) {
 			Colloq:      v.Colloq,
 			From:        v.From,
 			Image:       v.Image.Full,
-			Gold:        v.Gold.Total,
+			BaseGold:    v.Gold.Base,
+			TotalGold:   v.Gold.Total,
 			Depth:       v.Depth,
 		})
 	}
