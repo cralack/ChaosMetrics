@@ -290,48 +290,59 @@
           </el-row>
         </div>
         <div class="item-container">
-          <div v-if="item">
-            <el-tooltip
-              placement="top"
-              effect="dark"
-              :visible-arrow="false"
+          <el-row
+            v-for="itemList in matchedItemsTri"
+            :key="itemList.id"
+            class="w-62 bg-blue-gray-500"
+          >
+            <div
+              v-for="item in itemList.details"
+              :key="item.id"
             >
-              <template #content>
-                <div
-                  class="tooltip-content"
-                  style="white-space: pre-wrap"
-                >
-                  <el-text
-                    size="large"
-                    type="warning"
-                  >{{ item.name }}
-                  </el-text><br>
-                  <el-text
-                    size="small"
-                  >价格：{{ item.total_gold }}({{ item.base_gold }})
-                  </el-text>
-                  <el-divider class="my-divider" />
-                  <el-text> {{ item.description }}</el-text>
-                  <el-divider class="my-divider" />
-                </div>
-                <ItemTree
-                  :item="item"
-                  :items="items"
+              <el-tooltip
+                placement="top"
+                effect="dark"
+                :visible-arrow="false"
+              >
+                <template #content>
+                  <div
+                    class="w-120"
+                    style="white-space: pre-wrap"
+                  >
+                    <el-text
+                      size="large"
+                      type="warning"
+                    >{{ item.name }}
+                    </el-text><br>
+                    <el-text
+                      size="small"
+                    >价格：{{ item.total_gold }}({{ item.base_gold }})
+                    </el-text>
+                    <el-divider class="my-divider" />
+                    <el-text> {{ item.description }}</el-text>
+                    <el-divider class="my-divider" />
+                  </div>
+                  <ItemTree
+                    :item="item"
+                    :items="items"
+                  />
+                </template>
+                <el-image
+                  class="mx-1"
+                  style="width: 40px"
+                  fit="cover"
+                  :src="getItemsImageUrl(item)"
                 />
-              </template>
-              <el-image
-                class="mx-1"
-                style="width: 40px"
-                fit="cover"
-                :src="getItemsImageUrl(item)"
-              />
-            </el-tooltip>
-          </div>
+              </el-tooltip>
+            </div>
+            <div class="mx-2">
+              <el-text type="warning">登场率:{{ (itemList.picks/ heroData.total_played * 100).toFixed(1) }}%</el-text><br>
+              <el-text type="warning">胜率:{{ (itemList.wins/itemList.picks*100).toFixed(1) }}%</el-text>
+            </div>
+          </el-row>
         </div>
-
       </el-main>
     </el-container>
-
   </div>
 </template>
 
@@ -362,8 +373,11 @@ const spells = ref([])
 const matchedSpells = ref([])
 
 const items = ref([])
-const itemID = ref('6610')
-const item = ref()
+// 示例使用
+// const matchedItemsFir = ref([])
+const matchedItemsTri = ref([])
+// const matchedItemsSho = ref([])
+// const matchedItemsOth = ref([])
 
 onMounted(async() => {
   const route = useRoute()
@@ -380,8 +394,10 @@ onMounted(async() => {
   }
   getMatchedSpells()
   perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
-  item.value = items.value.find(i => i.id === itemID.value)
-  console.log(item.value)
+  // matchedItemsFir.value = getMatchedItems(heroData.value.item.fir, items.value)
+  matchedItemsTri.value = getMatchedItems(heroData.value.item.tri, items.value)
+  // matchedItemsSho.value = getMatchedItems(heroData.value.item.Sho, items.value)
+  // matchedItemsOth.value = getMatchedItems(heroData.value.item.Oth, items.value)
 })
 
 const setData = async() => {
@@ -564,6 +580,20 @@ const getMatchedSpells = () => {
     .slice(0, 2)
 }
 
+const getMatchedItems = (itemArry, items) => {
+  return Object.entries(itemArry).map(([key, stats]) => {
+    const itemIds = key.split(',').map(id => id.trim())
+    const itemDetails = itemIds.map(itemId => items.find(item => item.id === itemId)).filter(Boolean)
+    return {
+      details: itemDetails,
+      picks: stats.picks,
+      wins: stats.wins
+    }
+  })
+    .sort((a, b) => b.picks - a.picks)
+    .slice(0, 3)
+}
+
 const spacer = h(ElDivider, { direction: 'vertical' })
 </script>
 
@@ -659,22 +689,6 @@ const spacer = h(ElDivider, { direction: 'vertical' })
 
 .item-container {
   @apply p-4 mt-2 bg-gray-600 flex flex-col items-start;
-}
-
-.item-view {
-  @apply flex items-center my-2;
-}
-
-.item-icons {
-  @apply flex items-center mr-4;
-}
-
-.item-icon {
-  @apply w-8 h-8 mx-1;
-}
-
-.item-stats {
-  @apply flex flex-col items-start;
 }
 
 .text-bg {
