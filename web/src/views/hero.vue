@@ -291,7 +291,11 @@
         </div>
         <div class="item-container">
           <div v-if="item">
-            <el-tooltip>
+            <el-tooltip
+              placement="top"
+              effect="dark"
+              :visible-arrow="false"
+            >
               <template #content>
                 <div
                   class="tooltip-content"
@@ -310,6 +314,10 @@
                   <el-text> {{ item.description }}</el-text>
                   <el-divider class="my-divider" />
                 </div>
+                <ItemTree
+                  :item="item"
+                  :items="items"
+                />
               </template>
               <el-image
                 class="mx-1"
@@ -334,6 +342,7 @@ import { useGameStore } from '@/store/game'
 import { useUserStore } from '@/store/user'
 import { getHeroData, getHeroDetail, getPerks, getSpells, getItems } from '@/api/game'
 import { ElDivider } from 'element-plus'
+import ItemTree from '@/views/itemTree.vue'
 
 const userStore = useUserStore()
 const gameStore = useGameStore()
