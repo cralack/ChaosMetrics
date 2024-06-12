@@ -54,7 +54,7 @@
         >
           <template #default="{ row }">
             <div style="display: flex; align-items: center;">
-              <div style="width: 36px; height: 48px;" /> <!-- Transparent Spacer -->
+              <div style="width: 36px; height: 48px;" />
               <router-link :to="`/herodetail?hero=${row.id}&loc=${loc}&mode=aram`">
                 <el-image
                   :src="`src/assets/datadragon/champion/${row.id}.png`"

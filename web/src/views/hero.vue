@@ -279,7 +279,7 @@
                     />
                   </el-tooltip>
                 </div>
-                <div class="mx-2">
+                <div class="txt">
                   <el-text type="warning">登场率:{{ (spell.picks / heroData.total_played * 100).toFixed(1) }}%</el-text>
                   <br>
                   <el-text type="warning">胜率:{{ (spell.wins / spell.picks * 100).toFixed(1) }}%</el-text>
@@ -289,58 +289,260 @@
             </el-space>
           </el-row>
         </div>
-        <div class="item-container">
-          <el-row
-            v-for="itemList in matchedItemsTri"
-            :key="itemList.id"
-            class="w-62 bg-blue-gray-500"
-          >
-            <div
-              v-for="item in itemList.details"
-              :key="item.id"
+        <div
+          v-if="matchedItems"
+          class="item-container"
+        >
+          <div class="fir">
+            <el-row
+              v-for="(itemList, index) in matchedItems.fir.slice(0, 3)"
+              :key="index"
+              justify="space-between"
             >
-              <el-tooltip
-                placement="top"
-                effect="dark"
-                :visible-arrow="false"
-              >
-                <template #content>
-                  <div
-                    class="w-120"
-                    style="white-space: pre-wrap"
+              <div class="flex">
+                <div
+                  v-for="item in itemList.details"
+                  :key="item.id"
+                >
+                  <el-tooltip
+                    placement="top"
+                    effect="dark"
+                    :visible-arrow="false"
                   >
-                    <el-text
-                      size="large"
-                      type="warning"
-                    >{{ item.name }}
-                    </el-text><br>
-                    <el-text
-                      size="small"
-                    >价格：{{ item.total_gold }}({{ item.base_gold }})
-                    </el-text>
-                    <el-divider class="my-divider" />
-                    <el-text> {{ item.description }}</el-text>
-                    <el-divider class="my-divider" />
-                  </div>
-                  <ItemTree
-                    :item="item"
-                    :items="items"
+                    <template #content>
+                      <div
+                        class="w-120"
+                        style="white-space: pre-wrap"
+                      >
+                        <el-text
+                          size="large"
+                          type="warning"
+                        >{{ item.name }}
+                        </el-text>
+                        <br>
+                        <el-text
+                          size="small"
+                        >价格：{{ item.total_gold }}({{ item.base_gold }})
+                        </el-text>
+                        <el-divider class="my-divider" />
+                        <el-text> {{ item.description }}</el-text>
+                        <el-divider class="my-divider" />
+                      </div>
+                      <ItemTree
+                        :item="item"
+                        :items="items"
+                      />
+                    </template>
+                    <el-image
+                      class="mx-1"
+                      style="width: 40px"
+                      fit="cover"
+                      :src="getItemsImageUrl(item)"
+                    />
+                  </el-tooltip>
+                </div>
+              </div>
+              <div class="txt">
+                <el-text type="warning">登场率:{{
+                  (itemList.picks / heroData.total_played * 100).toFixed(1)
+                }}%
+                </el-text>
+                <br>
+                <el-text type="warning">胜率:{{ (itemList.wins / itemList.picks * 100).toFixed(1) }}%</el-text>
+              </div>
+            </el-row>
+          </div>
+          <el-divider
+            direction="vertical"
+            class="divider"
+          />
+          <div class="sho">
+            <el-row
+              v-for="(itemList, index) in matchedItems.sho.filter(itemList => itemList.details.length === 1).slice(0, 3)"
+              :key="index"
+              justify="space-between"
+            >
+              <div
+                v-for="item in itemList.details"
+                :key="item.id"
+              >
+                <el-tooltip
+                  placement="top"
+                  effect="dark"
+                  :visible-arrow="false"
+                >
+                  <template #content>
+                    <div
+                      class="w-120"
+                      style="white-space: pre-wrap"
+                    >
+                      <el-text
+                        size="large"
+                        type="warning"
+                      >{{ item.name }}
+                      </el-text>
+                      <br>
+                      <el-text
+                        size="small"
+                      >价格：{{ item.total_gold }}({{ item.base_gold }})
+                      </el-text>
+                      <el-divider class="my-divider" />
+                      <el-text> {{ item.description }}</el-text>
+                      <el-divider class="my-divider" />
+                    </div>
+                    <ItemTree
+                      :item="item"
+                      :items="items"
+                    />
+                  </template>
+                  <el-image
+                    class="mx-1"
+                    style="width: 40px"
+                    fit="cover"
+                    :src="getItemsImageUrl(item)"
                   />
-                </template>
-                <el-image
-                  class="mx-1"
-                  style="width: 40px"
-                  fit="cover"
-                  :src="getItemsImageUrl(item)"
-                />
-              </el-tooltip>
-            </div>
-            <div class="mx-2">
-              <el-text type="warning">登场率:{{ (itemList.picks/ heroData.total_played * 100).toFixed(1) }}%</el-text><br>
-              <el-text type="warning">胜率:{{ (itemList.wins/itemList.picks*100).toFixed(1) }}%</el-text>
-            </div>
-          </el-row>
+                </el-tooltip>
+              </div>
+              <div class="txt">
+                <el-text type="warning">登场率:{{
+                  (itemList.picks / heroData.total_played * 100).toFixed(1)
+                }}%
+                </el-text>
+                <br>
+                <el-text type="warning">胜率:{{ (itemList.wins / itemList.picks * 100).toFixed(1) }}%</el-text>
+              </div>
+            </el-row>
+          </div>
         </div>
+        <div
+          v-if="matchedItems"
+          class="item-container"
+        >
+          <div class="tri">
+            <el-row
+              v-for="(itemList, index) in matchedItems.tri.filter(itemList => itemList.details.length === 3).slice(0, 3)"
+              :key="index"
+              justify="space-between"
+            >
+              <div class="flex">
+                <div
+                  v-for="item in itemList.details"
+                  :key="item.id"
+                >
+                  <el-tooltip
+                    placement="top"
+                    effect="dark"
+                    :visible-arrow="false"
+                  >
+                    <template #content>
+                      <div
+                        class="w-120"
+                        style="white-space: pre-wrap"
+                      >
+                        <el-text
+                          size="large"
+                          type="warning"
+                        >{{ item.name }}
+                        </el-text>
+                        <br>
+                        <el-text
+                          size="small"
+                        >价格：{{ item.total_gold }}({{ item.base_gold }})
+                        </el-text>
+                        <el-divider class="my-divider" />
+                        <el-text> {{ item.description }}</el-text>
+                        <el-divider class="my-divider" />
+                      </div>
+                      <ItemTree
+                        :item="item"
+                        :items="items"
+                      />
+                    </template>
+                    <el-image
+                      class="mx-1"
+                      style="width: 40px"
+                      fit="cover"
+                      :src="getItemsImageUrl(item)"
+                    />
+                  </el-tooltip>
+                </div>
+              </div>
+              <div class="txt">
+                <el-text type="warning">登场率:{{
+                  (itemList.picks / heroData.total_played * 100).toFixed(1)
+                }}%
+                </el-text>
+                <br>
+                <el-text type="warning">胜率:{{ (itemList.wins / itemList.picks * 100).toFixed(1) }}%</el-text>
+              </div>
+            </el-row>
+          </div>
+          <el-divider
+            direction="vertical"
+            class="divider"
+          />
+          <div class="oth">
+            <el-row
+              v-for="itemList in matchedItems.oth.slice(0,3)"
+              :key="itemList.id"
+              justify="space-between"
+            >
+              <div
+                v-for="item in itemList.details"
+                :key="item.id"
+              >
+                <el-tooltip
+                  placement="top"
+                  effect="dark"
+                  :visible-arrow="false"
+                >
+                  <template #content>
+                    <div
+                      class="w-120"
+                      style="white-space: pre-wrap"
+                    >
+                      <el-text
+                        size="large"
+                        type="warning"
+                      >{{ item.name }}
+                      </el-text>
+                      <br>
+                      <el-text
+                        size="small"
+                      >价格：{{ item.total_gold }}({{ item.base_gold }})
+                      </el-text>
+                      <el-divider class="my-divider" />
+                      <el-text> {{ item.description }}</el-text>
+                      <el-divider class="my-divider" />
+                    </div>
+                    <ItemTree
+                      :item="item"
+                      :items="items"
+                    />
+                  </template>
+                  <el-image
+                    class="mx-1"
+                    style="width: 40px"
+                    fit="cover"
+                    :src="getItemsImageUrl(item)"
+                  />
+                </el-tooltip>
+              </div>
+              <div class="txt">
+                <el-text type="warning">登场率:{{
+                  (itemList.picks / heroData.total_played * 100).toFixed(1)
+                }}%
+                </el-text>
+                <br>
+                <el-text type="warning">胜率:{{ (itemList.wins / itemList.picks * 100).toFixed(1) }}%</el-text>
+              </div>
+            </el-row>
+          </div>
+        </div>
+        <div class="comment">
+          <el-text>comment here</el-text>
+        </div>
+        <div class="mb-30" />
       </el-main>
     </el-container>
   </div>
@@ -348,10 +550,10 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import { computed, onMounted, ref, h } from 'vue'
+import { computed, h, onMounted, ref } from 'vue'
 import { useGameStore } from '@/store/game'
 import { useUserStore } from '@/store/user'
-import { getHeroData, getHeroDetail, getPerks, getSpells, getItems } from '@/api/game'
+import { getHeroData, getHeroDetail, getItems, getPerks, getSpells } from '@/api/game'
 import { ElDivider } from 'element-plus'
 import ItemTree from '@/views/itemTree.vue'
 
@@ -373,12 +575,7 @@ const spells = ref([])
 const matchedSpells = ref([])
 
 const items = ref([])
-// 示例使用
-// const matchedItemsFir = ref([])
-const matchedItemsTri = ref([])
-// const matchedItemsSho = ref([])
-// const matchedItemsOth = ref([])
-
+const matchedItems = ref()
 onMounted(async() => {
   const route = useRoute()
   await gameStore.setVersions()
@@ -394,10 +591,7 @@ onMounted(async() => {
   }
   getMatchedSpells()
   perkViews.value = perkWinRates.value.map(perk => setPerkView(perk))
-  // matchedItemsFir.value = getMatchedItems(heroData.value.item.fir, items.value)
-  matchedItemsTri.value = getMatchedItems(heroData.value.item.tri, items.value)
-  // matchedItemsSho.value = getMatchedItems(heroData.value.item.Sho, items.value)
-  // matchedItemsOth.value = getMatchedItems(heroData.value.item.Oth, items.value)
+  matchedItems.value = getMatchedItems(heroData.value.item, items.value)
 })
 
 const setData = async() => {
@@ -580,18 +774,33 @@ const getMatchedSpells = () => {
     .slice(0, 2)
 }
 
-const getMatchedItems = (itemArry, items) => {
-  return Object.entries(itemArry).map(([key, stats]) => {
-    const itemIds = key.split(',').map(id => id.trim())
-    const itemDetails = itemIds.map(itemId => items.find(item => item.id === itemId)).filter(Boolean)
-    return {
-      details: itemDetails,
-      picks: stats.picks,
-      wins: stats.wins
-    }
+const getMatchedItems = (heroData, items) => {
+  const result = {}
+  Object.entries(heroData).forEach(([category, itemData]) => {
+    result[category] = Object.entries(itemData).map(([key, stats]) => {
+      let itemDetails = []
+      // 如果key包含逗号，表示多个item
+      if (key.includes(',')) {
+        const itemIds = key.split(',').map(id => id.trim())
+        itemDetails = itemIds.map(itemId => items.find(item => item.id === itemId)).filter(Boolean)
+      } else {
+        // 单一item的情况
+        const itemDetail = items.find(item => item.id === key.trim())
+        if (itemDetail) {
+          itemDetails.push(itemDetail)
+        }
+      }
+      return {
+        details: itemDetails,
+        picks: stats.picks,
+        wins: stats.wins
+      }
+    })
+      .sort((a, b) => b.picks - a.picks)
+      .slice(0, 6)
   })
-    .sort((a, b) => b.picks - a.picks)
-    .slice(0, 3)
+
+  return result
 }
 
 const spacer = h(ElDivider, { direction: 'vertical' })
@@ -599,7 +808,8 @@ const spacer = h(ElDivider, { direction: 'vertical' })
 
 <style scoped>
 .container {
-  @apply flex w-full;
+  @apply flex
+  @apply w-full h-screen ;
 }
 
 .left-container {
@@ -642,6 +852,10 @@ const spacer = h(ElDivider, { direction: 'vertical' })
   @apply p-4 mt-2 bg-gray-600 flex jusity-center items-center ;
 }
 
+.spell-container .txt {
+  @apply mx-2;
+}
+
 .spell-col {
   @apply flex my-1 mx-2 ;
 }
@@ -650,13 +864,13 @@ const spacer = h(ElDivider, { direction: 'vertical' })
   @apply inline-flex flex-col items-center m-2;
 }
 
+.rune-icon {
+  @apply w-8 mb-1;
+}
+
 .skill-icon {
   @apply flex items-center mx-1 w-6 border-2 border-black;
   border-radius: 4px;
-}
-
-.rune-icon {
-  @apply w-8 mb-1;
 }
 
 .larger-icon {
@@ -688,7 +902,32 @@ const spacer = h(ElDivider, { direction: 'vertical' })
 }
 
 .item-container {
-  @apply p-4 mt-2 bg-gray-600 flex flex-col items-start;
+  @apply p-4 mt-2 bg-gray-600 flex;
+  height: 170px;
+}
+
+.item-container .fir {
+  @apply w-60;
+}
+
+.item-container .sho {
+  @apply w-50 mx-3;
+}
+
+.item-container .tri {
+  @apply w-60;
+}
+
+.item-container .oth {
+  @apply w-50 mx-3;
+}
+
+.item-container .txt {
+  @apply w-22;
+}
+
+.item-container .divider {
+  height: 100%;
 }
 
 .text-bg {
