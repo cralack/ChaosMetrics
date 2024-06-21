@@ -72,3 +72,12 @@ smtp:
   username: "cralack@163.com"            # SMTP服务器登录用户名，通常是你的邮箱地址
   password: "email_key"                  # SMTP服务器登录密码，或者是应用专用密码/授权码
 
+rabbitmq:
+  host: localhost                        # 服务器的IP地址
+  port: 5672                             # 服务器的端口号
+  username: guest                        # 用户名
+  password: guest                        # 密码
+  virtual_host: /                        # 虚拟主机
+  connection_timeout: 10s                # 连接超时时间
+  heartbeat: 30s                         # 心跳时间间隔
+
