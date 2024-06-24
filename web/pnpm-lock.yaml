@@ -9,7 +9,7 @@ dependencies:
     specifier: ^2.3.1
     version: 2.3.1(vue@3.4.29)
   '@vueuse/core':
-    specifier: ^10.10.0
+    specifier: ^10.11.0
     version: 10.11.0(vue@3.4.29)
   '@vueuse/integrations':
     specifier: ^10.10.0
@@ -18,8 +18,8 @@ dependencies:
     specifier: ^1.7.2
     version: 1.7.2
   element-plus:
-    specifier: ^2.7.3
-    version: 2.7.5(vue@3.4.29)
+    specifier: ^2.7.6
+    version: 2.7.6(vue@3.4.29)
   eslint:
     specifier: '8'
     version: 8.57.0
@@ -2353,8 +2353,8 @@ packages:
     resolution: {integrity: sha512-61H9mLzGOCLLVsnLiRzCbc63uldP0AniRYPV3hbGVtONA1pI7qSGILdbofR7A8TMbOypDocEAjH/e+9k1QIe3g==}
     dev: true
 
-  /element-plus@2.7.5(vue@3.4.29):
-    resolution: {integrity: sha512-e4oqhfRGBpdblgsjEBK+tA2+fg1H1KZ2Qinty1SaJl0X49FrMLK0lpXQNheWyBqI4V/pyjVOF9sRjz2hfyoctw==}
+  /element-plus@2.7.6(vue@3.4.29):
+    resolution: {integrity: sha512-36sw1K23hYjgeooR10U6CiCaCp2wvOqwoFurADZVlekeQ9v5U1FhJCFGEXO6i/kZBBMwsE1c9fxjLs9LENw2Rg==}
     peerDependencies:
       vue: ^3.2.0
     dependencies:
