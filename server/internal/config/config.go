@@ -10,6 +10,7 @@ type Root struct {
 	System    *SystemConf     `mapstructure:"system"`
 	JwtConf   *JwtConfig      `mapstructure:"jwt"`
 	EmailConf *EmailConf      `mapstructure:"smtp"`
+	AmqpConf  *AmqpConfig     `mapstructure:"amqp"`
 }
 type DirTree struct {
 	WorkDir string

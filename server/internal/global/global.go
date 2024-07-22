@@ -24,6 +24,7 @@ var (
 	ChaRDB    *redis.Client
 	ChaViper  *viper.Viper
 	ChaLogger *zap.Logger
+	ChaMQ     MessageQueue
 )
 
 const (
