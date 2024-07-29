@@ -16,7 +16,7 @@
     "element-plus": "^2.7.7",
     "eslint": "8",
     "nprogress": "^0.2.0",
-    "pinia": "^2.1.7",
+    "pinia": "^2.2.0",
     "sass": "^1.77.8",
     "universal-cookie": "^7",
     "vue": "^3.4.33",
