@@ -16,10 +16,10 @@ importers:
         version: 10.11.0(vue@3.4.33)
       '@vueuse/integrations':
         specifier: ^10.10.0
-        version: 10.11.0(async-validator@4.2.5)(axios@1.7.2)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.33)
+        version: 10.11.0(async-validator@4.2.5)(axios@1.7.3)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.33)
       axios:
-        specifier: ^1.7.2
-        version: 1.7.2
+        specifier: ^1.7.3
+        version: 1.7.3
       element-plus:
         specifier: ^2.7.8
         version: 2.7.8(vue@3.4.33)
@@ -1135,8 +1135,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios@1.7.2:
-    resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
+  axios@1.7.3:
+    resolution: {integrity: sha512-Ar7ND9pU99eJ9GpoGQKhKf58GpUOgnzuaB7ueNQ5BMi0p+LZ5oaEnfF999fAArcTIBwXTCHAmGcHOZJaWPq9Nw==}
 
   babel-plugin-polyfill-corejs2@0.4.11:
     resolution: {integrity: sha512-sMEJ27L0gRHShOh5G54uAAPaiCOygY/5ratXuiyb2G46FmlSpc9eFCzYVyDiPxfNbwzA7mYahmjQc5q+CZQ09Q==}
@@ -3070,14 +3070,14 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@vueuse/integrations@10.11.0(async-validator@4.2.5)(axios@1.7.2)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.33)':
+  '@vueuse/integrations@10.11.0(async-validator@4.2.5)(axios@1.7.3)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.33)':
     dependencies:
       '@vueuse/core': 10.11.0(vue@3.4.33)
       '@vueuse/shared': 10.11.0(vue@3.4.33)
       vue-demi: 0.14.8(vue@3.4.33)
     optionalDependencies:
       async-validator: 4.2.5
-      axios: 1.7.2
+      axios: 1.7.3
       nprogress: 0.2.0
       universal-cookie: 7.2.0
     transitivePeerDependencies:
@@ -3156,7 +3156,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios@1.7.2:
+  axios@1.7.3:
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
