@@ -42,8 +42,8 @@ importers:
         specifier: ^3.4.33
         version: 3.4.33
       vue-router:
-        specifier: ^4.4.0
-        version: 4.4.0(vue@3.4.33)
+        specifier: ^4.4.2
+        version: 4.4.2(vue@3.4.33)
     devDependencies:
       '@babel/eslint-parser':
         specifier: ^7.25.1
@@ -1923,8 +1923,8 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
-  vue-router@4.4.0:
-    resolution: {integrity: sha512-HB+t2p611aIZraV2aPSRNXf0Z/oLZFrlygJm+sZbdJaW6lcFqEDQwnzUBXn+DApw+/QzDU/I9TeWx9izEjTmsA==}
+  vue-router@4.4.2:
+    resolution: {integrity: sha512-1qNybkn2L7QsLzaXs8nvlQmRKp8XF8DCxZys/Jr1JpQcHsKUxTKzTxCVA1G7NfBfwRIBgCJPoujOG5lHCCNUxw==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -3939,7 +3939,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vue-router@4.4.0(vue@3.4.33):
+  vue-router@4.4.2(vue@3.4.33):
     dependencies:
       '@vue/devtools-api': 6.6.3
       vue: 3.4.33
