@@ -15,8 +15,8 @@ importers:
         specifier: ^10.11.1
         version: 10.11.1(vue@3.4.37)
       '@vueuse/integrations':
-        specifier: ^10.10.0
-        version: 10.11.0(async-validator@4.2.5)(axios@1.7.3)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.37)
+        specifier: ^10.11.1
+        version: 10.11.1(async-validator@4.2.5)(axios@1.7.3)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.37)
       axios:
         specifier: ^1.7.3
         version: 1.7.3
@@ -1032,17 +1032,14 @@ packages:
   '@vue/shared@3.4.37':
     resolution: {integrity: sha512-nIh8P2fc3DflG8+5Uw8PT/1i17ccFn0xxN/5oE9RfV5SVnd7G0XEFRwakrnNFE/jlS95fpGXDVG5zDETS26nmg==}
 
-  '@vueuse/core@10.11.0':
-    resolution: {integrity: sha512-x3sD4Mkm7PJ+pcq3HX8PLPBadXCAlSDR/waK87dz0gQE+qJnaaFhc/dZVfJz+IUYzTMVGum2QlR7ImiJQN4s6g==}
-
   '@vueuse/core@10.11.1':
     resolution: {integrity: sha512-guoy26JQktXPcz+0n3GukWIy/JDNKti9v6VEMu6kV2sYBsWuGiTU8OWdg+ADfUbHg3/3DlqySDe7JmdHrktiww==}
 
   '@vueuse/core@9.13.0':
     resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==}
 
-  '@vueuse/integrations@10.11.0':
-    resolution: {integrity: sha512-Pp6MtWEIr+NDOccWd8j59Kpjy5YDXogXI61Kb1JxvSfVBO8NzFQkmrKmSZz47i+ZqHnIzxaT38L358yDHTncZg==}
+  '@vueuse/integrations@10.11.1':
+    resolution: {integrity: sha512-Y5hCGBguN+vuVYTZmdd/IMXLOdfS60zAmDmFYc4BKBcMUPZH1n4tdyDECCPjXm0bNT3ZRUy1xzTLGaUje8Xyaw==}
     peerDependencies:
       async-validator: ^4
       axios: ^1
@@ -1082,17 +1079,11 @@ packages:
       universal-cookie:
         optional: true
 
-  '@vueuse/metadata@10.11.0':
-    resolution: {integrity: sha512-kQX7l6l8dVWNqlqyN3ePW3KmjCQO3ZMgXuBMddIu83CmucrsBfXlH+JoviYyRBws/yLTQO8g3Pbw+bdIoVm4oQ==}
-
   '@vueuse/metadata@10.11.1':
     resolution: {integrity: sha512-IGa5FXd003Ug1qAZmyE8wF3sJ81xGLSqTqtQ6jaVfkeZ4i5kS2mwQF61yhVqojRnenVew5PldLyRgvdl4YYuSw==}
 
   '@vueuse/metadata@9.13.0':
     resolution: {integrity: sha512-gdU7TKNAUVlXXLbaF+ZCfte8BjRJQWPCa2J55+7/h+yDtzw3vOoGQDRXzI6pyKyo6bXFT5/QoPE4hAknExjRLQ==}
-
-  '@vueuse/shared@10.11.0':
-    resolution: {integrity: sha512-fyNoIXEq3PfX1L3NkNhtVQUSRtqYwJtJg+Bp9rIzculIZWHTkKSysujrOk2J+NrRulLTQH9+3gGSfYLWSEWU1A==}
 
   '@vueuse/shared@10.11.1':
     resolution: {integrity: sha512-LHpC8711VFZlDaYUXEBbFBCQ7GS3dVU9mjOhhMhXP6txTV4EhYQg/KGnQuvt/sPAtoUKq7VVUnL6mVtFoL42sA==}
@@ -3069,16 +3060,6 @@ snapshots:
 
   '@vue/shared@3.4.37': {}
 
-  '@vueuse/core@10.11.0(vue@3.4.37)':
-    dependencies:
-      '@types/web-bluetooth': 0.0.20
-      '@vueuse/metadata': 10.11.0
-      '@vueuse/shared': 10.11.0(vue@3.4.37)
-      vue-demi: 0.14.8(vue@3.4.37)
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - vue
-
   '@vueuse/core@10.11.1(vue@3.4.37)':
     dependencies:
       '@types/web-bluetooth': 0.0.20
@@ -3094,16 +3075,16 @@ snapshots:
       '@types/web-bluetooth': 0.0.16
       '@vueuse/metadata': 9.13.0
       '@vueuse/shared': 9.13.0(vue@3.4.37)
-      vue-demi: 0.14.8(vue@3.4.37)
+      vue-demi: 0.14.10(vue@3.4.37)
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
 
-  '@vueuse/integrations@10.11.0(async-validator@4.2.5)(axios@1.7.3)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.37)':
+  '@vueuse/integrations@10.11.1(async-validator@4.2.5)(axios@1.7.3)(nprogress@0.2.0)(universal-cookie@7.2.0)(vue@3.4.37)':
     dependencies:
-      '@vueuse/core': 10.11.0(vue@3.4.37)
-      '@vueuse/shared': 10.11.0(vue@3.4.37)
-      vue-demi: 0.14.8(vue@3.4.37)
+      '@vueuse/core': 10.11.1(vue@3.4.37)
+      '@vueuse/shared': 10.11.1(vue@3.4.37)
+      vue-demi: 0.14.10(vue@3.4.37)
     optionalDependencies:
       async-validator: 4.2.5
       axios: 1.7.3
@@ -3113,29 +3094,20 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@vueuse/metadata@10.11.0': {}
-
   '@vueuse/metadata@10.11.1': {}
 
   '@vueuse/metadata@9.13.0': {}
 
-  '@vueuse/shared@10.11.0(vue@3.4.37)':
-    dependencies:
-      vue-demi: 0.14.8(vue@3.4.37)
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - vue
-
   '@vueuse/shared@10.11.1(vue@3.4.37)':
     dependencies:
-      vue-demi: 0.14.8(vue@3.4.37)
+      vue-demi: 0.14.10(vue@3.4.37)
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
 
   '@vueuse/shared@9.13.0(vue@3.4.37)':
     dependencies:
-      vue-demi: 0.14.8(vue@3.4.37)
+      vue-demi: 0.14.10(vue@3.4.37)
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
