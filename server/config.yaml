@@ -86,4 +86,4 @@ amqp:
   password: guest      # 密码，用于连接 RabbitMQ 服务器
   host: localhost      # MQ 服务器的 IP 地址或主机名
   port: "5672"         # MQ 服务器的端口号，默认是 5672
-  auto_delete: false   # 是否自动删除队列，当最后一个消费者断开连接后删除
+  auto_delete: true   # 是否自动删除队列，当最后一个消费者断开连接后删除

@@ -14,7 +14,7 @@ type RabbitMQ struct {
 	connNotify    chan *amqp.Error
 	channelNotify chan *amqp.Error
 	conn          *amqp.Connection
-	channel       *amqp.Channel
+	Channel       *amqp.Channel
 	logger        *zap.Logger
 	conf          *config.AmqpConfig
 	done          chan struct{}
@@ -53,11 +53,11 @@ func (m *RabbitMQ) Stop() {
 	close(m.done)
 
 	if !m.conn.IsClosed() {
-		if err := m.channel.Cancel(m.roleTag, true); err != nil {
-			m.logger.Error("rabbitmq channel cancel failed", zap.Error(err))
+		if err := m.Channel.Cancel(m.roleTag, true); err != nil {
+			m.logger.Error("rabbitmq Channel cancel failed", zap.Error(err))
 		}
-		if err := m.channel.Close(); err != nil {
-			m.logger.Error("rabbitmq channel closed failed", zap.Error(err))
+		if err := m.Channel.Close(); err != nil {
+			m.logger.Error("rabbitmq Channel closed failed", zap.Error(err))
 		}
 	}
 
@@ -80,31 +80,60 @@ func (m *RabbitMQ) Run() (err error) {
 	if m.conn, err = amqp.Dial(m.conf.Address); err != nil {
 		return err
 	}
-	if m.channel, err = m.conn.Channel(); err != nil {
+	if m.Channel, err = m.conn.Channel(); err != nil {
 		_ = m.conn.Close()
 		return err
 	}
 
 	// 声明一个主要使用的 exchange
-	err = m.channel.ExchangeDeclare(m.conf.Exchange, DelayType, true,
-		m.conf.AutoDelete, false, false, amqp.Table{"x-delayed-type": "direct"},
+	err = m.Channel.ExchangeDeclare(
+		m.conf.Exchange,
+		DelayType,
+		true,
+		m.conf.AutoDelete,
+		false,
+		false,
+		amqp.Table{
+			"x-delayed-type": "direct",
+		},
 	)
 	if err != nil {
 		return err
 	}
 
 	// 声明一个延时队列, 延时消息就是要发送到这里
-	q, err := m.channel.QueueDeclare(m.conf.Queue, false, m.conf.AutoDelete, false, false, nil)
+	q, err := m.Channel.QueueDeclare(
+		m.conf.Queue,
+		false,
+		m.conf.AutoDelete,
+		false,
+		false,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
 
-	err = m.channel.QueueBind(q.Name, "", m.conf.Exchange, false, nil)
+	err = m.Channel.QueueBind(
+		q.Name,
+		m.conf.RoutingKey,
+		m.conf.Exchange,
+		false,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
 
-	m.delivery, err = m.channel.Consume(q.Name, m.roleTag, false, false, false, false, nil)
+	m.delivery, err = m.Channel.Consume(
+		q.Name,
+		m.roleTag,
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
@@ -124,7 +153,7 @@ func (m *RabbitMQ) ReConnect() {
 			}
 		case err := <-m.channelNotify:
 			if err != nil {
-				m.logger.Error("rabbitmq channel NotifyClose", zap.Error(err))
+				m.logger.Error("rabbitmq Channel NotifyClose", zap.Error(err))
 			}
 		case <-m.done:
 			return
@@ -132,8 +161,8 @@ func (m *RabbitMQ) ReConnect() {
 
 		// backstop
 		if !m.conn.IsClosed() {
-			if err := m.channel.Cancel(m.roleTag, true); err != nil {
-				m.logger.Error("rabbitmq channel cancel failed", zap.Error(err))
+			if err := m.Channel.Cancel(m.roleTag, true); err != nil {
+				m.logger.Error("rabbitmq Channel cancel failed", zap.Error(err))
 			}
 			if err := m.conn.Close(); err != nil {
 				m.logger.Error("rabbitmq connection close failed", zap.Error(err))
@@ -168,8 +197,10 @@ func (m *RabbitMQ) ReConnect() {
 
 func (m *RabbitMQ) Consume() {
 	for d := range m.delivery {
+		m.logger.Debug(string(d.Body))
 		go func(delivery amqp.Delivery) {
 			if err := m.handler(delivery.Body); err != nil {
+				m.logger.Error("rabbitmq handler failed", zap.Error(err))
 				_ = delivery.Reject(true)
 			} else {
 				_ = delivery.Ack(false)
@@ -188,5 +219,11 @@ func (m *RabbitMQ) Publish(body []byte, delay int64) error {
 			DelayHeader: delay,
 		}
 	}
-	return m.channel.Publish(m.conf.Exchange, m.conf.RoutingKey, true, false, publishing)
+	return m.Channel.Publish(
+		m.conf.Exchange,
+		m.conf.RoutingKey,
+		false,
+		false,
+		publishing,
+	)
 }
