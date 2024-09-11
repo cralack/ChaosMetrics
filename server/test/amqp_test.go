@@ -17,18 +17,14 @@ func Test_messageQue(t *testing.T) {
 	if err != nil {
 		logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
 	}
-	defer func(conn *amqp.Connection) {
-		_ = conn.Close()
-	}(conn)
+	defer conn.Close()
 
 	// 创建一个通道
 	ch, err := conn.Channel()
 	if err != nil {
 		logger.Error("Failed to open a channel")
 	}
-	defer func(ch *amqp.Channel) {
-		_ = ch.Close()
-	}(ch)
+	defer ch.Close()
 
 	err = ch.ExchangeDeclare(
 		"test_exchange", // 交换机名称
@@ -71,7 +67,7 @@ func Test_messageQue(t *testing.T) {
 	msgs, err := ch.Consume(
 		q.Name, // 队列名称
 		"",     // 消费者标识符，留空表示由RabbitMQ自动生成
-		true,   // 是否自动应答
+		false,  // 是否自动应答
 		false,  // 是否独占模式（仅限于当前连接）
 		false,  // 是否禁止本地消息(RabbitMQ本身不支持)
 		false,  // 是否等待服务器响应
