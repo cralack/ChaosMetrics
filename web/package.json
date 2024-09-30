@@ -19,7 +19,7 @@
     "pinia": "^2.2.3",
     "sass": "^1.79.3",
     "universal-cookie": "^7",
-    "vue": "^3.5.8",
+    "vue": "^3.5.10",
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
