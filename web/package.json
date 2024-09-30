@@ -17,7 +17,7 @@
     "eslint": "8",
     "nprogress": "^0.2.0",
     "pinia": "^2.2.3",
-    "sass": "^1.79.3",
+    "sass": "^1.79.4",
     "universal-cookie": "^7",
     "vue": "^3.5.10",
     "vue-router": "^4.4.5"
