@@ -46,8 +46,8 @@ importers:
         version: 4.4.5(vue@3.5.12)
     devDependencies:
       '@babel/eslint-parser':
-        specifier: ^7.25.8
-        version: 7.25.8(@babel/core@7.25.2)(eslint@8.57.1)
+        specifier: ^7.25.9
+        version: 7.25.9(@babel/core@7.25.2)(eslint@8.57.1)
       '@vitejs/plugin-legacy':
         specifier: ^5.4.2
         version: 5.4.2(terser@5.31.1)(vite@5.4.9(sass@1.80.4)(terser@5.31.1))
@@ -88,8 +88,8 @@ packages:
     resolution: {integrity: sha512-BBt3opiCOxUr9euZ5/ro/Xv8/V7yJ5bjYMqG/C1YAo8MIKAnumZalCN+msbci3Pigy4lIQfPUpfMM27HMGaYEA==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/eslint-parser@7.25.8':
-    resolution: {integrity: sha512-Po3VLMN7fJtv0nsOjBDSbO1J71UhzShE9MuOSkWEV9IZQXzhZklYtzKZ8ZD/Ij3a0JBv1AG3Ny2L3jvAHQVOGg==}
+  '@babel/eslint-parser@7.25.9':
+    resolution: {integrity: sha512-5UXfgpK0j0Xr/xIdgdLEhOFxaDZ0bRPWJJchRpqOSur/3rZoPbqqki5mm0p4NE2cs28krBEiSM2MB7//afRSQQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || >=14.0.0}
     peerDependencies:
       '@babel/core': ^7.11.0
@@ -2141,7 +2141,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/eslint-parser@7.25.8(@babel/core@7.25.2)(eslint@8.57.1)':
+  '@babel/eslint-parser@7.25.9(@babel/core@7.25.2)(eslint@8.57.1)':
     dependencies:
       '@babel/core': 7.25.2
       '@nicolo-ribaudo/eslint-scope-5-internals': 5.1.1-v1
