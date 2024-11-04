@@ -11,15 +11,15 @@ import (
 )
 
 type RabbitMQ struct {
-	connNotify    chan *amqp.Error
+	ConnNotify    chan *amqp.Error
 	channelNotify chan *amqp.Error
 	conn          *amqp.Connection
 	Channel       *amqp.Channel
 	logger        *zap.Logger
 	conf          *config.AmqpConfig
-	done          chan struct{}
+	Done          chan struct{}
 	handler       func([]byte) error
-	delivery      <-chan amqp.Delivery
+	Delivery      <-chan amqp.Delivery
 	role          ROLE
 	roleTag       string
 }
@@ -46,12 +46,12 @@ func NewRabbitMQ(role ROLE, handler func([]byte) error) (*RabbitMQ, error) {
 			AutoDelete: conf.AutoDelete,
 		},
 		handler: handler,
-		done:    make(chan struct{}),
+		Done:    make(chan struct{}),
 	}, nil
 }
 
 func (m *RabbitMQ) Stop() {
-	close(m.done)
+	close(m.Done)
 
 	if !m.conn.IsClosed() {
 		if err := m.Channel.Cancel(m.roleTag, true); err != nil {
@@ -127,7 +127,7 @@ func (m *RabbitMQ) Run() (err error) {
 	}
 
 	if m.role == Consumer {
-		m.delivery, err = m.Channel.Consume(
+		m.Delivery, err = m.Channel.Consume(
 			q.Name,
 			m.roleTag,
 			false,
@@ -136,22 +136,23 @@ func (m *RabbitMQ) Run() (err error) {
 			false,
 			nil,
 		)
+		if err != nil {
+			return err
+		}
+		go m.Handle()
 	}
 
-	if err != nil {
-		return err
-	}
-
-	m.connNotify = m.conn.NotifyClose(make(chan *amqp.Error))
+	m.ConnNotify = m.conn.NotifyClose(make(chan *amqp.Error))
 	m.channelNotify = m.Channel.NotifyClose(make(chan *amqp.Error))
 
+	m.logger.Info("rabbitmq starting...")
 	return
 }
 
 func (m *RabbitMQ) ReConnect() {
 	for {
 		select {
-		case err := <-m.connNotify:
+		case err := <-m.ConnNotify:
 			if err != nil {
 				m.logger.Error("rabbitmq connection NotifyClose", zap.Error(err))
 			}
@@ -159,8 +160,8 @@ func (m *RabbitMQ) ReConnect() {
 			if err != nil {
 				m.logger.Error("rabbitmq Channel NotifyClose", zap.Error(err))
 			}
-		case <-m.done:
-			m.logger.Debug("job done")
+		case <-m.Done:
+			m.logger.Debug("job Done")
 			return
 		}
 
@@ -178,17 +179,17 @@ func (m *RabbitMQ) ReConnect() {
 		for err := range m.channelNotify {
 			m.logger.Error("", zap.Error(err))
 		}
-		for err := range m.connNotify {
+		for err := range m.ConnNotify {
 			m.logger.Error("", zap.Error(err))
 		}
 
 	quit: // Reconnect loop
 		for {
 			select {
-			case <-m.done:
+			case <-m.Done:
 				return
 			default:
-				m.logger.Error("rabbitmq reconnecting...")
+				m.logger.Info("rabbitmq reconnecting...")
 				if err := m.Run(); err != nil {
 					m.logger.Error("rabbitmq connection reconnect failed", zap.Error(err))
 					time.Sleep(5 * time.Second)
@@ -200,12 +201,12 @@ func (m *RabbitMQ) ReConnect() {
 	}
 }
 
-func (m *RabbitMQ) Consume() {
+func (m *RabbitMQ) Handle() {
 	if m.role == Producer {
 		m.logger.Info("producer cannot consume message")
 		return
 	}
-	for d := range m.delivery {
+	for d := range m.Delivery {
 		// m.logger.Debug(string(d.Body))
 		go func(delivery amqp.Delivery) {
 			if err := m.handler(delivery.Body); err != nil {
@@ -216,6 +217,7 @@ func (m *RabbitMQ) Consume() {
 			}
 		}(d)
 	}
+	m.logger.Debug("quitting handle")
 }
 
 func (m *RabbitMQ) Publish(body []byte, delay int64) error {

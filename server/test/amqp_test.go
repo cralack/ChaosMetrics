@@ -142,28 +142,32 @@ func Test_RabbitMQ_Producer(t *testing.T) {
 		}
 	}
 
-	timer := time.NewTimer(time.Second * 15)
+	timer := time.NewTimer(time.Second * 5)
 	<-timer.C
 	producer.Stop()
 }
 
 func Test_RabbitMQ_Consumer(t *testing.T) {
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
+
 	// 初始化消费者实例
 	// consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, nil)
 	consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, mockHandler())
 	assert.NoError(t, err)
 	assert.NotNil(t, consumer)
 
-	err = consumer.Start()
-	assert.NoError(t, err)
-	exit := make(chan os.Signal, 1)
-	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
-
 	// 确保消费者已启动
-	go consumer.Consume()
+	err = consumer.Start()
+	defer consumer.Stop()
+	assert.NoError(t, err)
 	logger.Info(" [*] Waiting for messages. To exit press CTRL+C")
+
+	// 测试ReConnect
+	time.Sleep(time.Second * 3)
+	consumer.ConnNotify <- amqp.ErrClosed
+
 	<-exit
-	consumer.Stop()
 }
 
 func mockHandler() func(body []byte) error {
