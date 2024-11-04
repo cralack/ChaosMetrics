@@ -33,16 +33,16 @@ func NewRabbitMQ(role ROLE, handler func([]byte) error) (*RabbitMQ, error) {
 		conf.User, conf.Password, conf.Host, conf.Port)
 
 	roleConfig := &config.AmqpConfig{
-		Address:    address,
-		Exchange:   Constant[role][Exchange],
-		Queue:      Constant[role][Queue],
-		RoutingKey: Constant[role][RoutingKey],
+		URL:        address,
+		Exchange:   Exchange,
+		Queue:      Queue,
+		RoutingKey: RoutingKey,
 		AutoDelete: conf.AutoDelete,
 	}
 	return &RabbitMQ{
 		logger:  logger,
 		role:    role,
-		roleTag: Constant[role][Tag],
+		roleTag: RoleTag[role],
 		conf:    roleConfig,
 		handler: handler,
 		done:    make(chan struct{}),
@@ -77,7 +77,7 @@ func (m *RabbitMQ) Start() error {
 }
 
 func (m *RabbitMQ) Run() (err error) {
-	if m.conn, err = amqp.Dial(m.conf.Address); err != nil {
+	if m.conn, err = amqp.Dial(m.conf.URL); err != nil {
 		return err
 	}
 	if m.Channel, err = m.conn.Channel(); err != nil {
@@ -104,7 +104,7 @@ func (m *RabbitMQ) Run() (err error) {
 	// 声明一个延时队列, 延时消息就是要发送到这里
 	q, err := m.Channel.QueueDeclare(
 		m.conf.Queue,
-		false,
+		true,
 		m.conf.AutoDelete,
 		false,
 		false,
@@ -125,21 +125,24 @@ func (m *RabbitMQ) Run() (err error) {
 		return err
 	}
 
-	m.delivery, err = m.Channel.Consume(
-		q.Name,
-		m.roleTag,
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
+	if m.role == Consumer {
+		m.delivery, err = m.Channel.Consume(
+			q.Name,
+			m.roleTag,
+			false,
+			false,
+			false,
+			false,
+			nil,
+		)
+	}
+
 	if err != nil {
 		return err
 	}
 
 	m.connNotify = m.conn.NotifyClose(make(chan *amqp.Error))
-	m.channelNotify = m.conn.NotifyClose(make(chan *amqp.Error))
+	m.channelNotify = m.Channel.NotifyClose(make(chan *amqp.Error))
 
 	return
 }
@@ -156,6 +159,7 @@ func (m *RabbitMQ) ReConnect() {
 				m.logger.Error("rabbitmq Channel NotifyClose", zap.Error(err))
 			}
 		case <-m.done:
+			m.logger.Debug("job done")
 			return
 		}
 
@@ -169,7 +173,7 @@ func (m *RabbitMQ) ReConnect() {
 			}
 		}
 
-		// Clear notify channels
+		// IMPORTANT: HAVE TO Clear notify
 		for err := range m.channelNotify {
 			m.logger.Error("", zap.Error(err))
 		}
@@ -196,6 +200,10 @@ func (m *RabbitMQ) ReConnect() {
 }
 
 func (m *RabbitMQ) Consume() {
+	if m.role == Producer {
+		m.logger.Info("producer cannot consume message")
+		return
+	}
 	for d := range m.delivery {
 		m.logger.Debug(string(d.Body))
 		go func(delivery amqp.Delivery) {

@@ -2,6 +2,9 @@ package test
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"testing"
 	"time"
 
@@ -30,7 +33,7 @@ func Test_messageQue(t *testing.T) {
 		"test_exchange", // 交换机名称
 		xamqp.DelayType, // 交换机类型
 		true,            // 是否持久化
-		false,           // 是否自动删除
+		true,            // 是否自动删除
 		false,           // 是否内部使用
 		false,           // 是否等待服务器响应
 		amqp.Table{ // 其他属性
@@ -44,7 +47,7 @@ func Test_messageQue(t *testing.T) {
 	q, err := ch.QueueDeclare(
 		"test_queue", // 队列名称，留空表示由RabbitMQ自动生成
 		true,         // 是否持久化
-		false,        // 是否自动删除（当没有任何消费者连接时）
+		true,         // 是否自动删除（当没有任何消费者连接时）
 		false,        // 是否排他队列（仅限于当前连接）
 		false,        // 是否等待服务器响应
 		nil,
@@ -114,15 +117,8 @@ func Test_messageQue(t *testing.T) {
 	<-timer.C
 }
 
-func Test_RabbitMQ_Integration(t *testing.T) {
-	role := xamqp.Worker
-	// 初始化消费者实例
-	consumer, err := xamqp.NewRabbitMQ(role, mockHandler())
-	assert.NoError(t, err)
-	assert.NotNil(t, consumer)
-
-	err = consumer.Start()
-	assert.NoError(t, err)
+func Test_RabbitMQ_Producer(t *testing.T) {
+	role := xamqp.Producer
 
 	// 初始化生产者实例
 	producer, err := xamqp.NewRabbitMQ(role, nil) // 生产者不需要处理函数
@@ -132,22 +128,38 @@ func Test_RabbitMQ_Integration(t *testing.T) {
 	err = producer.Start()
 	assert.NoError(t, err)
 
-	// 确保消费者已启动
-	go consumer.Consume()
-	time.Sleep(1 * time.Second)
-
 	// should be 4,5,1,2,3
-	delayedTime := []int64{5000, 7000, 9000, 1000, 3000}
-	for i, tim := range delayedTime {
-		massage := fmt.Sprintf("%d test message", i+1)
-		err = producer.Publish([]byte(massage), tim)
+	delayedTime := []int64{9, 1, 6, 4, 3, 8, 2, 5, 7, 10}
+	for _, tim := range delayedTime {
+		massage := fmt.Sprintf("%d test message", tim)
+		err = producer.Publish([]byte(massage), tim*500)
 		assert.NoError(t, err)
 		if err == nil {
 			logger.Debug("sent message " + massage)
 		}
 	}
+
+	timer := time.NewTimer(time.Second * 15)
+	<-timer.C
 	producer.Stop()
-	time.Sleep(time.Second * 10)
+}
+
+func Test_RabbitMQ_Consumer(t *testing.T) {
+	role := xamqp.Consumer
+	// 初始化消费者实例
+	consumer, err := xamqp.NewRabbitMQ(role, mockHandler())
+	assert.NoError(t, err)
+	assert.NotNil(t, consumer)
+
+	err = consumer.Start()
+	assert.NoError(t, err)
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
+
+	// 确保消费者已启动
+	go consumer.Consume()
+	logger.Info(" [*] Waiting for messages. To exit press CTRL+C")
+	<-exit
 	consumer.Stop()
 }
 
