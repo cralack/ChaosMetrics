@@ -31,19 +31,20 @@ func NewRabbitMQ(role ROLE, handler func([]byte) error) (*RabbitMQ, error) {
 	conf := global.ChaConf.AmqpConf
 	address := fmt.Sprintf("amqp://%s:%s@%s:%s/",
 		conf.User, conf.Password, conf.Host, conf.Port)
-
-	roleConfig := &config.AmqpConfig{
-		URL:        address,
-		Exchange:   Exchange,
-		Queue:      Queue,
-		RoutingKey: RoutingKey,
-		AutoDelete: conf.AutoDelete,
+	if role == Consumer && handler == nil {
+		return nil, fmt.Errorf("no handler for consumer or consumer handler is nil")
 	}
 	return &RabbitMQ{
 		logger:  logger,
 		role:    role,
 		roleTag: RoleTag[role],
-		conf:    roleConfig,
+		conf: &config.AmqpConfig{
+			URL:        address,
+			Exchange:   Exchange,
+			Queue:      Queue,
+			RoutingKey: RoutingKey,
+			AutoDelete: conf.AutoDelete,
+		},
 		handler: handler,
 		done:    make(chan struct{}),
 	}, nil
@@ -205,7 +206,7 @@ func (m *RabbitMQ) Consume() {
 		return
 	}
 	for d := range m.delivery {
-		m.logger.Debug(string(d.Body))
+		// m.logger.Debug(string(d.Body))
 		go func(delivery amqp.Delivery) {
 			if err := m.handler(delivery.Body); err != nil {
 				m.logger.Error("rabbitmq handler failed", zap.Error(err))
@@ -222,7 +223,7 @@ func (m *RabbitMQ) Publish(body []byte, delay int64) error {
 		ContentType: "text/plain",
 		Body:        body,
 	}
-	if delay > 0 {
+	if delay >= 0 {
 		publishing.Headers = amqp.Table{
 			DelayHeader: delay,
 		}

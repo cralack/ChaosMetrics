@@ -20,14 +20,18 @@ func Test_messageQue(t *testing.T) {
 	if err != nil {
 		logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
 	}
-	defer conn.Close()
+	defer func(conn *amqp.Connection) {
+		_ = conn.Close()
+	}(conn)
 
 	// 创建一个通道
 	ch, err := conn.Channel()
 	if err != nil {
 		logger.Error("Failed to open a channel")
 	}
-	defer ch.Close()
+	defer func(ch *amqp.Channel) {
+		_ = ch.Close()
+	}(ch)
 
 	err = ch.ExchangeDeclare(
 		"test_exchange", // 交换机名称
@@ -118,10 +122,9 @@ func Test_messageQue(t *testing.T) {
 }
 
 func Test_RabbitMQ_Producer(t *testing.T) {
-	role := xamqp.Producer
 
 	// 初始化生产者实例
-	producer, err := xamqp.NewRabbitMQ(role, nil) // 生产者不需要处理函数
+	producer, err := xamqp.NewRabbitMQ(xamqp.Producer, nil) // 生产者不需要处理函数
 	assert.NoError(t, err)
 	assert.NotNil(t, producer)
 
@@ -129,7 +132,7 @@ func Test_RabbitMQ_Producer(t *testing.T) {
 	assert.NoError(t, err)
 
 	// should be 4,5,1,2,3
-	delayedTime := []int64{9, 1, 6, 4, 3, 8, 2, 5, 7, 10}
+	delayedTime := []int64{9, 1, 6, 4, 3, 8, 2, 5, 7, 10, 0}
 	for _, tim := range delayedTime {
 		massage := fmt.Sprintf("%d test message", tim)
 		err = producer.Publish([]byte(massage), tim*500)
@@ -145,9 +148,9 @@ func Test_RabbitMQ_Producer(t *testing.T) {
 }
 
 func Test_RabbitMQ_Consumer(t *testing.T) {
-	role := xamqp.Consumer
 	// 初始化消费者实例
-	consumer, err := xamqp.NewRabbitMQ(role, mockHandler())
+	// consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, nil)
+	consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, mockHandler())
 	assert.NoError(t, err)
 	assert.NotNil(t, consumer)
 
