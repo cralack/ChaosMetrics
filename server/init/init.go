@@ -59,4 +59,5 @@ func init() {
 	} else {
 		global.ChaLogger.Debug("init orm model succeed")
 	}
+
 }

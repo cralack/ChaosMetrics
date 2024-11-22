@@ -41,11 +41,13 @@ var Cmd = &cobra.Command{
 			WithLoc(utils.ConvertLocStrToLocation(loc)),
 			WithEndMark(tier, rank),
 			WithQues(ques...),
+			WithContext(cmd.Context()),
 		)
 		if err != nil {
 			global.ChaLogger.Error("init pumper failed", zap.Error(err))
 			return
 		}
+
 		pumper.StartEngine()
 		pumper.UpdateAll()
 	},

@@ -1,0 +1,19 @@
+@startuml
+entity Master#white
+entity Worker
+entity Updater#black
+entity Analyzer#red
+entity Router#blue
+
+queue RabbitMQ
+
+Master -> RabbitMQ : Publish Task for Worker
+RabbitMQ -> Worker : Deliver Task to Worker
+
+Updater -> RabbitMQ : Send Game Data
+Worker -> RabbitMQ : Send Match Data
+
+RabbitMQ -> Analyzer : Deliver Data for Cleansing
+RabbitMQ -> Router : Deliver Data for Request Response
+
+@enduml

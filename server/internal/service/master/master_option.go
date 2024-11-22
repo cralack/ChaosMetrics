@@ -17,27 +17,27 @@ var defaultOptions = options{
 	logger: global.ChaLogger,
 }
 
-type Option func(opts *options)
+type Setup func(opts *options)
 
-func WithLogger(logger *zap.Logger) Option {
+func WithLogger(logger *zap.Logger) Setup {
 	return func(opts *options) {
 		opts.logger = logger
 	}
 }
 
-func WithregistryURL(registryURL string) Option {
+func WithregistryURL(registryURL string) Setup {
 	return func(opts *options) {
 		opts.registryURL = registryURL
 	}
 }
 
-func WithRegistry(registry registry.Registry) Option {
+func WithRegistry(registry registry.Registry) Setup {
 	return func(opts *options) {
 		opts.registry = registry
 	}
 }
 
-func WithGRPCAddress(GRPCAddress string) Option {
+func WithGRPCAddress(GRPCAddress string) Setup {
 	return func(opts *options) {
 		opts.GRPCAddress = GRPCAddress
 	}

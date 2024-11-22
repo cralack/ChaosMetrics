@@ -1,6 +1,7 @@
 package pumper
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -8,9 +9,10 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 )
 
-type Options struct {
+type Strategy struct {
 	Token         string
 	registryURL   string
+	Ctx           context.Context
 	Loc           []riotmodel.LOCATION // 地区列表
 	Que           []riotmodel.QUECODE  // 队列类型列表
 	TestEndMark1  riotmodel.TIER       // 测试用终止标记
@@ -21,9 +23,9 @@ type Options struct {
 	LifeTime      time.Duration        // 缓存生命周期
 }
 
-type Option func(*Options) // Strategy的配置选项
+type Setup func(*Strategy) // Strategy的配置选项
 
-var defaultStrategy = &Options{
+var defaultStrategy = &Strategy{
 	Token:         "",
 	Loc:           []riotmodel.LOCATION{riotmodel.TW2},            // 默认地区为台湾
 	Que:           []riotmodel.QUECODE{riotmodel.RANKED_SOLO_5x5}, // 默认队列类型为排位赛5v5
@@ -36,8 +38,8 @@ var defaultStrategy = &Options{
 	// LifeTime: -1, // cache forever
 }
 
-func WithLoc(locs ...riotmodel.LOCATION) Option {
-	return func(opts *Options) {
+func WithLoc(locs ...riotmodel.LOCATION) Setup {
+	return func(opts *Strategy) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
 			if riotmodel.VN2 < loc {
@@ -52,8 +54,8 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 
 // WithAreaLoc (riotmodel.LOC_ALL)
 // WithAreaLoc (riotmodel.LOC_AMERICAS,riotmodel.LOC_ASIA)
-func WithAreaLoc(areas ...riotmodel.AREA) Option {
-	return func(opts *Options) {
+func WithAreaLoc(areas ...riotmodel.AREA) Setup {
+	return func(opts *Strategy) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		america := []riotmodel.LOCATION{
 			riotmodel.BR1,
@@ -111,8 +113,8 @@ func WithAreaLoc(areas ...riotmodel.AREA) Option {
 
 // WithEndMark (riotmodel.DIAMOND,1)
 // WithEndMark (riotmodel.IRON,4)
-func WithEndMark(tier riotmodel.TIER, div uint) Option {
-	return func(opts *Options) {
+func WithEndMark(tier riotmodel.TIER, div uint) Setup {
+	return func(opts *Strategy) {
 		if riotmodel.IRON < tier || 4 < div || div < 1 {
 			global.ChaLogger.Error("wrong param,end mark need DIAMON <= tier <= IRON" +
 				" && I <= div <= IV.using default option")
@@ -123,23 +125,23 @@ func WithEndMark(tier riotmodel.TIER, div uint) Option {
 	}
 }
 
-func WithToken(token string) Option {
-	return func(opts *Options) {
+func WithToken(token string) Setup {
+	return func(opts *Strategy) {
 		if token != "" {
 			opts.Token = token
 		}
 	}
 }
 
-func WithRegistryURL(registryURL string) Option {
-	return func(opts *Options) {
+func WithRegistryURL(registryURL string) Setup {
+	return func(opts *Strategy) {
 		opts.registryURL = registryURL
 	}
 }
 
 // WithQues (riotmodel.RANKED_SOLO_5x5)
-func WithQues(ques ...riotmodel.QUECODE) Option {
-	return func(opts *Options) {
+func WithQues(ques ...riotmodel.QUECODE) Setup {
+	return func(opts *Strategy) {
 		tmp := make([]riotmodel.QUECODE, 0, 3)
 		for _, que := range ques {
 			if 3 < que {
@@ -149,5 +151,11 @@ func WithQues(ques ...riotmodel.QUECODE) Option {
 			tmp = append(tmp, que)
 		}
 		opts.Que = tmp
+	}
+}
+
+func WithContext(ctx context.Context) Setup {
+	return func(opts *Strategy) {
+		opts.Ctx = ctx
 	}
 }

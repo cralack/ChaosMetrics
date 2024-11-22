@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -122,9 +123,10 @@ func Test_messageQue(t *testing.T) {
 }
 
 func Test_RabbitMQ_Producer(t *testing.T) {
-
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	// 初始化生产者实例
-	producer, err := xamqp.NewRabbitMQ(xamqp.Producer, nil) // 生产者不需要处理函数
+	producer, err := xamqp.NewRabbitMQ(xamqp.Producer, nil, xamqp.WithContext(ctx)) // 生产者不需要处理函数
 	assert.NoError(t, err)
 	assert.NotNil(t, producer)
 
@@ -135,31 +137,31 @@ func Test_RabbitMQ_Producer(t *testing.T) {
 	delayedTime := []int64{9, 1, 6, 4, 3, 8, 2, 5, 7, 10, 0}
 	for _, tim := range delayedTime {
 		massage := fmt.Sprintf("%d test message", tim)
-		err = producer.Publish([]byte(massage), tim*500)
+		err = producer.Publish([]byte(massage), xamqp.Exchange, xamqp.RoutingKey, tim*500)
 		assert.NoError(t, err)
 		if err == nil {
 			logger.Debug("sent message " + massage)
 		}
 	}
 
-	timer := time.NewTimer(time.Second * 5)
+	timer := time.NewTimer(time.Second * 10)
 	<-timer.C
-	producer.Stop()
 }
 
 func Test_RabbitMQ_Consumer(t *testing.T) {
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
-
+	ctx, cancel := context.WithCancel(context.Background())
+	ctx = context.WithValue(ctx, "key", "quit")
+	defer cancel()
 	// 初始化消费者实例
 	// consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, nil)
-	consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, mockHandler())
+	consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, mockHandler(), xamqp.WithContext(ctx))
 	assert.NoError(t, err)
 	assert.NotNil(t, consumer)
 
 	// 确保消费者已启动
 	err = consumer.Start()
-	defer consumer.Stop()
 	assert.NoError(t, err)
 	logger.Info(" [*] Waiting for messages. To exit press CTRL+C")
 

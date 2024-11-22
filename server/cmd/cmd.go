@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"os"
 
 	"github.com/cralack/ChaosMetrics/server/cmd/master"
@@ -50,8 +51,17 @@ func AddCommands(root *cobra.Command) {
 	)
 }
 
-func RunCmd() error {
+func RunCmd(ctx context.Context) error {
 	AddCommands(rootCmd)
+	rootCmd.SetContext(ctx)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				// global.ChaLogger.Info("chaos metrics exit", zap.Error(ctx.Err()))
+			}
+		}
+	}()
 
 	// { // debug master part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])

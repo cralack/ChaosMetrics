@@ -15,7 +15,7 @@ type Strategy struct {
 	EndMark     string
 }
 
-type Option func(stgy *Strategy) // Strategy的配置选项
+type Setup func(stgy *Strategy) // Strategy的配置选项
 
 var defaultStrategy = &Strategy{
 	Loc:  []riotmodel.LOCATION{riotmodel.TW2},
@@ -24,7 +24,7 @@ var defaultStrategy = &Strategy{
 	LifeTime: time.Hour * 24 * 7, // 7 day
 }
 
-func _(locs ...riotmodel.LOCATION) Option {
+func _(locs ...riotmodel.LOCATION) Setup {
 	return func(stgy *Strategy) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
@@ -38,19 +38,19 @@ func _(locs ...riotmodel.LOCATION) Option {
 	}
 }
 
-func WithLifeTime(life time.Duration) Option {
+func WithLifeTime(life time.Duration) Setup {
 	return func(stgy *Strategy) {
 		stgy.LifeTime = life
 	}
 }
 
-func WithForceUpdate(flag bool) Option {
+func WithForceUpdate(flag bool) Setup {
 	return func(stgy *Strategy) {
 		stgy.ForceUpdate = flag
 	}
 }
 
-func WithEndmark(version string) Option {
+func WithEndmark(version string) Setup {
 	return func(stgy *Strategy) {
 		stgy.EndMark = version
 	}

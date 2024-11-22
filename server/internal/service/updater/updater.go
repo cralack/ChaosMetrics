@@ -29,7 +29,7 @@ type Updater struct {
 	stgy       *Strategy
 }
 
-func NewRiotUpdater(opts ...Option) *Updater {
+func NewRiotUpdater(opts ...Setup) *Updater {
 	stgy := defaultStrategy
 	for _, opt := range opts {
 		opt(stgy)
@@ -80,13 +80,18 @@ func (u *Updater) UpdateVersions() (version []string) {
 	if err = json.Unmarshal(buff, &version); err != nil {
 		u.logger.Error("unmarshal json to version failed", zap.Error(err))
 	}
+	idx := 0
 
 	for i, v := range version {
+		if v == "14.9.1" {
+			idx = i
+		}
 		if v == "3.6.14" {
 			version = version[:i+1]
 			break
 		}
 	}
+	version = version[idx:]
 	// store to redis
 	key := "/version"
 	buff, _ = json.Marshal(version)

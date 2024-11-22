@@ -27,7 +27,7 @@ type Master struct {
 	options
 }
 
-func New(id string, opts ...Option) (*Master, error) {
+func New(id string, opts ...Setup) (*Master, error) {
 	m := &Master{
 		workNodes: make(map[string]*registry.Node),
 		rlock:     &sync.RWMutex{},

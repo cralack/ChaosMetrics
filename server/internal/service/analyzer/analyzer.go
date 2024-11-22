@@ -34,7 +34,7 @@ type Analyzer struct {
 
 	curVersion    string
 	analyzedCount []int64
-	options       *options
+	stgy          *Strategy
 	idxMap        map[int]string                    // idx->championName
 	totalPlayed   map[string]int64                  // totalPlayed[version+loc+mode]
 	banedCount    map[string]int                    // banedCount[name+ver+loc+mode]
@@ -45,8 +45,8 @@ type Analyzer struct {
 	shoesList     map[uint]map[int]struct{}         // shoesList[version][shoes]
 }
 
-func NewAnalyzer(opts ...Option) *Analyzer {
-	stgy := defaultOptions
+func NewAnalyzer(opts ...Setup) *Analyzer {
+	stgy := defaultStrategy
 	for _, opt := range opts {
 		opt(stgy)
 	}
@@ -68,7 +68,7 @@ func NewAnalyzer(opts ...Option) *Analyzer {
 		Exit:          make(chan struct{}),
 		curVersion:    global.ChaRDB.HGet(context.Background(), "/version", "cur").Val(),
 		analyzedCount: make([]int64, 16),
-		options:       stgy,
+		stgy:          stgy,
 		idxMap:        idxMap,
 		totalPlayed:   make(map[string]int64),
 		banedCount:    make(map[string]int),
@@ -85,11 +85,11 @@ func (a *Analyzer) Analyze() {
 	go a.handleMatches()
 
 	a.loadChampionTemplate()
-	for _, loc := range a.options.Loc {
+	for _, loc := range a.stgy.Loc {
 		var total int64 = 1
 		// start counter
 		go a.counter(&total, loc)
-		for _, ver := range a.options.Versions {
+		for _, ver := range a.stgy.Versions {
 			a.loadMatch(loc, ver, &total)
 		}
 	}
@@ -169,9 +169,9 @@ func (a *Analyzer) loadMatch(loCode riotmodel.LOCATION, ver string, total *int64
 
 	// chunk
 	totalSize := int(totalCount)
-	chunkSize := a.options.BatchSize
+	chunkSize := a.stgy.BatchSize
 	for i := 0; i < totalSize; i += chunkSize {
-		matches = make([]*riotmodel.MatchDB, 0, a.options.BatchSize)
+		matches = make([]*riotmodel.MatchDB, 0, a.stgy.BatchSize)
 		if err = a.db.Offset(i).Limit(chunkSize).Where("loc = ?", loc).Where("analyzed = ?",
 			false).Where("game_version LIKE ?", ver).Preload(
 			"Participants").Find(&matches).Error; err != nil {

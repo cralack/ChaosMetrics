@@ -1,8 +1,15 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/cralack/ChaosMetrics/server/cmd"
 	_ "github.com/cralack/ChaosMetrics/server/init"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"go.uber.org/zap"
 )
 
 //	@title						ChaosMetrics API接口文档
@@ -19,7 +26,24 @@ import (
 //	@externalDocs.url			https://swagger.io/resources/open-api/
 
 func main() {
-	if err := cmd.RunCmd(); err != nil {
-		panic(err)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	// timer := time.NewTimer(time.Second * 5)
+	errChan := make(chan error, 1)
+	go func() {
+		if err := cmd.RunCmd(ctx); err != nil {
+			errChan <- err
+		}
+	}()
+
+	select {
+	case err := <-errChan:
+		cancel()
+		global.ChaLogger.Error("run app failed:", zap.Error(err))
+	case sig := <-quit:
+		cancel()
+		global.ChaLogger.Info("received signal:", zap.String("signal", sig.String()))
 	}
 }

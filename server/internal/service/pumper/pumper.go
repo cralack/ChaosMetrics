@@ -14,10 +14,10 @@ import (
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/fetcher"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/cralack/ChaosMetrics/server/pkg/xamqp"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"github.com/cralack/ChaosMetrics/server/utils/scheduler"
 	"github.com/redis/go-redis/v9"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -34,14 +34,16 @@ const (
 )
 
 type Pumper struct {
-	id          string
-	logger      *zap.Logger
-	db          *gorm.DB
-	rdb         *redis.Client
-	lock        *sync.Mutex
-	etcdcli     *clientv3.Client
+	id     string
+	logger *zap.Logger
+	db     *gorm.DB
+	rdb    *redis.Client
+	lock   *sync.Mutex
+	Ctx    context.Context
+	// etcdcli     *clientv3.Client
 	fetcher     fetcher.Fetcher
 	scheduler   scheduler.Scheduler
+	Consumer    global.MessageQueue
 	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
 	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
 	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
@@ -49,7 +51,7 @@ type Pumper struct {
 	out         chan *DBResult
 	entrieIdx   []uint
 	summonerIdx []uint
-	stgy        *Options
+	stgy        *Strategy
 }
 
 type DBResult struct {
@@ -58,7 +60,7 @@ type DBResult struct {
 	Data  interface{}
 }
 
-func NewPumper(id string, opts ...Option) (*Pumper, error) {
+func NewPumper(id string, opts ...Setup) (*Pumper, error) {
 	stgy := defaultStrategy
 	for _, opt := range opts {
 		opt(stgy)
@@ -87,18 +89,7 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		stgy.Token = utils.RemoveExtraLF(string(buff))
 	}
 
-	// setup etcd client
-	endpoints := []string{stgy.registryURL}
-	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
-	if err != nil {
-		return nil, err
-	}
-
-	if global.ChaEnv == global.TestEnv {
-		stgy.MaxMatchCount = 1
-	}
-
-	return &Pumper{
+	pumper := &Pumper{
 		id:          id,
 		logger:      global.ChaLogger,
 		db:          global.ChaDB,
@@ -113,10 +104,38 @@ func NewPumper(id string, opts ...Option) (*Pumper, error) {
 		entryMap:    entryMap,
 		sumnMap:     sumnMap,
 		matchMap:    matchMap,
-		etcdcli:     cli,
-
+		// etcdcli:     cli,
+		Ctx:  stgy.Ctx,
 		stgy: stgy,
-	}, nil
+	}
+	// setup etcd client
+	// endpoints := []string{stgy.registryURL}
+	// cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// setup mq
+	consumer, err := xamqp.NewRabbitMQ(
+		xamqp.Consumer,
+		pumper.TaskHandlers,
+		xamqp.WithContext(pumper.Ctx),
+		// xamqp.WithRoutingKey(pumper.id),
+		// xamqp.WithQueue("LOC/AREA"),
+	)
+	if err != nil || consumer == nil {
+		return nil, err
+	}
+	pumper.Consumer = consumer
+	if err = consumer.Start(); err != nil {
+		return nil, err
+	}
+
+	if global.ChaEnv == global.TestEnv {
+		stgy.MaxMatchCount = 1
+	}
+
+	return pumper, nil
 }
 
 func (p *Pumper) Schedule() {
@@ -159,8 +178,8 @@ func (p *Pumper) StartEngine() {
 	// go p.LoadAll()
 	go p.Schedule()
 	// get task from etcd
-	go p.getTask()
-	go p.watchTasks()
+	// go p.getTask()
+	// go p.watchTasks()
 
 	go p.fetch()
 	go p.handleResult()

@@ -6,7 +6,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/utils"
 )
 
-type options struct {
+type Strategy struct {
 	Loc       []riotmodel.LOCATION // 地区列表
 	Mode      []riotmodel.GAMEMODE // 游戏模式
 	Lang      []riotmodel.LANG     // 语言
@@ -14,9 +14,9 @@ type options struct {
 	BatchSize int
 }
 
-type Option func(stgy *options) // Strategy的配置选项
+type Setup func(stgy *Strategy) // Strategy的配置选项
 
-var defaultOptions = &options{
+var defaultStrategy = &Strategy{
 	Loc:       []riotmodel.LOCATION{riotmodel.TW2},                          // 默认地区为台湾
 	Mode:      []riotmodel.GAMEMODE{riotmodel.ARAM, riotmodel.CLASSIC},      // 默认模式为大乱斗
 	Lang:      []riotmodel.LANG{riotmodel.LANG_zh_CN, riotmodel.LANG_en_US}, // 默认中文、英文
@@ -25,8 +25,8 @@ var defaultOptions = &options{
 	// LifeTime: -1, // cache forever
 }
 
-func WithLoc(locs ...riotmodel.LOCATION) Option {
-	return func(stgy *options) {
+func WithLoc(locs ...riotmodel.LOCATION) Setup {
+	return func(stgy *Strategy) {
 		tmp := make([]riotmodel.LOCATION, 0, 16)
 		for _, loc := range locs {
 			if 16 < loc {
@@ -39,8 +39,8 @@ func WithLoc(locs ...riotmodel.LOCATION) Option {
 	}
 }
 
-func WithMode(mode ...riotmodel.GAMEMODE) Option {
-	return func(stgy *options) {
+func WithMode(mode ...riotmodel.GAMEMODE) Setup {
+	return func(stgy *Strategy) {
 		tmp := make([]riotmodel.GAMEMODE, 0, 10)
 		for _, m := range mode {
 			if riotmodel.CHERRY < m {
@@ -53,8 +53,8 @@ func WithMode(mode ...riotmodel.GAMEMODE) Option {
 	}
 }
 
-func WithVersions(versions ...string) Option {
-	return func(stgy *options) {
+func WithVersions(versions ...string) Setup {
+	return func(stgy *Strategy) {
 		for _, ver := range versions {
 			if ver == "all" {
 				stgy.Versions = utils.GetCurMajorVersions()
