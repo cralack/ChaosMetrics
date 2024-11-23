@@ -33,7 +33,10 @@ if [ "$setupRequired" = true ] ; then
     # 检查是否已有下载文件
     if [ ! -f "$DOWNLOAD_FILE" ]; then
         echo "Downloading DataDragon assets..."
-        wget "${DOWNLOAD_URL}" -O "$DOWNLOAD_FILE" -P
+        if ! wget "${DOWNLOAD_URL}" -O "$DOWNLOAD_FILE" -P ./; then
+            echo "Download failed."
+            exit 1
+        fi
     else
         echo "Download file $DOWNLOAD_FILE already exists. Skipping download."
     fi
@@ -53,7 +56,9 @@ if [ "$setupRequired" = true ] ; then
     done
 
     # 移动特定目录
-    mv "datadragon/img/champion/" "web/src/assets/datadragon/champion_og"
+    if [ ! -d "web/src/assets/datadragon/champion_og" ]; then
+        mv "datadragon/img/champion/" "web/src/assets/datadragon/champion_og"
+    fi
     mv "datadragon/img/perk-images/" "web/src/assets/datadragon/"
 
     # 清理下载的压缩包和临时目录
