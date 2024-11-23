@@ -1,14 +1,23 @@
-# 默认忽略的文件
+# 忽略的 IDE 配置和元数据文件
 /shelf/
 /workspace.xml
-# 基于编辑器的 HTTP 客户端请求
-/httpRequests/
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-/ChaosMetrics.iml
-/inspectionProfiles/Project_Default.xml
 /vcs.xml
 /watcherTasks.xml
+
+# 数据源和数据库相关配置
+/dataSources/
+/dataSources.local.xml
 /dataSources.xml
+
+# 基于编辑器的 HTTP 客户端请求
+/httpRequests/
+
+# 项目默认设置文件（如代码检查、项目特定配置等）
+/inspectionProfiles/Project_Default.xml
+
+# ESLint 配置文件（可根据需要调整路径）
 /jsLinters/eslint.xml
+
+# JetBrains 特定项目文件（如模块配置）
+/ChaosMetrics.iml
+
