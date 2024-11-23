@@ -1,4 +1,4 @@
-package global
+package xamqp
 
 type MessageQueue interface {
 	Start() error

@@ -1,11 +1,14 @@
 package master
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"sync"
 
 	"github.com/bwmarrin/snowflake"
+	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/pkg/xamqp"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
 	"github.com/cralack/ChaosMetrics/server/utils"
 	"go-micro.dev/v4/registry"
@@ -18,10 +21,10 @@ type Master struct {
 	Loc        string
 	leaderID   string
 	workNodes  map[string]*registry.Node
-	tasks      map[string]*TaskSpec
 	rlock      *sync.RWMutex
 	IDGen      *snowflake.Node
 	etcdCli    *clientv3.Client
+	producer   xamqp.MessageQueue
 	forwardCli publisher.PublisherService
 
 	options
@@ -48,12 +51,25 @@ func New(id string, opts ...Setup) (*Master, error) {
 	}
 
 	// init snowflake
-	machineId, _ := strconv.Atoi(id)
+	machineId, _ := strconv.Atoi(global.ChaConf.System.ID)
 	if node, err := snowflake.NewNode(int64(machineId)); err != nil {
 		return nil, err
 	} else {
 		m.IDGen = node
 	}
+	// init producer for master
+	producer, err := xamqp.NewRabbitMQ(
+		xamqp.Producer,
+		nil,
+		xamqp.WithContext(m.ctx),
+	)
+	if err != nil {
+		return nil, errors.New("init producer for master fail:" + err.Error())
+	}
+	if err = producer.Start(); err != nil {
+		return nil, errors.New("start producer for master fail:" + err.Error())
+	}
+	m.producer = producer
 
 	// init master's etcd client
 	if cli, err2 := clientv3.New(clientv3.Config{
@@ -75,5 +91,4 @@ func (m *Master) Run() {
 
 func (m *Master) SetForwardCli(cli publisher.PublisherService) {
 	m.forwardCli = cli
-
 }

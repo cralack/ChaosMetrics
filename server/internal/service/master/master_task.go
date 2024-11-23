@@ -2,14 +2,12 @@ package master
 
 import (
 	"context"
-	"errors"
 	"time"
 
-	"github.com/cralack/ChaosMetrics/server/internal/global"
+	"github.com/cralack/ChaosMetrics/server/pkg/xamqp"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
 	"github.com/golang/protobuf/ptypes/empty"
 	"go-micro.dev/v4/client"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 )
 
@@ -26,51 +24,34 @@ type TaskSpec struct {
 
 func (m *Master) AddTask(assigner Assigner, tasks ...*TaskSpec) {
 	for _, task := range tasks {
-		task.ID = m.IDGen.Generate().String()
+		if task.ID == "" {
+			task.ID = m.IDGen.Generate().String()
+		}
 
 		if node, err := assigner.Assign(m.workNodes); err != nil {
 			m.logger.Error("assign failed", zap.Error(err))
 			continue
 		} else {
-			task.AssgnedNode = node.Id + "|" + node.Address
-			task.CreationTime = time.Now().Unix()
+			task.AssgnedNode = node.Id
+			if task.CreationTime == 0 {
+				task.CreationTime = time.Now().Unix()
+			}
 			m.logger.Debug("add task", zap.Any("specs", task))
 		}
 
-		if _, err := m.etcdCli.Put(context.Background(),
-			getTaskPath(task.Name), Encode(task)); err != nil {
-			m.logger.Error("put etcd failed", zap.Error(err))
-			continue
+		// producer here
+		body := Encode(task)
+		if err := m.producer.Publish([]byte(body), xamqp.Exchange, task.AssgnedNode, 0); err != nil {
+			m.logger.Error("publish task failed", zap.Error(err))
+		} else {
+			m.logger.Debug("publish task", zap.Any("specs", task))
 		}
 	}
-}
-
-func (m *Master) loadTask() error {
-	resp, err := m.etcdCli.Get(context.Background(), global.TaskPath, clientv3.WithPrefix())
-	if err != nil {
-		return errors.New("master get task from etcd failed")
-	}
-	tasks := make(map[string]*TaskSpec)
-	for _, kv := range resp.Kvs {
-		if t, err2 := Decode(kv.Value); err2 == nil && t != nil {
-			tasks[t.Name] = t
-		}
-	}
-
-	m.rlock.Lock()
-	defer m.rlock.Unlock()
-	m.tasks = tasks
-
-	m.logger.Info("leader init load task", zap.Int("lenth", len(m.tasks)))
-
-	for _, t := range m.tasks {
-		m.AddTask(&SimpleAssigner{}, t)
-	}
-	return nil
 }
 
 var _ publisher.PublisherHandler = &Master{}
 
+// PushTask implement grpc call
 func (m *Master) PushTask(ctx context.Context, ptask *publisher.TaskSpec, out *empty.Empty) error {
 	// mark 'out' as unused
 	_ = out

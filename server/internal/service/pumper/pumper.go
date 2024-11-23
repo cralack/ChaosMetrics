@@ -3,6 +3,7 @@ package pumper
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -39,11 +40,10 @@ type Pumper struct {
 	db     *gorm.DB
 	rdb    *redis.Client
 	lock   *sync.Mutex
-	Ctx    context.Context
 	// etcdcli     *clientv3.Client
 	fetcher     fetcher.Fetcher
 	scheduler   scheduler.Scheduler
-	Consumer    global.MessageQueue
+	consumer    xamqp.MessageQueue
 	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
 	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
 	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
@@ -105,31 +105,23 @@ func NewPumper(id string, opts ...Setup) (*Pumper, error) {
 		sumnMap:     sumnMap,
 		matchMap:    matchMap,
 		// etcdcli:     cli,
-		Ctx:  stgy.Ctx,
 		stgy: stgy,
 	}
-	// setup etcd client
-	// endpoints := []string{stgy.registryURL}
-	// cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	// setup mq
 	consumer, err := xamqp.NewRabbitMQ(
 		xamqp.Consumer,
 		pumper.TaskHandlers,
-		xamqp.WithContext(pumper.Ctx),
-		// xamqp.WithRoutingKey(pumper.id),
-		// xamqp.WithQueue("LOC/AREA"),
+		xamqp.WithContext(pumper.stgy.Ctx),
+		xamqp.WithRoutingKey(pumper.id),
 	)
-	if err != nil || consumer == nil {
-		return nil, err
+	if err != nil {
+		return nil, errors.New("init consumer failed: " + err.Error())
 	}
-	pumper.Consumer = consumer
 	if err = consumer.Start(); err != nil {
 		return nil, err
 	}
+	pumper.consumer = consumer
 
 	if global.ChaEnv == global.TestEnv {
 		stgy.MaxMatchCount = 1
@@ -175,14 +167,10 @@ func (p *Pumper) handleResult() {
 }
 
 func (p *Pumper) StartEngine() {
-	// go p.LoadAll()
 	go p.Schedule()
-	// get task from etcd
-	// go p.getTask()
-	// go p.watchTasks()
-
 	go p.fetch()
 	go p.handleResult()
+	p.logger.Info("start pumper engine")
 }
 
 func (p *Pumper) LoadAll() {

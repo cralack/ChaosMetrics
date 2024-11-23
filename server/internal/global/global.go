@@ -1,6 +1,8 @@
 package global
 
 import (
+	"math/rand"
+
 	"github.com/cralack/ChaosMetrics/server/internal/config"
 	"github.com/redis/go-redis/v9"
 
@@ -24,7 +26,7 @@ var (
 	ChaRDB    *redis.Client
 	ChaViper  *viper.Viper
 	ChaLogger *zap.Logger
-	ChaMQ     MessageQueue
+	ChaRNG    *rand.Rand
 )
 
 const (

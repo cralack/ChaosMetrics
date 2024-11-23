@@ -110,9 +110,6 @@ func (m *Master) IsLeader() bool {
 
 func (m *Master) BecomeLeader() error {
 	m.updateWorkNodes()
-	if err := m.loadTask(); err != nil {
-		return err
-	}
 	atomic.StoreInt32(&m.ready, 1)
 	return nil
 }

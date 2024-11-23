@@ -1,6 +1,8 @@
 package master
 
 import (
+	"context"
+
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"go-micro.dev/v4/registry"
 	"go.uber.org/zap"
@@ -9,6 +11,7 @@ import (
 type options struct {
 	logger      *zap.Logger
 	registry    registry.Registry
+	ctx         context.Context
 	registryURL string
 	GRPCAddress string
 }
@@ -40,5 +43,11 @@ func WithRegistry(registry registry.Registry) Setup {
 func WithGRPCAddress(GRPCAddress string) Setup {
 	return func(opts *options) {
 		opts.GRPCAddress = GRPCAddress
+	}
+}
+
+func WithContext(ctx context.Context) Setup {
+	return func(opts *options) {
+		opts.ctx = ctx
 	}
 }

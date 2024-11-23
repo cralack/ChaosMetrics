@@ -24,7 +24,7 @@ type RabbitMQ struct {
 	roleTag       string
 }
 
-var _ global.MessageQueue = &RabbitMQ{}
+var _ MessageQueue = &RabbitMQ{}
 
 func NewRabbitMQ(role ROLE, handler func([]byte) error, sets ...Setup) (*RabbitMQ, error) {
 	logger := global.ChaLogger
@@ -39,6 +39,7 @@ func NewRabbitMQ(role ROLE, handler func([]byte) error, sets ...Setup) (*RabbitM
 	)
 	conf := &defaultConfig
 	conf.Addr = address
+	conf.AutoDelete = global.ChaConf.AmqpConf.AutoDelete
 	for _, set := range sets {
 		set(conf)
 	}
@@ -71,7 +72,6 @@ func (m *RabbitMQ) Stop() {
 		if err := m.conn.Close(); err != nil {
 			m.logger.Error("rabbitmq connection close failed", zap.Error(err))
 		}
-		m.logger.Info("rabbitmq stopped")
 	}
 }
 
@@ -195,6 +195,7 @@ func (m *RabbitMQ) ReConnect() {
 		for {
 			select {
 			case <-m.ctx.Done():
+				m.logger.Debug("quitting reconnect loop")
 				return
 			default:
 				m.logger.Info("rabbitmq reconnecting...")

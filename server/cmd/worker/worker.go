@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
@@ -28,7 +29,7 @@ var Cmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		Run()
+		Run(cmd.Context())
 	},
 }
 
@@ -42,7 +43,7 @@ func init() {
 	Cmd.Flags().StringVar(&token, "token", "", "set worker token")
 }
 
-func Run() {
+func Run(ctx context.Context) {
 	// load conf
 	conf := global.ChaConf.System
 	logger := global.ChaLogger
@@ -50,6 +51,7 @@ func Run() {
 	conf.ID = workerID
 	conf.GRPCListenAddress = GRPCListenAddress
 	conf.HTTPListenAddress = HTTPListenAddress
+	pumperID := conf.Name + "-" + conf.ID
 
 	area := utils.ConvertRegionStrToArea(region)
 	if workerID == "" {
@@ -59,18 +61,19 @@ func Run() {
 			workerID = fmt.Sprintf("%4d", time.Now().UnixNano())
 		}
 	}
-
-	// start pumper core
+	// init pumper core
 	core, err := pumper.NewPumper(
-		conf.Name+"-"+conf.ID,
+		pumperID,
 		pumper.WithAreaLoc(area),
 		pumper.WithRegistryURL(conf.RegistryAddress),
 		pumper.WithToken(token),
+		pumper.WithContext(ctx),
 	)
 	if err != nil {
 		logger.Panic("init worker failed", zap.Error(err))
 		return
 	}
+	// start core
 	core.StartEngine()
 	logger.Info("starting worker engine...")
 

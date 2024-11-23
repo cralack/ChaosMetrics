@@ -1,6 +1,7 @@
 package pumper
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -21,35 +22,7 @@ var Cmd = &cobra.Command{
 	Use:   "pump",
 	Short: "start a local pumper all",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := ConvertEndmark(end); err != nil {
-			global.ChaLogger.Error("init endmark failed", zap.Error(err))
-			return
-		}
-		switch que {
-		case "solo":
-			ques = append(ques, riotmodel.RANKED_SOLO_5x5)
-		case "flex":
-			ques = append(ques, riotmodel.RANKED_FLEX_SR)
-		case "all":
-			ques = append(ques, riotmodel.RANKED_SOLO_5x5, riotmodel.RANKED_FLEX_SR)
-		default:
-			global.ChaLogger.Error("init ques failed")
-			return
-		}
-		pumper, err := NewPumper(
-			id,
-			WithLoc(utils.ConvertLocStrToLocation(loc)),
-			WithEndMark(tier, rank),
-			WithQues(ques...),
-			WithContext(cmd.Context()),
-		)
-		if err != nil {
-			global.ChaLogger.Error("init pumper failed", zap.Error(err))
-			return
-		}
-
-		pumper.StartEngine()
-		pumper.UpdateAll()
+		Run(cmd.Context())
 	},
 }
 
@@ -58,6 +31,38 @@ func init() {
 	Cmd.Flags().StringVar(&loc, "loc", "na1", "set location")
 	Cmd.Flags().StringVar(&end, "end", "d1", "set end mark")
 	Cmd.Flags().StringVar(&que, "que", "all", "set que")
+}
+
+func Run(ctx context.Context) {
+	if err := ConvertEndmark(end); err != nil {
+		global.ChaLogger.Error("init endmark failed", zap.Error(err))
+		return
+	}
+	switch que {
+	case "solo":
+		ques = append(ques, riotmodel.RANKED_SOLO_5x5)
+	case "flex":
+		ques = append(ques, riotmodel.RANKED_FLEX_SR)
+	case "all":
+		ques = append(ques, riotmodel.RANKED_SOLO_5x5, riotmodel.RANKED_FLEX_SR)
+	default:
+		global.ChaLogger.Error("init ques failed")
+		return
+	}
+	pumper, err := NewPumper(
+		id,
+		WithLoc(utils.ConvertLocStrToLocation(loc)),
+		WithEndMark(tier, rank),
+		WithQues(ques...),
+		WithContext(ctx),
+	)
+	if err != nil {
+		global.ChaLogger.Error("init pumper failed", zap.Error(err))
+		return
+	}
+
+	pumper.StartEngine()
+	// pumper.UpdateAll()
 }
 
 func ConvertEndmark(str string) (err error) {

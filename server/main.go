@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/cralack/ChaosMetrics/server/cmd"
 	_ "github.com/cralack/ChaosMetrics/server/init"
@@ -26,24 +27,18 @@ import (
 //	@externalDocs.url			https://swagger.io/resources/open-api/
 
 func main() {
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	// timer := time.NewTimer(time.Second * 5)
-	errChan := make(chan error, 1)
-	go func() {
-		if err := cmd.RunCmd(ctx); err != nil {
-			errChan <- err
-		}
+	defer func() {
+		cancel()
+		time.Sleep(time.Second * 1)
 	}()
 
-	select {
-	case err := <-errChan:
-		cancel()
-		global.ChaLogger.Error("run app failed:", zap.Error(err))
-	case sig := <-quit:
-		cancel()
-		global.ChaLogger.Info("received signal:", zap.String("signal", sig.String()))
-	}
+	go func() {
+		if err := cmd.RunCmd(ctx); err != nil {
+			global.ChaLogger.Fatal("run app failed:", zap.Error(err))
+		}
+	}()
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+	<-quit // 阻塞等待接收 channel 数据
 }

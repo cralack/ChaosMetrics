@@ -143,8 +143,7 @@ func Test_RabbitMQ_Producer(t *testing.T) {
 			logger.Debug("sent message " + massage)
 		}
 	}
-
-	timer := time.NewTimer(time.Second * 10)
+	timer := time.NewTimer(time.Second * 5)
 	<-timer.C
 }
 
@@ -155,7 +154,6 @@ func Test_RabbitMQ_Consumer(t *testing.T) {
 	ctx = context.WithValue(ctx, "key", "quit")
 	defer cancel()
 	// 初始化消费者实例
-	// consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, nil)
 	consumer, err := xamqp.NewRabbitMQ(xamqp.Consumer, mockHandler(), xamqp.WithContext(ctx))
 	assert.NoError(t, err)
 	assert.NotNil(t, consumer)
@@ -166,9 +164,8 @@ func Test_RabbitMQ_Consumer(t *testing.T) {
 	logger.Info(" [*] Waiting for messages. To exit press CTRL+C")
 
 	// 测试ReConnect
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 1)
 	consumer.ConnNotify <- amqp.ErrClosed
-
 	<-exit
 }
 

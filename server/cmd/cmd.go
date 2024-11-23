@@ -54,14 +54,6 @@ func AddCommands(root *cobra.Command) {
 func RunCmd(ctx context.Context) error {
 	AddCommands(rootCmd)
 	rootCmd.SetContext(ctx)
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				// global.ChaLogger.Info("chaos metrics exit", zap.Error(ctx.Err()))
-			}
-		}
-	}()
 
 	// { // debug master part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
@@ -75,8 +67,7 @@ func RunCmd(ctx context.Context) error {
 	// 	}
 	// }
 
-	{
-		// debug worker part
+	{ // debug worker part
 		cmd, _, err := rootCmd.Find(os.Args[1:])
 		if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
 			arg := "pump"

@@ -1,6 +1,7 @@
 module github.com/cralack/ChaosMetrics/server
 
-go 1.22
+go 1.22.7
+
 toolchain go1.22.9
 
 require (

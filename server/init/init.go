@@ -1,6 +1,9 @@
 package init
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/cralack/ChaosMetrics/server/internal/config"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model"
@@ -44,6 +47,7 @@ func init() {
 
 	global.ChaLogger.Debug("env pkg init succeed")
 
+	global.ChaRNG = rand.New(rand.NewSource(time.Now().UnixNano()))
 	// if.need.AutoMigrate
 	if err = global.ChaDB.AutoMigrate(
 		&riotmodel.LeagueEntryDTO{},

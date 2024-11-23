@@ -43,6 +43,7 @@ func RunGRPCServer(logger *zap.Logger, cfg *config.SystemConf, opts ...interface
 	// init grpc server
 	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))
 	service := micro.NewService(
+		// start a grpc server
 		micro.Server(gs.NewServer(server.Id(cfg.ID))),
 		micro.Name(cfg.Name),
 		micro.Address(cfg.GRPCListenAddress),

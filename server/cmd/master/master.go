@@ -1,6 +1,8 @@
 package master
 
 import (
+	"context"
+
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/master"
 	"github.com/cralack/ChaosMetrics/server/utils/register"
@@ -21,7 +23,7 @@ var Cmd = &cobra.Command{
 	Short: "start a master cluster",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		Run()
+		Run(cmd.Context())
 	},
 }
 
@@ -33,7 +35,7 @@ func init() {
 	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")
 }
 
-func Run() {
+func Run(ctx context.Context) {
 	conf := global.ChaConf.System
 	logger := global.ChaLogger
 	conf.ID = masterId
@@ -41,12 +43,14 @@ func Run() {
 	conf.GRPCListenAddress = GRPCListenAddress
 	conf.HTTPListenAddress = HTTPListenAddress
 
+	// init master
 	m, err := master.New(
 		conf.Name+"-"+conf.ID,
 		master.WithLogger(logger.Named(global.MasterServiceName)),
 		master.WithregistryURL(conf.RegistryAddress),
 		master.WithGRPCAddress(conf.GRPCListenAddress),
 		master.WithRegistry(etcd.NewRegistry(registry.Addrs(conf.RegistryAddress))),
+		master.WithContext(ctx),
 	)
 	if err != nil {
 		logger.Error("start a master service failed", zap.Error(err))
