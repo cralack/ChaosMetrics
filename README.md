@@ -37,6 +37,8 @@
 3. 运行数据收集脚本，从Riot Games API检索最新的各种比赛数据。
 4. 执行分析脚本，进行各种分析并生成可视化结果。
 5. 探索生成的结果和可视化内容，以深入了解各种游戏的见解。
+6. 此外，本项目还包含一个消息队列设计的 UML 文件，位于以下路径：
+[message_queue_design.puml](/ChaosMetrics/server/internal/service/message_queue_design.puml)
 
 ## 贡献和未来改进
 

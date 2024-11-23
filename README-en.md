@@ -41,6 +41,9 @@ include:
    optimal champion combinations.
 5. **Game Duration Analysis**: We investigate the average game duration in each mode and examine factors that contribute
    to shorter or longer matches.
+6. 6. In addition, this project also contains a UML file for message queue design, located at the following path:
+[message_queue_design.puml](/ChaosMetrics/server/internal/service/message_queue_design.puml)
+
 
 ## Results and Visualizations
 
