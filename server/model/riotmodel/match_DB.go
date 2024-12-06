@@ -32,43 +32,46 @@ func (m *MatchDB) TableName() string {
 type ParticipantDB struct {
 	gorm.Model
 
-	MatchID                   uint    `json:"-" gorm:"column:match_id"`                                              // 匹配matchDTO_id
-	MetaMatchID               string  `json:"match_id" gorm:"column:meta_match_id;index;type:varchar(100)"`          // 比赛ID
-	Kills                     int     `json:"kills" gorm:"column:kills;type:smallint"`                               // 击杀数
-	Deaths                    int     `json:"deaths" gorm:"column:deaths;type:smallint"`                             // 死亡数
-	Assists                   int     `json:"assists" gorm:"column:assists;type:smallint"`                           // 助攻数
-	Item0                     int     `json:"item0" gorm:"column:item0;type:int"`                                    // 物品0
-	Item1                     int     `json:"item1" gorm:"column:item1;type:int"`                                    // 物品1
-	Item2                     int     `json:"item2" gorm:"column:item2;type:int"`                                    // 物品2
-	Item3                     int     `json:"item3" gorm:"column:item3;type:int"`                                    // 物品3
-	Item4                     int     `json:"item4" gorm:"column:item4;type:int"`                                    // 物品4
-	Item5                     int     `json:"item5" gorm:"column:item5;type:int"`                                    // 物品5
-	Item6                     int     `json:"item6" gorm:"column:item6;type:int"`                                    // 物品6 (饰品)
-	PentaKills                int     `json:"pentaKills" gorm:"column:penta_kills;type:smallint"`                    // 五杀数
-	QuadraKills               int     `json:"quadraKills" gorm:"column:quadra_kills;type:smallint"`                  // 四杀数
-	TripleKills               int     `json:"tripleKills" gorm:"column:triple_kills;type:smallint"`                  // 三杀数
-	ProfileIcon               int     `json:"profileIcon" gorm:"column:profile_icon;type:int"`                       // 头像图标ID
-	Role                      string  `json:"role" gorm:"column:role;type:varchar(100)"`                             // 角色
-	ChampionName              string  `json:"championName" gorm:"column:champion_name;type:varchar(50)"`             // 英雄名称
-	ChampionID                string  `json:"championId" gorm:"column:champion_id"`                                  // 英雄ID
-	ChampLevel                int     `json:"champLevel" gorm:"column:champ_level;type:smallint"`                    // 英雄等级
-	GameEndedInEarlySurrender bool    `json:"gameEndedInEarlySurrender" gorm:"column:game_ended_in_early_surrender"` // 是否提前投降结束游戏
-	Puuid                     string  `json:"puuid" gorm:"column:puuid;type:varchar(100)"`                           // 参与者UUID
-	SummonerName              string  `json:"summonerName" gorm:"column:summoner_name;type:varchar(100)"`            // 召唤师名称
-	Summoner1Id               int     `json:"summoner1Id" gorm:"column:summoner1_id;type:smallint"`                  // 召唤师技能1ID
-	Summoner2Id               int     `json:"summoner2Id" gorm:"column:summoner2_id;type:smallint"`                  // 召唤师技能2ID
-	JudgeScore                float32 `json:"judgeScore" gorm:"column:judge_score"`                                  // 评分
-	KDA                       float32 `json:"kda" gorm:"column:kda"`                                                 // KDA
-	KP                        float32 `json:"kp" gorm:"column:kp"`                                                   // 击杀参与率
-	TeamId                    int     `json:"teamId" gorm:"column:team_id;type:smallint"`                            // 队伍ID
-	DamageDealt               int     `json:"damageDealt" gorm:"column:damage_dealt"`                                // 造成伤害
-	DamageToken               int     `json:"damageToken" gorm:"column:damage_token"`                                // 承受伤害
-	VisionScore               int     `json:"visionScore" gorm:"column:vision_score;type:smallint"`                  // 视野得分
-	TimeCCingOthers           int     `json:"timeCCingOthers" gorm:"column:time_ccing_others;type:smallint"`         // 控制敌方英雄时间
-	TotalTimeSpentDead        int     `json:"totalTimeSpentDead" gorm:"column:total_time_spent_dead;type:smallint"`  // 总死亡时间
-	TotalMinionsKilled        int     `json:"totalMinionsKilled" gorm:"column:total_minions_killed;type:smallint"`   // 补刀总数
-	Build                     *Build  `gorm:"embedded;embeddedPrefix:build_"`
-	Win                       bool    `json:"win" gorm:"column:win"` // 是否获胜
+	MatchID                   uint   `json:"-" gorm:"column:match_id"`                                              // 匹配matchDTO_id
+	MetaMatchID               string `json:"match_id" gorm:"column:meta_match_id;index;type:varchar(100)"`          // 比赛ID
+	Kills                     int    `json:"kills" gorm:"column:kills;type:smallint"`                               // 击杀数
+	Deaths                    int    `json:"deaths" gorm:"column:deaths;type:smallint"`                             // 死亡数
+	Assists                   int    `json:"assists" gorm:"column:assists;type:smallint"`                           // 助攻数
+	Item0                     int    `json:"item0" gorm:"column:item0;type:int"`                                    // 物品0
+	Item1                     int    `json:"item1" gorm:"column:item1;type:int"`                                    // 物品1
+	Item2                     int    `json:"item2" gorm:"column:item2;type:int"`                                    // 物品2
+	Item3                     int    `json:"item3" gorm:"column:item3;type:int"`                                    // 物品3
+	Item4                     int    `json:"item4" gorm:"column:item4;type:int"`                                    // 物品4
+	Item5                     int    `json:"item5" gorm:"column:item5;type:int"`                                    // 物品5
+	Item6                     int    `json:"item6" gorm:"column:item6;type:int"`                                    // 物品6 (饰品)
+	PentaKills                int    `json:"pentaKills" gorm:"column:penta_kills;type:smallint"`                    // 五杀数
+	QuadraKills               int    `json:"quadraKills" gorm:"column:quadra_kills;type:smallint"`                  // 四杀数
+	TripleKills               int    `json:"tripleKills" gorm:"column:triple_kills;type:smallint"`                  // 三杀数
+	ProfileIcon               int    `json:"profileIcon" gorm:"column:profile_icon;type:int"`                       // 头像图标ID
+	Role                      string `json:"role" gorm:"column:role;type:varchar(100)"`                             // 角色
+	ChampionName              string `json:"championName" gorm:"column:champion_name;type:varchar(50)"`             // 英雄名称
+	ChampionID                string `json:"championId" gorm:"column:champion_id"`                                  // 英雄ID
+	ChampLevel                int    `json:"champLevel" gorm:"column:champ_level;type:smallint"`                    // 英雄等级
+	GameEndedInEarlySurrender bool   `json:"gameEndedInEarlySurrender" gorm:"column:game_ended_in_early_surrender"` // 是否提前投降结束游戏
+	Puuid                     string `json:"puuid" gorm:"column:puuid;type:varchar(100)"`                           // 参与者UUID
+	RiotName                  string `json:"riotName" gorm:"column:riot_name;type:varchar(100)"`
+	RiotTagline               string `json:"riotTagline" gorm:"column:riot_tagline;type:varchar(100)"`
+	// SummonerName              string  `json:"summonerName" gorm:"column:summoner_name;type:varchar(100)"`            // 召唤师名称
+	Summoner1Id        int     `json:"summoner1Id" gorm:"column:summoner1_id;type:smallint"` // 召唤师技能1ID
+	Summoner2Id        int     `json:"summoner2Id" gorm:"column:summoner2_id;type:smallint"` // 召唤师技能2ID
+	MetaSummonerId     string  `json:"metaSummonerId" gorm:"column:meta_summoner_id"`
+	JudgeScore         float32 `json:"judgeScore" gorm:"column:judge_score"`                                 // 评分
+	KDA                float32 `json:"kda" gorm:"column:kda"`                                                // KDA
+	KP                 float32 `json:"kp" gorm:"column:kp"`                                                  // 击杀参与率
+	TeamId             int     `json:"teamId" gorm:"column:team_id;type:smallint"`                           // 队伍ID
+	DamageDealt        int     `json:"damageDealt" gorm:"column:damage_dealt"`                               // 造成伤害
+	DamageToken        int     `json:"damageToken" gorm:"column:damage_token"`                               // 承受伤害
+	VisionScore        int     `json:"visionScore" gorm:"column:vision_score;type:smallint"`                 // 视野得分
+	TimeCCingOthers    int     `json:"timeCCingOthers" gorm:"column:time_ccing_others;type:smallint"`        // 控制敌方英雄时间
+	TotalTimeSpentDead int     `json:"totalTimeSpentDead" gorm:"column:total_time_spent_dead;type:smallint"` // 总死亡时间
+	TotalMinionsKilled int     `json:"totalMinionsKilled" gorm:"column:total_minions_killed;type:smallint"`  // 补刀总数
+	Build              *Build  `gorm:"embedded;embeddedPrefix:build_"`
+	Win                bool    `json:"win" gorm:"column:win"` // 是否获胜
 }
 
 func (p *ParticipantDB) TableName() string {
@@ -132,9 +135,11 @@ func (m *MatchDB) ParseClassicAndARAM(match *MatchDTO, matchTL *MatchTimelineDTO
 			ChampLevel:                p.ChampLevel,
 			GameEndedInEarlySurrender: p.GameEndedInEarlySurrender,
 			Puuid:                     p.Puuid,
-			SummonerName:              p.SummonerName,
+			RiotName:                  p.RiotIdGameName,
+			RiotTagline:               p.RiotIdTagline,
 			Summoner1Id:               p.Summoner1Id,
 			Summoner2Id:               p.Summoner2Id,
+			MetaSummonerId:            p.SummonerId,
 			KDA:                       p.Challenges.KDA,
 			KP:                        p.Challenges.KillParticipation,
 			TeamId:                    p.TeamId,

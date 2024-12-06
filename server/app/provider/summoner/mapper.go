@@ -28,7 +28,7 @@ func (s *SumonerService) HandleSummoner(src *riotmodel.SummonerDTO) (des *respon
 		return nil
 	}
 	des = &response.SummonerDTO{
-		// Name:          src.Name,
+		Name:          src.RiotName,
 		Loc:           src.Loc,
 		ProfileIconID: src.ProfileIconID,
 		SummonerLevel: src.SummonerLevel,
@@ -113,7 +113,8 @@ func ConvertMatchesToDTO(src *riotmodel.MatchDB) (des *response.MatchDTO) {
 	}
 	for i, p := range src.Participants {
 		des.Participants[i] = &response.Participant{
-			SummonerName: p.SummonerName,
+			SummonerName: p.RiotTagline,
+			Tagline:      p.RiotTagline,
 			ChampionName: p.ChampionName,
 			Kills:        p.Kills,
 			Deaths:       p.Deaths,

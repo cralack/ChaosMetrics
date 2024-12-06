@@ -93,18 +93,24 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 	)
 	loc, _ := utils.ConvertLocationToLoHoSTR(loCode)
 	region := utils.ConvertLocationToRegionHost(loCode)
-	// p.loadMatch(loc)
 
 	// init query val
-	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
+	startTime := time.Now().AddDate(0, -2, 0).Unix() // two month ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
 		startTime, endTime, p.stgy.MaxMatchCount)
 
 	for sid, summoner = range p.sumnMap[loc] {
 		matchList := utils.ConvertStrToSlice(summoner.Matches)
-		// ranker || no rank tier && len(match)<require
-		if _, has = p.entryMap[loc][sid]; has || !has && len(matchList) < p.stgy.MaxMatchCount {
+		// ranker || len(match)<require
+		needsUpdate := false
+		if _, has = p.entryMap[loc][sid]; has {
+			needsUpdate = true
+		} else if len(matchList) < p.stgy.MaxMatchCount {
+			needsUpdate = true
+		}
+
+		if needsUpdate {
 			url = fmt.Sprintf("%s/lol/match/v5/matches/by-puuid/%s/ids?%s",
 				region, summoner.PUUID, queryParams)
 			p.scheduler.Push(&scheduler.Task{
@@ -138,7 +144,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	)
 
 	sumID := req.Data.(*matchTask).sumn.MetaSummonerID
-	// fetch match
+	// 1.fetch match
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
 	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match %s failed",
@@ -160,7 +166,8 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		match.Info.GameMode == "CHERRY" {
 		return
 	}
-	// fetch match timeline
+
+	// 2. fetch match timeline
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s/timeline", host, matchID)
 	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match timeline %s failed",
@@ -193,10 +200,24 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		p.logger.Error("parse match failed", zap.Error(err))
 		return nil
 	}
+
+	// update summoner's name when revisionDate > 1day
+	sumn := req.Data.(*matchTask).sumn
+	if sumn.RiotName == "" || time.Now().Sub(sumn.RevisionDate) >= time.Hour*24*3 {
+		for _, par := range res.Participants {
+			if par.MetaSummonerId == sumn.MetaSummonerID && par.RiotName != sumn.RiotName {
+				sumn.FormerName = sumn.RiotName
+				sumn.FormerTagline = sumn.RiotTagline
+				sumn.RiotName = par.RiotName
+				sumn.RiotTagline = par.RiotTagline
+				return
+			}
+		}
+	}
 	return
 }
 
-func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
+func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sID string) {
 	if len(matches) == 0 {
 		return
 	}
@@ -217,9 +238,9 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 		} else {
 			gameId = uint(id)
 		}
-		m.ID = gameId*1e2 + uint(loCode)
+		m.ID = uint(loCode)*1e18 + gameId
 		for i, par := range m.Participants {
-			par.ID = gameId*1e3 + uint(i)*1e2 + uint(loCode)
+			par.ID = uint(loCode)*1e18 + gameId*1e3 + uint(i)
 		}
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
@@ -232,7 +253,7 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	if totalSize < chunkSize {
 		p.out <- &DBResult{
 			Type:  MatchTypeKey,
-			Brief: sName,
+			Brief: sID,
 			Data:  matches,
 		}
 		return
@@ -249,26 +270,30 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sName string) {
 	for _, chunk := range chunks {
 		p.out <- &DBResult{
 			Type:  MatchTypeKey,
-			Brief: sName,
+			Brief: sID,
 			Data:  chunk,
 		}
 	}
 	return
 }
 
-func (p *Pumper) FetchMatchByName(summonerName string, loc riotmodel.LOCATION) error {
+func (p *Pumper) FetchMatchBySumnID(sumnID string, loc riotmodel.LOCATION) {
 	var (
 		puuid  string
 		region string
 		url    string
 		locStr string
+		has    bool
 		sumn   *riotmodel.SummonerDTO
 	)
 	locStr, _ = utils.ConvertLocationToLoHoSTR(loc)
 	region = utils.ConvertLocationToRegionHost(loc)
-	sumn = p.LoadSingleSummoner(summonerName, locStr)
+	if sumn, has = p.sumnMap[locStr][sumnID]; !has {
+		p.logger.Error("no such summoner")
+		return
+	}
 	puuid = sumn.PUUID
-	startTime := time.Now().AddDate(-1, 0, 0).Unix() // one year ago unix
+	startTime := time.Now().AddDate(0, -2, 0).Unix() // one year ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
 		startTime, endTime, p.stgy.MaxMatchCount)
@@ -285,5 +310,4 @@ func (p *Pumper) FetchMatchByName(summonerName string, loc riotmodel.LOCATION) e
 		},
 		Priority: true,
 	})
-	return nil
 }

@@ -165,7 +165,7 @@ func Test_parse_match(t *testing.T) {
 		// fmt.Printf("%s 's TimeCCingOthers:%d\n\r", p.ChampionName, p.TimeCCingOthers)
 		// fmt.Printf("%s 's TotalTimeCCDealt:%d\n\r", p.ChampionName, p.TotalTimeCCDealt)
 		if p.FirstBloodKill {
-			fmt.Println("Champion Name of First Blood Kill:",
+			fmt.Println("Champion RiotName of First Blood Kill:",
 				p.ChampionName)
 			idx = i
 			break

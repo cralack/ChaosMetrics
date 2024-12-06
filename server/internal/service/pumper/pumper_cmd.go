@@ -13,10 +13,10 @@ import (
 	"go.uber.org/zap"
 )
 
-var id, loc, end, que string
+var id_, loc_, end_, que_ string
 var ques []riotmodel.QUECODE
-var tier riotmodel.TIER
-var rank uint
+var tier_ riotmodel.TIER
+var rank_ uint
 
 var Cmd = &cobra.Command{
 	Use:   "pump",
@@ -27,18 +27,18 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.Flags().StringVar(&id, "id", "command", "set id")
-	Cmd.Flags().StringVar(&loc, "loc", "na1", "set location")
-	Cmd.Flags().StringVar(&end, "end", "d1", "set end mark")
-	Cmd.Flags().StringVar(&que, "que", "all", "set que")
+	Cmd.Flags().StringVar(&id_, "id", "command", "set id")
+	Cmd.Flags().StringVar(&loc_, "loc", "na1", "set location")
+	Cmd.Flags().StringVar(&end_, "end", "d1", "set end mark")
+	Cmd.Flags().StringVar(&que_, "que", "all", "set que")
 }
 
 func Run(ctx context.Context) {
-	if err := ConvertEndmark(end); err != nil {
+	if err := ConvertEndmark(end_); err != nil {
 		global.ChaLogger.Error("init endmark failed", zap.Error(err))
 		return
 	}
-	switch que {
+	switch que_ {
 	case "solo":
 		ques = append(ques, riotmodel.RANKED_SOLO_5x5)
 	case "flex":
@@ -50,9 +50,9 @@ func Run(ctx context.Context) {
 		return
 	}
 	pumper, err := NewPumper(
-		id,
-		WithLoc(utils.ConvertLocStrToLocation(loc)),
-		WithEndMark(tier, rank),
+		id_,
+		WithLoc(utils.ConvertLocStrToLocation(loc_)),
+		WithEndMark(tier_, rank_),
 		WithQues(ques...),
 		WithContext(ctx),
 	)
@@ -68,32 +68,32 @@ func Run(ctx context.Context) {
 func ConvertEndmark(str string) (err error) {
 	str = strings.ToUpper(str)
 	rankStr := str[len(str)-1]
-	rank = uint(rankStr - '0')
-	if 4 < rank || rank < 0 {
+	rank_ = uint(rankStr - '0')
+	if 4 < rank_ || rank_ < 0 {
 		return errors.New("wrong rank")
 	}
 
 	switch str[0] {
 	case 'C':
-		tier = riotmodel.CHALLENGER
+		tier_ = riotmodel.CHALLENGER
 	case 'G':
-		tier = riotmodel.GRANDMASTER
+		tier_ = riotmodel.GRANDMASTER
 	case 'M':
-		tier = riotmodel.MASTER
+		tier_ = riotmodel.MASTER
 	case 'D':
-		tier = riotmodel.DIAMOND
+		tier_ = riotmodel.DIAMOND
 	case 'E':
-		tier = riotmodel.EMERALD
+		tier_ = riotmodel.EMERALD
 	case 'P':
-		tier = riotmodel.PLATINUM
+		tier_ = riotmodel.PLATINUM
 	// case 'G':
 	// 	tier = riotmodel.GOLD
 	case 'S':
-		tier = riotmodel.SILVER
+		tier_ = riotmodel.SILVER
 	case 'B':
-		tier = riotmodel.BRONZE
+		tier_ = riotmodel.BRONZE
 	case 'I':
-		tier = riotmodel.IRON
+		tier_ = riotmodel.IRON
 	default:
 		fmt.Println("Unknown tier")
 	}

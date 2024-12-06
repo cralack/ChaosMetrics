@@ -14,6 +14,7 @@ type MatchDTO struct {
 
 type Participant struct {
 	SummonerName string  `json:"summonerName"` // 召唤师名称
+	Tagline      string  `json:"tagline"`
 	ChampionName string  `json:"championName"` // 英雄名称
 	Kills        int     `json:"kills"`        // 击杀数
 	Deaths       int     `json:"deaths"`       // 死亡数

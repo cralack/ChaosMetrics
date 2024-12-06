@@ -70,7 +70,7 @@ type Participant struct {
 	ProfileIcon                    int         `json:"profileIcon" gorm:"column:profile_icon;type:int"`                                          // 头像图标ID
 	Puuid                          string      `json:"puuid" gorm:"column:puuid;type:varchar(100)"`                                              // 参与者UUID
 	QuadraKills                    int         `json:"quadraKills" gorm:"column:quadra_kills;type:smallint"`                                     // 四杀数
-	RiotIdName                     string      `json:"riotIdName" gorm:"column:riot_id_name;type:varchar(100)"`                                  // Riot ID名称
+	RiotIdGameName                 string      `json:"riotIdGameName" gorm:"column:riot_id_name;type:varchar(100)"`                              // Riot ID名称
 	RiotIdTagline                  string      `json:"riotIdTagline" gorm:"column:riot_id_tagline;type:varchar(100)"`                            // Riot ID标签
 	Role                           string      `json:"role" gorm:"column:role;type:varchar(100)"`                                                // 角色
 	SightWardsBoughtInGame         int         `json:"sightWardsBoughtInGame" gorm:"column:sight_wards_bought_in_game;type:smallint"`            // 购买视野守卫数
@@ -123,7 +123,7 @@ type Challenges struct {
 	AlliedJungleMonsterKills                 float32 `json:"alliedJungleMonsterKills" gorm:"column:allied_jungle_monster_kills;type:float"`                                         // 友方野怪击杀数
 	BaronTakedowns                           uint    `json:"baronTakedowns" gorm:"column:baron_takedowns;type:smallint"`                                                            // 击杀男爵次数
 	BlastConeOppositeOpponentCount           uint    `json:"blastConeOppositeOpponentCount" gorm:"column:blast_cone_opposite_opponent_count;type:smallint"`                         // 使用位移锥击飞对方次数
-	BountyGold                               uint    `json:"bountyGold" gorm:"column:bounty_gold;type:smallint"`                                                                    // 赏金金币总数
+	BountyGold                               float32 `json:"bountyGold" gorm:"column:bounty_gold;type:float"`                                                                       // 赏金金币总数
 	BuffsStolen                              uint    `json:"buffsStolen" gorm:"column:buffs_stolen;type:smallint"`                                                                  // 偷取增益效果次数
 	CompleteSupportQuestInTime               uint    `json:"completeSupportQuestInTime" gorm:"column:complete_support_quest_in_time;type:smallint"`                                 // 在时间内完成辅助任务次数
 	ControlWardsPlaced                       uint    `json:"controlWardsPlaced" gorm:"column:control_wards_placed;type:smallint"`                                                   // 放置控制守卫次数
@@ -237,7 +237,7 @@ type PerksDto struct {
 		Flex    int `json:"flex"`    // 弹性属性
 		Offense int `json:"offense"` // 进攻属性
 	} `json:"statPerks"`
-	
+
 	Styles []struct {
 		Description string `json:"description"` // 描述
 		Selections  []struct {
@@ -267,7 +267,7 @@ func (p *PerksDto) parsePerksMeta() string {
 	}
 	perk["statOffense"] = p.StatPerks.Offense
 	perk["statFlex"], perk["statDefence"] = sortPerk(p.StatPerks.Flex, p.StatPerks.Defense)
-	
+
 	return fmt.Sprintf("pri:%d,%d,%d,%d,%d sub:%d,%d,%d stat:%d,%d,%d",
 		perk["priSty"], perk["pri0"], perk["pri1"], perk["pri2"], perk["pri3"],
 		perk["subSty"], perk["sub0"], perk["sub1"],

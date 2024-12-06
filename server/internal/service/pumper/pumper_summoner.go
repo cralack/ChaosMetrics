@@ -26,6 +26,7 @@ func (p *Pumper) UpdateSumoner() {
 		// Generate URLs
 		go p.createSummonerURL(loc)
 	}
+
 	<-p.Exit
 }
 
@@ -116,20 +117,7 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 			},
 		})
 	}
-	// expand from self
-	for _, sumn := range p.sumnMap[loc] {
-		if sumn.MetaSummonerID == "" {
-			ogUrl := fmt.Sprintf("%s/lol/summoner/v4/summoners/by-name/%s", host, sumn.MetaSummonerID)
-			p.scheduler.Push(&scheduler.Task{
-				Type: SummonerTypeKey,
-				Loc:  loc,
-				URL:  ogUrl,
-				Data: &summonerTask{
-					summonerBrief: sumn.MetaSummonerID,
-				},
-			})
-		}
-	}
+
 	// finish signal
 	p.scheduler.Push(&scheduler.Task{
 		Type: SummonerTypeKey,
@@ -227,17 +215,6 @@ func (p *Pumper) summonerCounter(loc string) {
 }
 
 func (p *Pumper) LoadSingleSummoner(name, loc string) (res *riotmodel.SummonerDTO) {
-	// has := false
-	// if res, has = p.sumnMap[loc][name]; has {
-	// 	return res
-	// }
-	// // redis read
-	// key := fmt.Sprintf("/summoner/%s", loc)
-	// buff := p.rdb.HGet(context.Background(), key, sumID).Val()
-	// if err := json.Unmarshal([]byte(buff), &res); err == nil && res.MetaSummonerID == sumID {
-	// 	return res
-	// }
-
 	// db read
 	if err := p.db.Where("loc = ?", loc).Where("name = ?", name).First(&res).Preload(
 		clause.Associations).Error; err == nil && res.MetaSummonerID == name {

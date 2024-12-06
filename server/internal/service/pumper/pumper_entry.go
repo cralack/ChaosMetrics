@@ -3,7 +3,6 @@ package pumper
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -217,41 +216,24 @@ func (p *Pumper) cacheEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {
 	}
 }
 
-func (p *Pumper) FetchEntryByName(summonerName string, loc riotmodel.LOCATION) error {
+func (p *Pumper) FetchEntryBySumnID(sumnID string, loc riotmodel.LOCATION) {
 	var (
-		sumId   string
-		url     string
-		locStr  string
-		host    string
-		buff    []byte
-		err     error
-		sumn    *riotmodel.SummonerDTO
-		entries []*riotmodel.LeagueEntryDTO
+		url    string
+		locStr string
+		host   string
 	)
 	locStr, host = utils.ConvertLocationToLoHoSTR(loc)
-	sumn = p.LoadSingleSummoner(summonerName, locStr)
-	sumId = sumn.MetaSummonerID
 
-	url = fmt.Sprintf("%s/lol/league/v4/entries/by-summoner/%s", host, sumId)
-	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 50 {
-		return errors.New("get summoner by name failed" + err.Error())
-	}
-	if err = json.Unmarshal(buff, &entries); err != nil {
-		return errors.New("unmarshal entry failed" + err.Error())
-	}
-
-	for _, entry := range entries {
-		p.scheduler.Push(&scheduler.Task{
-			Type:     EntryTypeKey,
-			Loc:      locStr,
-			URL:      url,
-			Priority: true,
-			Data: &entryTask{
-				Tier:  entry.Tier,
-				Rank:  entry.Rank,
-				Queue: entry.QueType,
-			},
-		})
-	}
-	return nil
+	url = fmt.Sprintf("%s/lol/league/v4/entries/by-summoner/%s", host, sumnID)
+	p.scheduler.Push(&scheduler.Task{
+		Type:     mortalEntryTypeKey,
+		Priority: true,
+		Loc:      locStr,
+		URL:      url,
+		Data: &entryTask{
+			Tier:  "",
+			Rank:  "",
+			Queue: "",
+		},
+	})
 }

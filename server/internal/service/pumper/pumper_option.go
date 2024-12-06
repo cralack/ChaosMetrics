@@ -159,3 +159,9 @@ func WithContext(ctx context.Context) Setup {
 		opts.Ctx = ctx
 	}
 }
+
+func WithMaxMatchCount(size int) Setup {
+	return func(opts *Strategy) {
+		opts.MaxMatchCount = size
+	}
+}

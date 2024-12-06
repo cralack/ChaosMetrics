@@ -18,7 +18,10 @@ type SummonerDTO struct {
 	AccountID      string    `json:"accountId" gorm:"column:account_id;type:varchar(100)"`      // 加密的账号ID，最长为56个字符
 	ProfileIconID  int       `json:"profileIconId" gorm:"column:profile_icon_id;type:smallint"` // 与召唤师相关联的召唤师图标ID
 	RevisionDate   time.Time `json:"revisionDate" gorm:"column:revision_date"`                  // 召唤师最后修改的日期，以毫秒为单位的时间戳
-	Name           string    `json:"name" gorm:"column:name;index;type:varchar(100)"`           // 召唤师名称
+	RiotName       string    `json:"name" gorm:"column:name;index;type:varchar(100)"`           // Riot名称
+	RiotTagline    string    `json:"tagline" gorm:"column:tagline;type:varchar(100)"`
+	FormerName     string    `json:"formerName" gorm:"column:former_name;type:varchar(100)"`
+	FormerTagline  string    `json:"formerTagline" gorm:"column:former_tagline;type:varchar(100)"`
 	MetaSummonerID string    `json:"id" gorm:"column:meta_summoner_id;index;type:varchar(100)"` // 加密的召唤师ID，最长为63个字符
 	PUUID          string    `json:"puuid" gorm:"column:puuid;type:varchar(100)"`               // 加密的PUUID，长度为78个字符
 	SummonerLevel  int       `json:"summonerLevel" gorm:"column:summoner_level;type:smallint"`  // 召唤师等级
@@ -70,8 +73,8 @@ func (s *SummonerDTO) UnmarshalJSON(data []byte) error {
 				global.ChaLogger.Error("parse failed", zap.Error(err))
 				return err
 			}
-		case "name":
-			s.Name = v.(string)
+		// case "name":
+		// 	s.RiotName = v.(string)
 		case "id":
 			s.MetaSummonerID = v.(string)
 		case "puuid":

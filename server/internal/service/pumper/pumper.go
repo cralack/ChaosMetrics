@@ -32,6 +32,8 @@ const (
 	SummonerTypeKey    = "sum"
 	MatchTypeKey       = "match"
 	finishTypeKey      = "finish"
+	entryBySumnID      = "entryBySummoner"
+	matchBySumnID      = "matchBySummoner"
 )
 
 type Pumper struct {
@@ -205,9 +207,9 @@ func (p *Pumper) fetch() {
 	endTier, endRank = ConvertRankToStr(p.stgy.TestEndMark1, p.stgy.TestEndMark2)
 	// catch panic
 	defer func() {
-		if err := recover(); err != nil {
+		if er := recover(); er != nil {
 			p.logger.Error("fetcher panic",
-				zap.Any("err", err),
+				zap.Any("err", er),
 				zap.String("stack", string(debug.Stack())))
 		}
 	}()
@@ -365,7 +367,7 @@ func (p *Pumper) fetch() {
 			summoner := data.sumn
 			summoner.Matches = utils.ConvertSliceToStr(curMatchList)
 			cnt++
-			p.handleSummoner(req.Loc, summoner)
+
 			// init val
 			matches = make([]*riotmodel.MatchDB, 0, p.stgy.MaxMatchCount)
 			loc := utils.ConvertLocStrToLocation(req.Loc)
@@ -384,8 +386,10 @@ func (p *Pumper) fetch() {
 					}
 				}
 			}
-			p.logger.Debug(fmt.Sprintf("updating %s's match list @ %d,store %d matches",
-				summoner.MetaSummonerID, cnt, len(matches)))
+			p.handleSummoner(req.Loc, summoner)
+
+			p.logger.Debug(fmt.Sprintf("updating %s#%s's match list @ %d,store %d matches",
+				summoner.RiotName, summoner.RiotTagline, cnt, len(matches)))
 			if cnt == int(p.summonerIdx[loc]) {
 				p.rdb.HSet(context.Background(), "lastupdate", "pumper", time.Now().Unix())
 			}
@@ -393,6 +397,8 @@ func (p *Pumper) fetch() {
 				continue
 			}
 			p.handleMatches(matches, summoner.MetaSummonerID)
+
+			// case entryBySumnID:
 		}
 	}
 }
