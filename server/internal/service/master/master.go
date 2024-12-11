@@ -51,7 +51,7 @@ func New(id string, opts ...Setup) (*Master, error) {
 	}
 
 	// init snowflake
-	machineId, _ := strconv.Atoi(global.ChaConf.System.ID)
+	machineId, _ := strconv.Atoi(global.ChaConf.Micro.ID)
 	if node, err := snowflake.NewNode(int64(machineId)); err != nil {
 		return nil, err
 	} else {

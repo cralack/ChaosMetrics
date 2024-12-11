@@ -68,7 +68,8 @@ func (s *UsrService) SendVerifyEmail(tar *model.User, token string) error {
 	message.SetHeader("From", conf.Username)
 	message.SetAddressHeader("To", tar.Email, tar.NickName)
 	message.SetHeader("Subject", "Thanks for register")
-	link := fmt.Sprintf("%s/user/verify?token=%s", global.ChaConf.System.Domain, token)
+	link := fmt.Sprintf("%s:%s/user/verify?token=%s",
+		global.ChaConf.Router.DomainHost, global.ChaConf.Router.DomainPort, token)
 	message.SetBody("text/html", fmt.Sprintf("Click the following link to verify:<br><a href=\"%s\">here</a> ", link))
 
 	if err := dialer.DialAndSend(message); err != nil {

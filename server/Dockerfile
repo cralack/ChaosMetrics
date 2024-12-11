@@ -23,4 +23,4 @@ COPY --from=BUILDER /app/config.yaml ./config.yaml
 COPY --from=BUILDER /app/api_key ./
 COPY --from=BUILDER /app/email_key ./
 
-CMD ["sh", "-c", "echo $API_KEY > /root/api_key && echo $EMAIL_KEY > /root/email_key && /bin/bash"]
+CMD ["/bin/sh", "-c", "echo $API_KEY > /root/api_key && echo $EMAIL_KEY > /root/email_key && ./server worker"]

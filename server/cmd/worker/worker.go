@@ -45,25 +45,24 @@ func init() {
 
 func Run(ctx context.Context) {
 	// load conf
-	conf := global.ChaConf.System
+	conf := global.ChaConf.Micro
 	logger := global.ChaLogger
 	conf.Name = global.WorkerServiceName
 	conf.ID = workerID
 	conf.GRPCListenAddress = GRPCListenAddress
 	conf.HTTPListenAddress = HTTPListenAddress
-	pumperID := conf.Name + "-" + conf.ID
 
 	area := utils.ConvertRegionStrToArea(region)
-	if workerID == "" {
+	if conf.ID == "" {
 		if podIP != "" {
-			workerID = strconv.Itoa(int(utils.GetIDbyIP(podIP)))
+			conf.ID = strconv.Itoa(int(utils.GetIDbyIP(podIP)))
 		} else {
-			workerID = fmt.Sprintf("%4d", time.Now().UnixNano())
+			conf.ID = fmt.Sprintf("%4d", time.Now().UnixNano())
 		}
 	}
 	// init pumper core
 	core, err := pumper.NewPumper(
-		pumperID,
+		conf.Name+"-"+conf.ID,
 		pumper.WithAreaLoc(area),
 		pumper.WithRegistryURL(conf.RegistryAddress),
 		pumper.WithToken(token),

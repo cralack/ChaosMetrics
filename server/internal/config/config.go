@@ -7,7 +7,8 @@ type Root struct {
 	RedisConf *RedisConfig    `mapstructure:"redis"`
 	LogConf   *LoggerConfig   `mapstructure:"logger"`
 	Fetcher   *FetcherConfig  `mapstructure:"fetcher"`
-	System    *SystemConf     `mapstructure:"system"`
+	Micro     *MicroServ      `mapstructure:"micro"`
+	Router    *Router         `mapstructure:"router"`
 	JwtConf   *JwtConfig      `mapstructure:"jwt"`
 	EmailConf *EmailConf      `mapstructure:"smtp"`
 	AmqpConf  *AmqpConfig     `mapstructure:"amqp"`

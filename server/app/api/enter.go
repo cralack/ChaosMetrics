@@ -21,8 +21,8 @@ import (
 
 func RegisterRoutes(r *gin.Engine) {
 	// register swagger
-	docs.SwaggerInfo.BasePath = global.ChaConf.System.RouterPrefix
-	r.GET(global.ChaConf.System.RouterPrefix+"/swagger/*any",
+	docs.SwaggerInfo.BasePath = global.ChaConf.Router.RouterPrefix
+	r.GET(global.ChaConf.Router.RouterPrefix+"/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler))
 	global.ChaLogger.Info("register swagger handler")
 	// cors
@@ -32,7 +32,7 @@ func RegisterRoutes(r *gin.Engine) {
 	c := cors.New(corsConfig)
 	r.Use(c)
 
-	PublicGroup := r.Group(global.ChaConf.System.RouterPrefix)
+	PublicGroup := r.Group(global.ChaConf.Router.RouterPrefix)
 	{
 		PublicGroup.GET("/health", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, "ok")
@@ -45,7 +45,7 @@ func RegisterRoutes(r *gin.Engine) {
 		common.InitCommonAPI(PublicGroup)
 	}
 
-	PrivateGroup := r.Group(global.ChaConf.System.RouterPrefix)
+	PrivateGroup := r.Group(global.ChaConf.Router.RouterPrefix)
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 	{
 		comment.InitCommentRouter(PrivateGroup)

@@ -10,8 +10,8 @@ import (
 )
 
 func Test_router(t *testing.T) {
-	prefix := global.ChaConf.System.RouterPrefix
-	logger.Debug(fmt.Sprintf("prifix:%s", prefix))
+	routeConf := global.ChaConf.Router
+	logger.Debug(fmt.Sprintf("prifix:%s", routeConf.RouterPrefix))
 
 	r := router.New()
 

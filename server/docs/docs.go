@@ -1388,6 +1388,9 @@ const docTemplate = `{
                     "description": "召唤师名称",
                     "type": "string"
                 },
+                "tagline": {
+                    "type": "string"
+                },
                 "teamId": {
                     "description": "队伍ID",
                     "type": "integer"

@@ -36,7 +36,7 @@ func init() {
 }
 
 func Run(ctx context.Context) {
-	conf := global.ChaConf.System
+	conf := global.ChaConf.Micro
 	logger := global.ChaLogger
 	conf.ID = masterId
 	conf.Name = global.MasterServiceName

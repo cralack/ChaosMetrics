@@ -19,7 +19,7 @@ func CasbinHandler() gin.HandlerFunc {
 			waitUse, _ := utils.GetClaims(ctx)
 			// 获取请求的PATH
 			path := ctx.Request.URL.Path
-			obj := strings.TrimPrefix(path, global.ChaConf.System.RouterPrefix)
+			obj := strings.TrimPrefix(path, global.ChaConf.Router.RouterPrefix)
 			// 获取请求方法
 			act := ctx.Request.Method
 			// 获取用户的角色

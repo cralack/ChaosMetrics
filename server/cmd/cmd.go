@@ -81,9 +81,9 @@ func RunCmd(ctx context.Context) error {
 	// { // debug worker part
 	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
 	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
-	// 		arg := "pump"
-	// 		extraArg1 := "--id=1"
-	// 		args := append([]string{arg, extraArg1}, os.Args[1:]...)
+	// 		arg := "worker"
+	// 		// extraArg1 := "--id=1"
+	// 		args := append([]string{arg}, os.Args[1:]...)
 	// 		rootCmd.SetArgs(args)
 	// 	}
 	// }

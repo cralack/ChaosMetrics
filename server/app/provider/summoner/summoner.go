@@ -34,7 +34,7 @@ func NewSumnService(params ...interface{}) *SumonerService {
 	if len(params) > 0 {
 		global.ChaLogger.Debug("param", zap.Int("len", len(params)))
 	}
-	conf := global.ChaConf.System
+	conf := global.ChaConf.Micro
 	reg := etcd.NewRegistry(registry.Addrs(conf.RegistryAddress))
 	name := "gin.grpc.client"
 

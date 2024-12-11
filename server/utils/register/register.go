@@ -39,7 +39,7 @@ func (g *Greeter) Hello(ctx context.Context, in *empty.Empty, out *empty.Empty) 
 }
 
 // RunGRPCServer and regestry worker to etcd
-func RunGRPCServer(logger *zap.Logger, cfg *config.SystemConf, opts ...interface{}) {
+func RunGRPCServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{}) {
 	// init grpc server
 	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))
 	service := micro.NewService(
@@ -79,7 +79,7 @@ func RunGRPCServer(logger *zap.Logger, cfg *config.SystemConf, opts ...interface
 	}
 }
 
-func RunHTTPServer(logger *zap.Logger, cfg *config.SystemConf, opts ...interface{}) {
+func RunHTTPServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{}) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
