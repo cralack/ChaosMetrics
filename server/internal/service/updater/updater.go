@@ -80,18 +80,13 @@ func (u *Updater) UpdateVersions() (version []string) {
 	if err = json.Unmarshal(buff, &version); err != nil {
 		u.logger.Error("unmarshal json to version failed", zap.Error(err))
 	}
-	idx := 0
 
 	for i, v := range version {
-		if v == "14.9.1" {
-			idx = i
-		}
 		if v == "3.6.14" {
 			version = version[:i+1]
 			break
 		}
 	}
-	version = version[idx:]
 	// store to redis
 	key := "/version"
 	buff, _ = json.Marshal(version)
@@ -208,8 +203,8 @@ func (u *Updater) UpdateChampions(version string) {
 				continue
 			} else {
 				cnt++
-				// u.logger.Debug(fmt.Sprintf("fetch %03d/%03d %s@%s succeed",
-				// 	cnt, len(cList), chamID, lang))
+				u.logger.Debug(fmt.Sprintf("fetch %03d/%03d %s@%s succeed",
+					cnt, len(cList), chamID, lang))
 			}
 			cham = tmp.Data[chamID]
 			cmds = append(cmds, pipe.HSet(ctx, key, fmt.Sprintf("%s@%d", cham.ID, vIdx), cham))
@@ -220,7 +215,6 @@ func (u *Updater) UpdateChampions(version string) {
 			u.logger.Error("redis store champions failed", zap.Error(err))
 		} else {
 			u.logger.Info(fmt.Sprintf("%d@%s's champion(%d/%d) store done", vIdx, lang, cnt, len(cList)))
-
 		}
 	}
 	return

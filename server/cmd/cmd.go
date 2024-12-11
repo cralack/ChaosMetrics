@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"context"
-	"os"
 
 	"github.com/cralack/ChaosMetrics/server/cmd/master"
 	"github.com/cralack/ChaosMetrics/server/cmd/worker"
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/pumper"
 	"github.com/cralack/ChaosMetrics/server/internal/service/router"
+	"github.com/cralack/ChaosMetrics/server/internal/service/updater"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -47,6 +47,7 @@ func AddCommands(root *cobra.Command) {
 		worker.Cmd,
 		router.Cmd,
 		pumper.Cmd,
+		updater.Cmd,
 		envCmd,
 	)
 }
@@ -67,14 +68,14 @@ func RunCmd(ctx context.Context) error {
 	// 	}
 	// }
 
-	{ // debug worker part
-		cmd, _, err := rootCmd.Find(os.Args[1:])
-		if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
-			arg := "pump"
-			extraArg1 := "--id=1"
-			args := append([]string{arg, extraArg1}, os.Args[1:]...)
-			rootCmd.SetArgs(args)
-		}
-	}
+	// { // debug worker part
+	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
+	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
+	// 		arg := "pump"
+	// 		extraArg1 := "--id=1"
+	// 		args := append([]string{arg, extraArg1}, os.Args[1:]...)
+	// 		rootCmd.SetArgs(args)
+	// 	}
+	// }
 	return rootCmd.Execute()
 }
