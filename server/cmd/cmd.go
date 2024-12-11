@@ -29,6 +29,15 @@ var envCmd = &cobra.Command{
 	},
 }
 
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "get current version",
+	Args:  cobra.NoArgs,
+	Run: func(cmd *cobra.Command, args []string) {
+		global.ChaLogger.Info("chaos metris current version: v0.9")
+	},
+}
+
 var rootCmd = &cobra.Command{
 	Use:     "chao",
 	Aliases: []string{"cm"},
@@ -48,6 +57,7 @@ func AddCommands(root *cobra.Command) {
 		router.Cmd,
 		pumper.Cmd,
 		updater.Cmd,
+		versionCmd,
 		envCmd,
 	)
 }
