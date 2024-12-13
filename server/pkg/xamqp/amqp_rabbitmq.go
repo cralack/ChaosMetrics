@@ -169,7 +169,7 @@ func (m *RabbitMQ) ReConnect() {
 				m.logger.Error("rabbitmq Channel NotifyClose", zap.Error(err))
 			}
 		case <-m.ctx.Done():
-			m.logger.Debug("rabbitmq quitting...")
+			m.logger.Info("rabbitmq quitting...")
 			return
 		}
 

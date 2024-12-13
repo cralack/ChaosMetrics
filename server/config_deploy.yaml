@@ -1,0 +1,86 @@
+env: product  # 环境(test|dev|product)
+
+database:
+  driver: mysql                         # 连接驱动
+  host: 172.17.0.3                       # 数据库服务器的 IP 地址
+  port: 3306                            # 数据库服务器的端口号
+  dbname: chaosmetrics                  # 数据库名称
+  username: root                        # 数据库用户名
+  password: "123456"                    # 数据库密码
+  charset: utf8mb4                      # 字符集
+  collation: utf8mb4_unicode_ci         # 字符序
+  timeout: 10s                          # 连接超时时间
+  read_timeout: 2s                      # 读超时时间
+  write_timeout: 2s                     # 写超时时间
+  parse_time: true                      # 是否解析时间
+  protocol: tcp                         # 传输协议
+  loc: Local                            # 时区
+  conn_max_idle: 10                     # 连接池最大空闲连接数
+  conn_max_open: 100                    # 连接池最大连接数
+  conn_max_lifetime: 1h                 # 连接的最大生命周期
+
+logger:
+  maxsize: 500                          # 日志文件的最大大小，以兆字节（M）为单位
+  maxbackups: 3                         # 保留的旧日志文件的最大数量
+  maxage: 30                            # 保留旧日志文件的最大天数
+  localtime: true                       # 是否使用本地时间记录日志
+  compress: true                        # 是否压缩旧的日志文件
+
+fetcher:
+  timeout: 15                           # 连接超时时间
+  header:
+    user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36  # 用户代理
+    accept_language: zh-CN,zh;q=0.9,ja-JP;q=0.8,ja;q=0.7                                           # 接受的语言
+    accept_charset: application/x-www-form-urlencoded; charset=UTF-8                               # 接受的字符集
+    origin: https://developer.riotgames.com                                                        # 请求来源
+  rate_limiter:
+    each_sec: 20                          # 每秒允许的 API 请求次数限制
+    each_2min: 98                         # 每两分钟允许的 API 请求次数限制
+
+redis:
+  host: 172.17.0.2                       # IP地址
+  port: 6379                             # 端口
+  db: 0                                  # 数据库编号
+  username: testman                      # 用户名
+  password: ""                           # 密码
+  timeout: 10s                           # 连接超时
+  read_timeout: 2s                       # 读超时
+  write_timeout: 2s                      # 写超时
+  conn_min_idle: 10                      # 连接池最小空闲连接数
+  conn_max_open: 20                      # 连接池最大连接数
+  conn_max_lifetime: 1h                  # 连接的最大生命周期
+  conn_max_idletime: 1h                  # 连接数空闲时长
+
+router:
+  domain:                                # 系统域名或地址，用于访问系统服务
+  domain_host: localhost
+  domain_port: 8080
+  router_prefix: ""                      # 路由前缀，用于API网关等场景下的URL前缀设置
+
+micro:
+  registry_address: 172.17.0.4            # 注册中心地址，用于服务发现和注册
+  registry_port: 2379                    # 注册中心端口，用于服务发现和注册
+  register_ttl: 60                       # 注册生存时间（秒），注册信息在此时间后过期需要重新注册
+  register_interval: 15                  # 注册间隔（秒），服务每隔这段时间重新注册一次
+  client_timeout: 10                     # 客户端请求超时时间（秒）
+
+
+jwt:
+  signing_key: open sesame               # JWT签名密钥，用于令牌的签发和验证
+  expires_time: 1h                       # 令牌过期时间，1小时后令牌失效
+  buffer_time: 15m                       # 缓冲时间，令牌在过期前这段时间内可被刷新
+  issuer: chaos                          # 令牌发行者标识
+
+smtp:
+  host: "smtp.163.com"                   # SMTP服务器地址，用于发送电子邮件
+  port: 465                              # SMTP服务器端口，常用465或587（SSL/TLS加密）
+  from: "Chaos Metrics"                  # 发件人名称，邮件中显示的发件人信息
+  username: "cralack@163.com"            # SMTP服务器登录用户名，通常是你的邮箱地址
+  password: "email_key"                  # SMTP服务器登录密码，或者是应用专用密码/授权码
+
+amqp:
+  user: guest          # 用户名，用于连接 RabbitMQ 服务器
+  password: guest      # 密码，用于连接 RabbitMQ 服务器
+  host: 172.17.0.5      # MQ 服务器的 IP 地址或主机名
+  port: 5672         # MQ 服务器的端口号，默认是 5672
+  auto_delete: true   # 是否自动删除队列，当最后一个消费者断开连接后删除

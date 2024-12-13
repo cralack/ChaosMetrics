@@ -1,4 +1,4 @@
-FROM golang:alpine AS BUILDER
+FROM golang:alpine AS builder
 
 LABEL maintainer="cralack92@gmail.com"
 WORKDIR /app
@@ -11,16 +11,19 @@ RUN go env -w GO111MODULE=on \
     && go mod tidy \
     && go build -o server .
 
-RUN touch /app/api_key \
+RUN rm -f /app/api_key \
+    && rm -f /app/email_key \
+    && touch /app/api_key \
     && touch /app/email_key
 
 FROM alpine:latest
 RUN apk --no-cache add bash
 WORKDIR /root/
 
-COPY --from=BUILDER /app/server ./server
-COPY --from=BUILDER /app/config.yaml ./config.yaml
-COPY --from=BUILDER /app/api_key ./
-COPY --from=BUILDER /app/email_key ./
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/config_deploy.yaml ./config.yaml
+COPY --from=builder /app/api_key ./
+COPY --from=builder /app/email_key ./
 
-CMD ["/bin/sh", "-c", "echo $API_KEY > /root/api_key && echo $EMAIL_KEY > /root/email_key && ./server worker"]
+ENTRYPOINT ["./server"]
+CMD ["worker"]

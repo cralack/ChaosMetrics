@@ -88,6 +88,9 @@ func NewPumper(id string, opts ...Setup) (*Pumper, error) {
 			global.ChaLogger.Error("get api key failed",
 				zap.Error(err))
 		}
+		if string(buff) == "" {
+			buff = []byte(os.Getenv("API_KEY"))
+		}
 		stgy.Token = utils.RemoveExtraLF(string(buff))
 	}
 

@@ -122,9 +122,9 @@ func (m *Master) WatchWorker() chan *registry.Result {
 	ch := make(chan *registry.Result)
 	go func() {
 		for {
-			res, err := watcher.Next()
-			if err != nil {
-				m.logger.Error("watch worker service failed", zap.Error(err))
+			res, err2 := watcher.Next()
+			if err2 != nil {
+				m.logger.Error("watch worker service failed", zap.Error(err2))
 				continue
 			}
 			ch <- res

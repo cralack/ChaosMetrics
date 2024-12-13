@@ -97,7 +97,7 @@ func RunHTTPServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{
 		logger.Fatal(fmt.Sprintf("register %s grpc http proxy failed", cfg.Name))
 	}
 
-	logger.Debug(fmt.Sprintf("grpc's http proxy listening on %v", cfg.HTTPListenAddress))
+	logger.Info(fmt.Sprintf("grpc's http proxy listening on %v", cfg.HTTPListenAddress))
 	if err = http.ListenAndServe(cfg.HTTPListenAddress, mux); err != nil {
 		logger.Fatal("HTTPListenAndServe failed")
 	}

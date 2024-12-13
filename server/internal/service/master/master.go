@@ -35,11 +35,11 @@ func New(id string, opts ...Setup) (*Master, error) {
 		workNodes: make(map[string]*registry.Node),
 		rlock:     &sync.RWMutex{},
 	}
-	options := defaultOptions
+	optis := defaultOptions
 	for _, opt := range opts {
-		opt(&options)
+		opt(&optis)
 	}
-	m.options = options
+	m.options = optis
 
 	// init masterID
 

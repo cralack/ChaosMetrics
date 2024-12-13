@@ -71,6 +71,9 @@ func Viper() (*viper.Viper, error) {
 		if err2 != nil {
 			fmt.Println("load email client passwd failed")
 		}
+		if string(buff) == "" {
+			buff = []byte(os.Getenv("EMAIL_KEY"))
+		}
 		conf.EmailConf.Passwd = utils.RemoveExtraLF(string(buff))
 	}
 
