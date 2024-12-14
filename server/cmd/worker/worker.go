@@ -64,7 +64,7 @@ func Run(ctx context.Context) {
 	core, err := pumper.NewPumper(
 		conf.Name+"-"+conf.ID,
 		pumper.WithAreaLoc(area),
-		pumper.WithRegistryURL(conf.RegistryAddress),
+		// pumper.WithRegistryURL(conf.RegistryAddress),
 		pumper.WithToken(token),
 		pumper.WithContext(ctx),
 	)

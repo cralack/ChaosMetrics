@@ -17,7 +17,6 @@ type DirTree struct {
 	WorkDir string
 	LogDir  string
 	TestDir string
-	// ConfDir string
 }
 
 func New() *Root {

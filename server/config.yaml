@@ -1,3 +1,4 @@
+---
 env: dev  # 环境(test|dev|product)
 
 database:
@@ -64,7 +65,6 @@ micro:
   register_interval: 15                  # 注册间隔（秒），服务每隔这段时间重新注册一次
   client_timeout: 10                     # 客户端请求超时时间（秒）
 
-
 jwt:
   signing_key: open sesame               # JWT签名密钥，用于令牌的签发和验证
   expires_time: 1h                       # 令牌过期时间，1小时后令牌失效
@@ -82,5 +82,5 @@ amqp:
   user: guest          # 用户名，用于连接 RabbitMQ 服务器
   password: guest      # 密码，用于连接 RabbitMQ 服务器
   host: localhost      # MQ 服务器的 IP 地址或主机名
-  port: 5672         # MQ 服务器的端口号，默认是 5672
-  auto_delete: true   # 是否自动删除队列，当最后一个消费者断开连接后删除
+  port: 5672           # MQ 服务器的端口号，默认是 5672
+  auto_delete: true    # 是否自动删除队列，当最后一个消费者断开连接后删除

@@ -10,8 +10,8 @@ import (
 )
 
 type Strategy struct {
-	Token         string
-	registryURL   string
+	Token string
+	// registryURL   string
 	Ctx           context.Context
 	Loc           []riotmodel.LOCATION // 地区列表
 	Que           []riotmodel.QUECODE  // 队列类型列表
@@ -133,11 +133,11 @@ func WithToken(token string) Setup {
 	}
 }
 
-func WithRegistryURL(registryURL string) Setup {
-	return func(opts *Strategy) {
-		opts.registryURL = registryURL
-	}
-}
+// func WithRegistryURL(registryURL string) Setup {
+// 	return func(opts *Strategy) {
+// 		opts.registryURL = registryURL
+// 	}
+// }
 
 // WithQues (riotmodel.RANKED_SOLO_5x5)
 func WithQues(ques ...riotmodel.QUECODE) Setup {

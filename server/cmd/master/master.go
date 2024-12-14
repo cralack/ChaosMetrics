@@ -2,6 +2,7 @@ package master
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/master"
@@ -42,14 +43,15 @@ func Run(ctx context.Context) {
 	conf.Name = global.MasterServiceName
 	conf.GRPCListenAddress = GRPCListenAddress
 	conf.HTTPListenAddress = HTTPListenAddress
+	regUrl := fmt.Sprintf("%s:%s", conf.RegistryAddress, conf.RegistryPort)
 
 	// init master
 	m, err := master.New(
 		conf.Name+"-"+conf.ID,
 		master.WithLogger(logger.Named(global.MasterServiceName)),
-		master.WithregistryURL(conf.RegistryAddress),
+		master.WithregistryURL(regUrl),
 		master.WithGRPCAddress(conf.GRPCListenAddress),
-		master.WithRegistry(etcd.NewRegistry(registry.Addrs(conf.RegistryAddress))),
+		master.WithRegistry(etcd.NewRegistry(registry.Addrs(regUrl))),
 		master.WithContext(ctx),
 	)
 	if err != nil {
