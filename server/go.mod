@@ -30,7 +30,7 @@ require (
 	go-micro.dev/v4 v4.11.0
 	go.etcd.io/etcd/client/v3 v3.5.17
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.30.0
+	golang.org/x/crypto v0.31.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697
 	google.golang.org/grpc v1.68.1
 	google.golang.org/protobuf v1.35.2
