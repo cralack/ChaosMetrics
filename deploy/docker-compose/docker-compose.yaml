@@ -1,0 +1,169 @@
+---
+
+networks:
+  container-net:
+    driver: bridge
+
+services:
+  worker:
+    build:
+      context: ../../server
+      dockerfile: ./Dockerfile
+      args:
+        IMAGE_NAME: worker
+    command: worker --id=1 --http=:8081 --grpc=:9091
+    ports:
+      - "8081:8081"
+      - "9091:9091"
+    networks:
+      - container-net
+    environment:
+      API_KEY:
+        1xxxx
+      EMAIL_KEY:
+        2xxxx
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      etcd:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  master:
+    build:
+      context: ../../server
+      dockerfile: ./Dockerfile
+      args:
+        IMAGE_NAME: worker
+    command: master --id=1 --http=:8082 --grpc=:9092
+    ports:
+      - "8082:8082"
+      - "9092:9092"
+    networks:
+      - container-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      etcd:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.3
+    restart: always
+    environment:
+      MYSQL_DATABASE: "chaosmetrics"
+      MYSQL_USER: "chaos"
+      MYSQL_PASSWORD: "123456"
+      MYSQL_ROOT_PASSWORD: "123456"
+      TZ: 'Asia/Shanghai'
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - container-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis:
+    image: redis:7.2
+    restart: always
+    environment:
+      REDIS_PASSWORD: ""
+    ports:
+      - "6379:6379"
+    expose:
+      - 6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - container-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rabbitmq:
+    build:
+      context: ../docker
+      dockerfile: ./rabbitmq.Dockerfile
+      args:
+        IMAGE_NAME: cus_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # Admin UI port
+    expose:
+      - 5672
+      - 15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - container-net
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  etcd:
+    image: gcr.io/etcd-development/etcd:v3.5.6
+    volumes:
+      - /tmp/etcd:/etcd-data
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    expose:
+      - 2379
+      - 2380
+    networks:
+      - container-net
+    environment:
+      - ETCDCTL_API=3
+    command:
+      - /usr/local/bin/etcd
+      - --data-dir=/etcd-data
+      - --name
+      - etcd
+      - --initial-advertise-peer-urls
+      - http://0.0.0.0:2380
+      - --listen-peer-urls
+      - http://0.0.0.0:2380
+      - --advertise-client-urls
+      - http://0.0.0.0:2379
+      - --listen-client-urls
+      - http://0.0.0.0:2379
+      - --initial-cluster
+      - etcd=http://0.0.0.0:2380
+      - --initial-cluster-state
+      - new
+      - --initial-cluster-token
+      - tkn
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:
+
+

@@ -6,7 +6,7 @@ database:
   host: localhost                       # 数据库服务器的 IP 地址
   port: 3306                            # 数据库服务器的端口号
   dbname: chaosmetrics                  # 数据库名称
-  username: root                        # 数据库用户名
+  username: chaos                       # 数据库用户名
   password: "123456"                    # 数据库密码
   charset: utf8mb4                      # 字符集
   collation: utf8mb4_unicode_ci         # 字符序

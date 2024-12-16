@@ -16,7 +16,7 @@ RUN rm -f /app/api_key \
     && touch /app/api_key \
     && touch /app/email_key
 
-FROM alpine:latest
+FROM alpine:latest AS chaos
 RUN apk --no-cache add bash
 WORKDIR /root/
 

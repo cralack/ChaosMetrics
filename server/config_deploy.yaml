@@ -3,7 +3,7 @@ env: product  # 环境(test|dev|product)
 
 database:
   driver: mysql                         # 连接驱动
-  host: 172.17.0.3                      # 数据库服务器的 IP 地址
+  host: mysql                           # 数据库服务器的 IP 地址
   port: 3306                            # 数据库服务器的端口号
   dbname: chaosmetrics                  # 数据库名称
   username: root                        # 数据库用户名
@@ -39,7 +39,7 @@ fetcher:
     each_2min: 98                         # 每两分钟允许的 API 请求次数限制
 
 redis:
-  host: 172.17.0.2                       # IP地址
+  host: redis                            # IP地址
   port: 6379                             # 端口
   db: 0                                  # 数据库编号
   username: testman                      # 用户名
@@ -59,7 +59,7 @@ router:
   router_prefix: ""                      # 路由前缀，用于API网关等场景下的URL前缀设置
 
 micro:
-  registry_address: 172.17.0.4           # 注册中心地址，用于服务发现和注册
+  registry_address: etcd                 # 注册中心地址，用于服务发现和注册
   registry_port: 2379                    # 注册中心端口，用于服务发现和注册
   register_ttl: 60                       # 注册生存时间（秒），注册信息在此时间后过期需要重新注册
   register_interval: 15                  # 注册间隔（秒），服务每隔这段时间重新注册一次
@@ -81,6 +81,6 @@ smtp:
 amqp:
   user: guest                            # 用户名，用于连接 RabbitMQ 服务器
   password: guest                        # 密码，用于连接 RabbitMQ 服务器
-  host: 172.17.0.5                       # MQ 服务器的 IP 地址或主机名
+  host: rabbitmq                         # MQ 服务器的 IP 地址或主机名
   port: 5672                             # MQ 服务器的端口号，默认是 5672
   auto_delete: true                      # 是否自动删除队列，当最后一个消费者断开连接后删除
