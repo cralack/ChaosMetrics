@@ -53,6 +53,7 @@ func NewRiotUpdater(opts ...Setup) *Updater {
 
 func (u *Updater) UpdateAll() {
 	versions := u.UpdateVersions()
+	u.logger.Info("current version:" + versions[0])
 	for _, curVer := range versions {
 		if isEnd(curVer, u.stgy.EndMark) {
 			u.logger.Info(curVer)

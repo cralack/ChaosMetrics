@@ -56,12 +56,18 @@ func (m *Master) PushTask(ctx context.Context, ptask *publisher.TaskSpec, out *e
 	// mark 'out' as unused
 	_ = out
 
+	// for follower
 	if !m.IsLeader() && m.leaderID != "" && m.leaderID != m.ID {
 		addr := getLeaderAddr(m.leaderID)
 		_, err := m.forwardCli.PushTask(ctx, ptask, client.WithAddress(addr))
-		m.logger.Error("forward failed", zap.Error(err))
-		return err
+		if err != nil {
+			m.logger.Error("forward failed", zap.Error(err))
+			return err
+		}
+		return nil
 	}
+
+	// for master
 	m.rlock.Lock()
 	defer m.rlock.Unlock()
 

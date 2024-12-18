@@ -1,7 +1,6 @@
 package pumper
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/cralack/ChaosMetrics/server/internal/service/master"
@@ -16,7 +15,8 @@ func (p *Pumper) TaskHandlers(body []byte) error {
 	taskLoc := utils.ConvertLocStrToLocation(task.Loc)
 	sumn := p.LoadSingleSummoner(task.SumName, task.Loc)
 	if sumn == nil {
-		return errors.New("summoner not found")
+		p.logger.Error("summoner not found")
+		return nil
 	}
 
 	switch task.Type {

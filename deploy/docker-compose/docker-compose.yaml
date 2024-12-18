@@ -5,16 +5,11 @@ networks:
     driver: bridge
 
 services:
-  worker:
+  updater: &server-base
     build:
       context: ../../server
       dockerfile: ./Dockerfile
-      args:
-        IMAGE_NAME: worker
-    command: worker --id=1 --http=:8081 --grpc=:9091
-    ports:
-      - "8081:8081"
-      - "9091:9091"
+    image: chaos:latest
     networks:
       - container-net
     environment:
@@ -32,27 +27,27 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  master:
-    build:
-      context: ../../server
-      dockerfile: ./Dockerfile
-      args:
-        IMAGE_NAME: worker
+  worker-1:
+    <<: *server-base
+    command: worker --id=1 --http=:8081 --grpc=:9091
+
+  worker-2:
+    <<: *server-base
+    command: worker --id=2 --http=:8083 --grpc=:9093
+
+  master-1:
+    <<: *server-base
     command: master --id=1 --http=:8082 --grpc=:9092
+
+  master-2:
+    <<: *server-base
+    command: master --id=2 --http=:8084 --grpc=:9094
+
+  router:
+    <<: *server-base
+    command: router --addr=:8080
     ports:
-      - "8082:8082"
-      - "9092:9092"
-    networks:
-      - container-net
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      etcd:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - "8080:8080"
 
   mysql:
     image: mysql:8.3
@@ -100,8 +95,7 @@ services:
     build:
       context: ../docker
       dockerfile: ./rabbitmq.Dockerfile
-      args:
-        IMAGE_NAME: cus_rabbitmq
+    image: custom-rabbitmq
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: "guest"

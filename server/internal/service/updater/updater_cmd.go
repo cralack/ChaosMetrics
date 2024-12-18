@@ -20,7 +20,7 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.Flags().BoolVar(&force, "force", false, "if force update")
-	Cmd.Flags().StringVarP(&endmark, "endmark", "e", "14.24.1", "version endmark")
+	Cmd.Flags().StringVarP(&endmark, "endmark", "e", "14.1.1", "version endmark")
 }
 
 func Run() {

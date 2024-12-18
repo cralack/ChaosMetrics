@@ -26,4 +26,4 @@ COPY --from=builder /app/api_key ./
 COPY --from=builder /app/email_key ./
 
 ENTRYPOINT ["./server"]
-CMD ["worker"]
+CMD ["update"]
