@@ -251,7 +251,7 @@ func (a *Analyzer) handleMatches() {
 }
 
 func (a *Analyzer) AnalyzeSingleMatch(match *riotmodel.MatchDB) {
-	if match.GameMode == "CHERRY" || match.GameMode == "ONEFORALL" || len(match.Participants) == 0 {
+	if !(match.GameMode == "CLASSIC" || match.GameMode == "ARAM") || len(match.Participants) == 0 {
 		return
 	}
 	var (

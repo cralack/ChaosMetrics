@@ -255,6 +255,9 @@ func (u *Updater) UpdateItems(version string) {
 			u.logger.Error("unmarshal json to item list failed", zap.Error(err))
 			continue
 		}
+		pipe := u.rdb.Pipeline()
+		cmds := make([]*redis.IntCmd, 0, len(itemList.Data))
+		key2 := fmt.Sprintf("/items/%s", lang)
 		for k, it := range itemList.Data {
 			it.ID = k
 			it.Description = utils.RemoveHTMLTags(it.Description)
@@ -270,6 +273,11 @@ func (u *Updater) UpdateItems(version string) {
 				tk := fmt.Sprintf("%d-cherry-%s", vIdx, lang)
 				items[tk] = append(items[tk], it)
 			}
+
+			cmds = append(cmds, pipe.HSet(ctx, key2, fmt.Sprintf("%s@%d", k, vIdx), it))
+		}
+		if _, err = pipe.Exec(ctx); err != nil {
+			u.logger.Error("redis store items failed", zap.Error(err))
 		}
 	}
 	for k, its := range items {
