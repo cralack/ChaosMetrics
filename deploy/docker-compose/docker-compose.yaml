@@ -9,7 +9,7 @@ services:
     build:
       context: ../../server
       dockerfile: ./Dockerfile
-    image: chaos:latest
+    image: server:latest
     networks:
       - container-net
     environment:
@@ -48,6 +48,20 @@ services:
     command: router --addr=:8080
     ports:
       - "8080:8080"
+
+  web:
+    build:
+      context: ../../web
+      dockerfile: ./Dockerfile
+    image: web:latest
+    restart: always
+    ports:
+      - "8888:80"
+    volumes:
+      - web_data:/usr/share/nginx/html
+    depends_on:
+      - router
+    command: nginx -g "daemon off;"
 
   mysql:
     image: mysql:8.3
@@ -159,5 +173,6 @@ volumes:
   mysql_data:
   redis_data:
   rabbitmq_data:
+  web_data:
 
 
