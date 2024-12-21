@@ -86,6 +86,16 @@ func RunHTTPServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{
 	mux := runtime.NewServeMux()
 	dialOptions := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
+	_ = mux.HandlePath("GET", "/health", func(w http.ResponseWriter, r *http.Request, _ map[string]string) {
+		w.WriteHeader(http.StatusOK)
+		n, er := w.Write([]byte("ok"))
+		if er != nil {
+			logger.Error(er.Error())
+		} else {
+			logger.Debug(fmt.Sprintf("health response: %d", n))
+		}
+	})
+
 	var err error
 	if len(opts) > 0 {
 		err = publisher.RegisterPublisherGwFromEndpoint(ctx, mux, cfg.GRPCListenAddress, dialOptions)

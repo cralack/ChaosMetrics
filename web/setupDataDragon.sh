@@ -63,7 +63,7 @@ if [ "$setupRequired" = true ] ; then
     mv "datadragon/img/perk-images/" "src/assets/datadragon/"
 
     # 清理下载的压缩包和临时目录
-    # rm "$DOWNLOAD_FILE"
+    rm "$DOWNLOAD_FILE"
     rm -rf datadragon/
 
     echo "DataDragon assets have been updated."

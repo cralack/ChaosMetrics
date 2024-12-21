@@ -30,24 +30,54 @@ services:
   worker-1:
     <<: *server-base
     command: worker --id=1 --http=:8081 --grpc=:9091
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/health" ]
+      start_period: 3s
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   worker-2:
     <<: *server-base
     command: worker --id=2 --http=:8083 --grpc=:9093
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      start_period: 3s
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   master-1:
     <<: *server-base
     command: master --id=1 --http=:8082 --grpc=:9092
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      start_period: 3s
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   master-2:
     <<: *server-base
     command: master --id=2 --http=:8084 --grpc=:9094
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
+      start_period: 3s
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   router:
     <<: *server-base
     command: router --addr=:8080
     ports:
       - "8080:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      start_period: 3s
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   web:
     build:
@@ -134,6 +164,8 @@ services:
     image: gcr.io/etcd-development/etcd:v3.5.6
     volumes:
       - /tmp/etcd:/etcd-data
+    restart:
+      always
     ports:
       - "2379:2379"
       - "2380:2380"

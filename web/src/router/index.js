@@ -54,6 +54,10 @@ const routes = [
     name: NotFound,
     component: NotFound
   },
+  {
+    path: '/healthv',
+    component: { template: '<div>OK</div>' }
+  }
 ]
 
 const router = createRouter({

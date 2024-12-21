@@ -17,6 +17,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install && pnpm run build
 
 FROM nginx:alpine
 LABEL maintainer="cralack92@gmail.com"
+
+RUN apk --no-cache add logrotate
+RUN echo "/var/log/nginx/*.log {\n    size 5000M\n    rotate 7\n    compress\n    missingok\n    notifempty\n    dateext\n}" > /etc/logrotate.d/nginx
+
 COPY --from=base   /app/nginx.conf /etc/nginx/conf.d/my.conf
 COPY --from=build  /app/dist /usr/share/nginx/html
 COPY --from=build  /app/src/assets/tags /usr/share/nginx/html/src/assets/tags

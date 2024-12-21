@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
@@ -15,16 +16,20 @@ func GinLogger() gin.HandlerFunc {
 		query := c.Request.URL.RawQuery
 		c.Next()
 
-		cost := time.Since(start)
-		global.ChaLogger.Info(path,
-			zap.Int("status", c.Writer.Status()),
-			zap.String("method", c.Request.Method),
-			zap.String("path", path),
-			zap.String("query", query),
-			zap.String("ip", c.ClientIP()),
-			zap.String("user-agent", c.Request.UserAgent()),
-			zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
-			zap.Duration("cost", cost),
-		)
+		cost := time.Since(start).Microseconds()
+		if path != "/health" {
+			global.ChaLogger.Info(path,
+				zap.Int("status", c.Writer.Status()),
+				zap.String("method", c.Request.Method),
+				zap.String("path", path),
+				zap.String("query", query),
+				zap.String("ip", c.ClientIP()),
+				zap.String("user-agent", c.Request.UserAgent()),
+				zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
+				zap.String("cost", fmt.Sprintf("%d ms", cost)),
+			)
+		} else {
+			global.ChaLogger.Debug("health check")
+		}
 	}
 }
