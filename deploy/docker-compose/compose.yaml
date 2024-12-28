@@ -12,11 +12,6 @@ services:
     image: server:latest
     networks:
       - container-net
-    environment:
-      API_KEY:
-        1xxxx
-      EMAIL_KEY:
-        2xxxx
     depends_on:
       mysql:
         condition: service_healthy
@@ -30,6 +25,11 @@ services:
   worker-1:
     <<: *server-base
     command: worker --id=1 --http=:8081 --grpc=:9091
+    environment:
+      API_KEY:
+        1xxxx
+      EMAIL_KEY:
+        2xxxx
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/health" ]
       start_period: 3s
@@ -40,6 +40,11 @@ services:
   worker-2:
     <<: *server-base
     command: worker --id=2 --http=:8083 --grpc=:9093
+    environment:
+      API_KEY:
+        1xxxx
+      EMAIL_KEY:
+        2xxxx
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
       start_period: 3s
@@ -167,11 +172,8 @@ services:
     restart:
       always
     ports:
-      - "2379:2379"
-      - "2380:2380"
-    expose:
-      - 2379
-      - 2380
+      - "12379:2379"
+      - "12380:2380"
     networks:
       - container-net
     environment:

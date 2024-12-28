@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: chaosmetrics
+  labels:
+    app: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: web:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: web-data
+          mountPath: /usr/share/nginx/html
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/
+        command:
+        - nginx
+        - -g
+        - "daemon off;"
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+      volumes:
+      - name: web-data
+        persistentVolumeClaim:
+          claimName: web-data-pvc
+      - name: nginx-config
+        configMap:
+          name: nginx.conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+  namespace: chaosmetrics
+spec:
+  type: NodePort
+#  type: ClusterIP
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8888
+      nodePort: 8888
+  selector:
+    app: web
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: web-data-pvc
+  namespace: chaosmetrics
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: web-data-pv
+  namespace: chaosmetrics
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/web
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  namespace: chaosmetrics
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/mysql
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx.conf
+data:
+  my.conf: |
+    server {
+        listen  80;
+        server_name localhost;
+
+        # Vue 前端应用的路由处理
+        location / {
+            root /usr/share/nginx/html;
+            add_header Cache-Control 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+            try_files $uri $uri/ /index.html;
+        }
+
+        # 后端 API 路由代理
+        location /api {
+            proxy_set_header Host $http_host;
+            proxy_set_header  X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass http://127.0.0.1:8080; # 设置代理服务器的协议和地址
+        }
+
+        # Swagger UI 的代理路由
+        location /api/swagger/index.html {
+            proxy_pass http://127.0.0.1:8080/swagger/index.html;
+        }
+
+        location /healthx {
+            add_header Content-Type text/html;
+            return 200 "ok";
+        }
+    }
