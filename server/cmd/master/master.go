@@ -13,7 +13,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var podIP string
 var masterId string
 var HTTPListenAddress string
 var GRPCListenAddress string
@@ -30,7 +29,6 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.Flags().StringVar(&masterId, "id", "", "set master id")
-	Cmd.Flags().StringVar(&podIP, "podip", "192.168.123.197", "set pod IP")
 	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8081", "set HTTP listen address")
 	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9091", "set GRPC listen address")
 	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9981", "set GRPC listen address")

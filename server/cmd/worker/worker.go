@@ -2,9 +2,7 @@ package worker
 
 import (
 	"context"
-	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/pumper"
@@ -15,7 +13,6 @@ import (
 )
 
 var workerID string
-var podIP string
 var HTTPListenAddress string
 var GRPCListenAddress string
 var PProfListenAddress string
@@ -35,7 +32,6 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.Flags().StringVar(&workerID, "id", "", "set worker id")
-	Cmd.Flags().StringVar(&podIP, "podip", "192.168.123.197", "set pod IP")
 	Cmd.Flags().StringVar(&HTTPListenAddress, "http", ":8082", "set HTTP listen address")
 	Cmd.Flags().StringVar(&GRPCListenAddress, "grpc", ":9092", "set GRPC listen address")
 	Cmd.Flags().StringVar(&PProfListenAddress, "pprof", ":9982", "set GRPC listen address")
@@ -54,11 +50,16 @@ func Run(ctx context.Context) {
 
 	area := utils.ConvertRegionStrToArea(region)
 	if conf.ID == "" {
-		if podIP != "" {
-			conf.ID = strconv.Itoa(int(utils.GetIDbyIP(podIP)))
-		} else {
-			conf.ID = fmt.Sprintf("%4d", time.Now().UnixNano())
+		// if podIP != "" {
+		// 	conf.ID = strconv.Itoa(int(utils.GetIDbyIP(podIP)))
+		// } else {
+		// 	conf.ID = fmt.Sprintf("%4d", time.Now().UnixNano())
+		// }
+		ip, err := utils.GetLocalIP()
+		if err != nil {
+			logger.Fatal("get local ip failed", zap.Error(err))
 		}
+		conf.ID = strconv.Itoa(int(utils.GetIDbyIP(ip)))
 	}
 	// init pumper core
 	core, err := pumper.NewPumper(

@@ -15,8 +15,11 @@ spec:
     spec:
       containers:
       - name: router
-        image: server:local
-        command: ["router", "--addr=:8080"]
+        image: shadowhisper/chao_server:v0.91
+        command: ["./server"]
+        args:
+          - "router"
+          - "--addr=:8080"
         ports:
         - containerPort: 8080
         livenessProbe:

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"os"
 
 	"github.com/cralack/ChaosMetrics/server/cmd/master"
 	"github.com/cralack/ChaosMetrics/server/cmd/worker"
@@ -78,14 +79,14 @@ func RunCmd(ctx context.Context) error {
 	// 	}
 	// }
 	//
-	// { // debug worker part
-	// 	cmd, _, err := rootCmd.Find(os.Args[1:])
-	// 	if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
-	// 		arg := "update"
-	// 		// extraArg1 := "--id=1"
-	// 		args := append([]string{arg}, os.Args[1:]...)
-	// 		rootCmd.SetArgs(args)
-	// 	}
-	// }
+	{ // debug worker part
+		cmd, _, err := rootCmd.Find(os.Args[1:])
+		if err != nil || cmd.Args == nil || global.ChaEnv == global.TestEnv {
+			arg := "worker"
+			// extraArg1 := "--id=1"
+			args := append([]string{arg}, os.Args[1:]...)
+			rootCmd.SetArgs(args)
+		}
+	}
 	return rootCmd.Execute()
 }

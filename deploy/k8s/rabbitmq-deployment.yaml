@@ -5,7 +5,7 @@ metadata:
   name: rabbitmq
   namespace: chaosmetrics
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: rabbitmq
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: rabbitmq
-        image: custom-rabbitmq:local
+        image: shadowhisper/custom-rabbitmq:0.9
         env:
         - name: RABBITMQ_DEFAULT_USER
           value: "guest"

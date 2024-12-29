@@ -4,7 +4,7 @@ metadata:
   name: worker
   namespace: chaosmetrics
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: worker
@@ -15,25 +15,18 @@ spec:
     spec:
       containers:
       - name: worker
-        image: server:local
-        command: ["worker", "--podip=$(MY_POD_IP)"]
+        image: shadowhisper/chao_server:v0.91
+        command: [ "./server" ]
+        args:
+          - "worker"
         env:
           - name: API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: chaos-secrets
-                key: API_KEY
+            value: "1xxx"
           - name: EMAIL_KEY
-            valueFrom:
-              secretKeyRef:
-                name: chaos-secrets
-                key: EMAIL_KEY
-          - name: MY_POD_IP
-            valueFrom:
-              fieldRef:
-               fieldPath: status.podIP
+            value: "2xxx"
         ports:
         - containerPort: 8082
+        - containerPort: 9092
         readinessProbe:
           httpGet:
             path: /health

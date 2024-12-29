@@ -4,7 +4,7 @@ metadata:
   name: master
   namespace: chaosmetrics
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: master
@@ -15,8 +15,10 @@ spec:
     spec:
       containers:
       - name: master
-        image: server:local
-        command: ["master","--podip=${MY_POD_IP}"]
+        image: shadowhisper/chao_server:v0.91
+        command: ["./server"]
+        args:
+          - "master"
         ports:
         - containerPort: 8081
         - containerPort: 9091

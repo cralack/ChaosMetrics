@@ -38,13 +38,7 @@ spec:
         ports:
         - containerPort: 2379
         - containerPort: 2380
-        volumeMounts:
-        - mountPath: /etcd-data
-          name: etcd-data
-      volumes:
-      - name: etcd-data
-        persistentVolumeClaim:
-          claimName: etcd-pvc
+
 ---
 apiVersion: v1
 kind: Service

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"math/rand"
 	"net"
 
@@ -12,6 +13,7 @@ import (
 )
 
 func GetIDbyIP(ip string) uint32 {
+	global.ChaLogger.Debug(fmt.Sprintf("IP:[%s]", ip))
 	var id uint32
 	if err := binary.Read(bytes.NewBuffer(net.ParseIP(ip).To4()), binary.BigEndian, &id); err != nil {
 		global.ChaLogger.Error("get id by ip failed",
