@@ -17,9 +17,7 @@ spec:
       containers:
         - name: updater
           image: shadowhisper/chao_server:v0.92
-          command: [ "./server" ]
-          args:
-            - "update"
+          command: ["sleep","infinity"]
           ports:
             - containerPort: 8080
           livenessProbe:

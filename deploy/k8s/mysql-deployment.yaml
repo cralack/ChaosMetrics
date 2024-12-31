@@ -45,8 +45,10 @@ metadata:
   name: mysql
   namespace: chaosmetrics
 spec:
+  type: NodePort
   ports:
     - port: 3306
       targetPort: 3306
+      nodePort: 32100
   selector:
     app: mysql

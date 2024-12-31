@@ -10,7 +10,7 @@ import (
 func Test_update_champion(t *testing.T) {
 	u := updater.NewRiotUpdater(
 		updater.WithLifeTime(time.Hour*24*30*2), // 2 month
-		updater.WithForceUpdate(true),
+		updater.WithForceUpdate(false),
 		updater.WithEndmark("14.1.1"),
 	)
 

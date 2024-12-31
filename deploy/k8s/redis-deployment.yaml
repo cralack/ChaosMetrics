@@ -37,8 +37,10 @@ metadata:
   name: redis
   namespace: chaosmetrics
 spec:
+  type: NodePort
   ports:
   - port: 6379
     targetPort: 6379
+    nodePort: 32101
   selector:
     app: redis

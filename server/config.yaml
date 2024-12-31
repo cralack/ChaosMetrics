@@ -4,7 +4,7 @@ env: dev  # 环境(test|dev|product)
 database:
   driver: mysql                         # 连接驱动
   host: localhost                       # 数据库服务器的 IP 地址
-  port: 3306                            # 数据库服务器的端口号
+  port: 32100                            # 数据库服务器的端口号
   dbname: chaosmetrics                  # 数据库名称
   username: chaos                       # 数据库用户名
   password: "123456"                    # 数据库密码
@@ -40,7 +40,7 @@ fetcher:
 
 redis:
   host: localhost                        # IP地址
-  port: 6379                             # 端口
+  port: 32101                             # 端口
   db: 0                                  # 数据库编号
   username: testman                      # 用户名
   password: ""                           # 密码
