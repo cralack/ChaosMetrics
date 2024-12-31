@@ -22,8 +22,8 @@ export default defineConfig({
     open: true, // 是否自动打开浏览器
     // 反向代理 跨域配置
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
+      '/api/': {
+        target: 'http://localhost:8080/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

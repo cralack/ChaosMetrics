@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: worker
-        image: shadowhisper/chao_server:v0.91
+        image: shadowhisper/chao_server:v0.92
         command: [ "./server" ]
         args:
           - "worker"

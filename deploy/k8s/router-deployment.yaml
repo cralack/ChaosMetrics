@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +16,7 @@ spec:
     spec:
       containers:
       - name: router
-        image: shadowhisper/chao_server:v0.91
+        image: shadowhisper/chao_server:v0.92
         command: ["./server"]
         args:
           - "router"
@@ -28,3 +29,22 @@ spec:
             port: 8080
           initialDelaySeconds: 3
           periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  namespace: chaosmetrics
+  labels:
+    app: router
+spec:
+  selector:
+    app: router
+  ports:
+    - port: 8080
+      name: http
+      targetPort: 8080
+#      nodePort: 30280
+  type: ClusterIP
+#  type: NodePort

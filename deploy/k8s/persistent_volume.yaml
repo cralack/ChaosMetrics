@@ -1,0 +1,59 @@
+---
+#mysql
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  namespace: chaosmetrics
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/mysql
+
+---
+#redis
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv
+  namespace: chaosmetrics
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/redis
+
+---
+#rabbitmq
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbitmq-pv
+  namespace: chaosmetrics
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/rabbitmq
+
+---
+#web
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: web-data-pv
+  namespace: chaosmetrics
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/web

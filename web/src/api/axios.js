@@ -3,7 +3,8 @@ import { getToken } from '@/utils/auth'
 import { successMessage, errorMessage } from '@/utils/message'
 
 const service = axios.create({
-  baseURL: 'http://localhost:8080'
+  baseURL:'/api',
+  timeout: 99999
 })
 
 service.interceptors.request.use(function(config) {

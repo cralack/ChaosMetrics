@@ -50,30 +50,3 @@ spec:
       targetPort: 3306
   selector:
     app: mysql
-
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mysql-pv
-  namespace: chaosmetrics
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/mysql
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pvc
-  namespace: chaosmetrics
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi

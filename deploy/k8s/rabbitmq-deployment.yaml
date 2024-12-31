@@ -49,30 +49,3 @@ spec:
     targetPort: 15672
   selector:
     app: rabbitmq
-
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: rabbitmq-pv
-  namespace: chaosmetrics
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/rabbitmq
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: rabbitmq-pvc
-  namespace: chaosmetrics
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi

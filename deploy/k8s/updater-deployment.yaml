@@ -1,0 +1,30 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: updater
+  namespace: chaosmetrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: updater
+  template:
+    metadata:
+      labels:
+        app: updater
+    spec:
+      containers:
+        - name: updater
+          image: shadowhisper/chao_server:v0.92
+          command: [ "./server" ]
+          args:
+            - "update"
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10

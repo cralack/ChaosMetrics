@@ -42,30 +42,3 @@ spec:
     targetPort: 6379
   selector:
     app: redis
-
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: redis-pv
-  namespace: chaosmetrics
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/redis
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: redis-pvc
-  namespace: chaosmetrics
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
