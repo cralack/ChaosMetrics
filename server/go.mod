@@ -1,8 +1,7 @@
 module github.com/cralack/ChaosMetrics/server
 
 go 1.22.7
-
-toolchain go1.22.9
+toolchain go1.23.6
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
@@ -30,7 +29,7 @@ require (
 	go-micro.dev/v4 v4.11.0
 	go.etcd.io/etcd/client/v3 v3.5.18
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250204164813-702378808489
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
