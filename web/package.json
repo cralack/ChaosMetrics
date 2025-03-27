@@ -10,20 +10,22 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
-    "@vueuse/core": "^12.7.0",
-    "@vueuse/integrations": "^13.0.0",
+
+    "@vueuse/core": "^13.0.0",
+    "@vueuse/integrations": "^12.7.0",
+
     "axios": "^1.8.4",
     "element-plus": "^2.9.6",
     "eslint": "8",
     "nprogress": "^0.2.0",
-    "pinia": "^2.3.1",
+    "pinia": "^3.0.1",
     "sass": "^1.86.0",
     "universal-cookie": "^7",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.26.10",
+    "@babel/eslint-parser": "^7.27.0",
     "@vitejs/plugin-legacy": "^5.4.3",
     "@vitejs/plugin-vue": "^5.2.3",
     "eslint-plugin-vue": "^9.33.0",
