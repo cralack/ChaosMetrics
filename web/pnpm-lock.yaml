@@ -15,8 +15,8 @@ importers:
         specifier: ^13.0.0
         version: 13.0.0(vue@3.5.13)
       '@vueuse/integrations':
-        specifier: ^12.7.0
-        version: 12.7.0(async-validator@4.2.5)(axios@1.8.4)(nprogress@0.2.0)(universal-cookie@7.2.2)
+        specifier: ^13.0.0
+        version: 13.0.0(async-validator@4.2.5)(axios@1.8.4)(nprogress@0.2.0)(universal-cookie@7.2.2)(vue@3.5.13)
       axios:
         specifier: ^1.8.4
         version: 1.8.4
@@ -1104,8 +1104,8 @@ packages:
   '@vueuse/core@9.13.0':
     resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==}
 
-  '@vueuse/integrations@12.7.0':
-    resolution: {integrity: sha512-IEq7K4bCl7mn3uKJaWtNXnd1CAPaHLUMuyj5K1/k/pVcItt0VONZW8xiGxdIovJcQjkzOHjImhX5t6gija+0/g==}
+  '@vueuse/integrations@13.0.0':
+    resolution: {integrity: sha512-PXARslYRWf4u0xjdW6N5eC5kVQj2z/dxfZ7ildI1okLm2AwmhL+wiWzaNMSJMxTKX4ew7kNe70yJg1QjnWmE5w==}
     peerDependencies:
       async-validator: ^4
       axios: ^1
@@ -1119,6 +1119,7 @@ packages:
       qrcode: ^1.5
       sortablejs: ^1
       universal-cookie: ^7
+      vue: ^3.5.0
     peerDependenciesMeta:
       async-validator:
         optional: true
@@ -3247,18 +3248,16 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@vueuse/integrations@12.7.0(async-validator@4.2.5)(axios@1.8.4)(nprogress@0.2.0)(universal-cookie@7.2.2)':
+  '@vueuse/integrations@13.0.0(async-validator@4.2.5)(axios@1.8.4)(nprogress@0.2.0)(universal-cookie@7.2.2)(vue@3.5.13)':
     dependencies:
-      '@vueuse/core': 12.7.0
-      '@vueuse/shared': 12.7.0
+      '@vueuse/core': 13.0.0(vue@3.5.13)
+      '@vueuse/shared': 13.0.0(vue@3.5.13)
       vue: 3.5.13
     optionalDependencies:
       async-validator: 4.2.5
       axios: 1.8.4
       nprogress: 0.2.0
       universal-cookie: 7.2.2
-    transitivePeerDependencies:
-      - typescript
 
   '@vueuse/metadata@12.7.0': {}
 
