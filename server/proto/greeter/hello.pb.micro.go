@@ -5,9 +5,9 @@ package greeter
 
 import (
 	fmt "fmt"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	proto "google.golang.org/protobuf/proto"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	math "math"
 )
 
@@ -45,7 +45,7 @@ func NewGreeterEndpoints() []*api.Endpoint {
 // Client API for Greeter service
 
 type GreeterService interface {
-	Hello(ctx context.Context, in *empty.Empty, opts ...client.CallOption) (*empty.Empty, error)
+	Hello(ctx context.Context, in *emptypb.Empty, opts ...client.CallOption) (*emptypb.Empty, error)
 }
 
 type greeterService struct {
@@ -60,9 +60,9 @@ func NewGreeterService(name string, c client.Client) GreeterService {
 	}
 }
 
-func (c *greeterService) Hello(ctx context.Context, in *empty.Empty, opts ...client.CallOption) (*empty.Empty, error) {
+func (c *greeterService) Hello(ctx context.Context, in *emptypb.Empty, opts ...client.CallOption) (*emptypb.Empty, error) {
 	req := c.c.NewRequest(c.name, "Greeter.Hello", in)
-	out := new(empty.Empty)
+	out := new(emptypb.Empty)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,12 +73,12 @@ func (c *greeterService) Hello(ctx context.Context, in *empty.Empty, opts ...cli
 // Server API for Greeter service
 
 type GreeterHandler interface {
-	Hello(context.Context, *empty.Empty, *empty.Empty) error
+	Hello(context.Context, *emptypb.Empty, *emptypb.Empty) error
 }
 
 func RegisterGreeterHandler(s server.Server, hdlr GreeterHandler, opts ...server.HandlerOption) error {
 	type greeter interface {
-		Hello(ctx context.Context, in *empty.Empty, out *empty.Empty) error
+		Hello(ctx context.Context, in *emptypb.Empty, out *emptypb.Empty) error
 	}
 	type Greeter struct {
 		greeter
@@ -97,6 +97,6 @@ type greeterHandler struct {
 	GreeterHandler
 }
 
-func (h *greeterHandler) Hello(ctx context.Context, in *empty.Empty, out *empty.Empty) error {
+func (h *greeterHandler) Hello(ctx context.Context, in *emptypb.Empty, out *emptypb.Empty) error {
 	return h.GreeterHandler.Hello(ctx, in, out)
 }

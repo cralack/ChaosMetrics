@@ -15,7 +15,6 @@ import (
 
 	etcdReg "github.com/go-micro/plugins/v4/registry/etcd"
 	gs "github.com/go-micro/plugins/v4/server/grpc"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go-micro.dev/v4"
 	"go-micro.dev/v4/client"
@@ -24,11 +23,12 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Greeter struct{}
 
-func (g *Greeter) Hello(ctx context.Context, in *empty.Empty, out *empty.Empty) error {
+func (g *Greeter) Hello(ctx context.Context, in *emptypb.Empty, out *emptypb.Empty) error {
 	_, cancel := context.WithCancel(ctx)
 	defer cancel()
 	if in == out {
@@ -38,7 +38,7 @@ func (g *Greeter) Hello(ctx context.Context, in *empty.Empty, out *empty.Empty) 
 	return nil
 }
 
-// RunGRPCServer and regestry worker to etcd
+// RunGRPCServer and registry worker to etcd
 func RunGRPCServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{}) {
 	// init grpc server
 	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))

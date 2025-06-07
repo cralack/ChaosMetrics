@@ -6,15 +6,15 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/pkg/xamqp"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
-	"github.com/golang/protobuf/ptypes/empty"
 	"go-micro.dev/v4/client"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type TaskSpec struct {
 	ID           string
 	Name         string
-	AssgnedNode  string
+	AssignedNode string
 	CreationTime int64
 
 	SumName string
@@ -32,7 +32,7 @@ func (m *Master) AddTask(assigner Assigner, tasks ...*TaskSpec) {
 			m.logger.Error("assign failed", zap.Error(err))
 			continue
 		} else {
-			task.AssgnedNode = node.Id
+			task.AssignedNode = node.Id
 			if task.CreationTime == 0 {
 				task.CreationTime = time.Now().Unix()
 			}
@@ -41,7 +41,7 @@ func (m *Master) AddTask(assigner Assigner, tasks ...*TaskSpec) {
 
 		// producer here
 		body := Encode(task)
-		if err := m.producer.Publish([]byte(body), xamqp.Exchange, task.AssgnedNode, 0); err != nil {
+		if err := m.producer.Publish([]byte(body), xamqp.Exchange, task.AssignedNode, 0); err != nil {
 			m.logger.Error("publish task failed", zap.Error(err))
 		} else {
 			m.logger.Debug("publish task", zap.Any("specs", task))
@@ -52,7 +52,7 @@ func (m *Master) AddTask(assigner Assigner, tasks ...*TaskSpec) {
 var _ publisher.PublisherHandler = &Master{}
 
 // PushTask implement grpc call
-func (m *Master) PushTask(ctx context.Context, ptask *publisher.TaskSpec, out *empty.Empty) error {
+func (m *Master) PushTask(ctx context.Context, ptask *publisher.TaskSpec, out *emptypb.Empty) error {
 	// mark 'out' as unused
 	_ = out
 

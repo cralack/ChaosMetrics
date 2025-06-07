@@ -69,7 +69,7 @@ func Viper() (*viper.Viper, error) {
 		path := filepath.Join(conf.DirTree.WorkDir, conf.EmailConf.Passwd)
 		buff, err2 := os.ReadFile(path)
 		if err2 != nil {
-			fmt.Println("load email client passwd failed")
+			return nil, err2
 		}
 		if string(buff) == "" {
 			buff = []byte(os.Getenv("EMAIL_KEY"))

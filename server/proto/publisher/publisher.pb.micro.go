@@ -5,9 +5,9 @@ package publisher
 
 import (
 	fmt "fmt"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	proto "google.golang.org/protobuf/proto"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	math "math"
 )
 
@@ -45,7 +45,7 @@ func NewPublisherEndpoints() []*api.Endpoint {
 // Client API for Publisher service
 
 type PublisherService interface {
-	PushTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*empty.Empty, error)
+	PushTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*emptypb.Empty, error)
 }
 
 type publisherService struct {
@@ -60,9 +60,9 @@ func NewPublisherService(name string, c client.Client) PublisherService {
 	}
 }
 
-func (c *publisherService) PushTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*empty.Empty, error) {
+func (c *publisherService) PushTask(ctx context.Context, in *TaskSpec, opts ...client.CallOption) (*emptypb.Empty, error) {
 	req := c.c.NewRequest(c.name, "Publisher.PushTask", in)
-	out := new(empty.Empty)
+	out := new(emptypb.Empty)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,12 +73,12 @@ func (c *publisherService) PushTask(ctx context.Context, in *TaskSpec, opts ...c
 // Server API for Publisher service
 
 type PublisherHandler interface {
-	PushTask(context.Context, *TaskSpec, *empty.Empty) error
+	PushTask(context.Context, *TaskSpec, *emptypb.Empty) error
 }
 
 func RegisterPublisherHandler(s server.Server, hdlr PublisherHandler, opts ...server.HandlerOption) error {
 	type publisher interface {
-		PushTask(ctx context.Context, in *TaskSpec, out *empty.Empty) error
+		PushTask(ctx context.Context, in *TaskSpec, out *emptypb.Empty) error
 	}
 	type Publisher struct {
 		publisher
@@ -97,6 +97,6 @@ type publisherHandler struct {
 	PublisherHandler
 }
 
-func (h *publisherHandler) PushTask(ctx context.Context, in *TaskSpec, out *empty.Empty) error {
+func (h *publisherHandler) PushTask(ctx context.Context, in *TaskSpec, out *emptypb.Empty) error {
 	return h.PublisherHandler.PushTask(ctx, in, out)
 }
