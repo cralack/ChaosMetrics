@@ -11,7 +11,7 @@ import (
 	"github.com/cralack/ChaosMetrics/server/pkg/xamqp"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
 	"github.com/cralack/ChaosMetrics/server/utils"
-	"go-micro.dev/v4/registry"
+	"go-micro.dev/v5/registry"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 

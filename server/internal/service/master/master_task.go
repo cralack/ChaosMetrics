@@ -6,7 +6,7 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/pkg/xamqp"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
-	"go-micro.dev/v4/client"
+	"go-micro.dev/v5/client"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

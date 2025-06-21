@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"go-micro.dev/v4/registry"
+	"go-micro.dev/v5/registry"
 	"go.uber.org/zap"
 )
 

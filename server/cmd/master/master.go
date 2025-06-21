@@ -7,9 +7,9 @@ import (
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/internal/service/master"
 	"github.com/cralack/ChaosMetrics/server/utils/register"
-	"github.com/go-micro/plugins/v4/registry/etcd"
 	"github.com/spf13/cobra"
-	"go-micro.dev/v4/registry"
+	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/registry/etcd"
 	"go.uber.org/zap"
 )
 
@@ -49,7 +49,7 @@ func Run(ctx context.Context) {
 		master.WithLogger(logger.Named(global.MasterServiceName)),
 		master.WithregistryURL(regUrl),
 		master.WithGRPCAddress(conf.GRPCListenAddress),
-		master.WithRegistry(etcd.NewRegistry(registry.Addrs(regUrl))),
+		master.WithRegistry(etcd.NewEtcdRegistry(registry.Addrs(regUrl))),
 		master.WithContext(ctx),
 	)
 	if err != nil {

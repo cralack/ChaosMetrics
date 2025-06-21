@@ -2,13 +2,10 @@ package master
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 
-	"github.com/cralack/ChaosMetrics/server/internal/global"
-	"go-micro.dev/v4/registry"
+	"go-micro.dev/v5/registry"
 )
 
 func workNodeDiff(old map[string]*registry.Node, new map[string]*registry.Node) (add []string, del []string, chg []string) {
@@ -29,14 +26,14 @@ func workNodeDiff(old map[string]*registry.Node, new map[string]*registry.Node) 
 	return
 }
 
-func GetNodeID(name string) (string, error) {
-	nodeID := strings.Split(name, "|")
-	if len(nodeID) < 2 {
-		return "", errors.New("get node id failed")
-	}
-	id := nodeID[0]
-	return id, nil
-}
+// func GetNodeID(name string) (string, error) {
+// 	nodeID := strings.Split(name, "|")
+// 	if len(nodeID) < 2 {
+// 		return "", errors.New("get node id failed")
+// 	}
+// 	id := nodeID[0]
+// 	return id, nil
+// }
 
 func Encode(s *TaskSpec) string {
 	buff, _ := json.Marshal(s)
@@ -52,9 +49,9 @@ func Decode(ds []byte) (*TaskSpec, error) {
 	}
 }
 
-func getTaskPath(name string) string {
-	return fmt.Sprintf("%s/%s", global.TaskPath, name)
-}
+// func getTaskPath(name string) string {
+// 	return fmt.Sprintf("%s/%s", global.TaskPath, name)
+// }
 
 func getLeaderAddr(str string) string {
 	s := strings.Split(str, "@")

@@ -11,15 +11,14 @@ import (
 	"github.com/cralack/ChaosMetrics/server/internal/service/master"
 	pb "github.com/cralack/ChaosMetrics/server/proto/greeter"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
-	grpccli "github.com/go-micro/plugins/v4/client/grpc"
-
-	etcdReg "github.com/go-micro/plugins/v4/registry/etcd"
-	gs "github.com/go-micro/plugins/v4/server/grpc"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"go-micro.dev/v4"
-	"go-micro.dev/v4/client"
-	"go-micro.dev/v4/registry"
-	"go-micro.dev/v4/server"
+	"go-micro.dev/v5"
+	"go-micro.dev/v5/client"
+	grpccli "go-micro.dev/v5/client/grpc"
+	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/registry/etcd"
+	"go-micro.dev/v5/server"
+	gs "go-micro.dev/v5/server/grpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -41,19 +40,21 @@ func (g *Greeter) Hello(ctx context.Context, in *emptypb.Empty, out *emptypb.Emp
 // RunGRPCServer and registry worker to etcd
 func RunGRPCServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{}) {
 	// init grpc server
-	reg := etcdReg.NewRegistry(registry.Addrs(cfg.RegistryAddress))
+	reg := etcd.NewEtcdRegistry(registry.Addrs(cfg.RegistryAddress))
+
 	service := micro.NewService(
-		// start a grpc server
-		micro.Server(gs.NewServer(server.Id(cfg.ID))),
-		micro.Name(cfg.Name),
-		micro.Address(cfg.GRPCListenAddress),
-		micro.Registry(reg),
-		micro.RegisterTTL(cfg.RegisterTTL*time.Second),
-		micro.RegisterInterval(cfg.RegisterInterval*time.Second),
-		micro.WrapHandler(logWrapper(logger)),
-		// master forward require
+		micro.Server(gs.NewServer(
+			server.Name(cfg.Name),
+			server.Id(cfg.ID),
+			server.Address(cfg.GRPCListenAddress),
+			server.Registry(reg),
+			server.RegisterTTL(cfg.RegisterTTL*time.Second),
+			server.RegisterInterval(cfg.RegisterInterval*time.Second),
+		)),
 		micro.Client(grpccli.NewClient()),
+		// micro.WrapHandler(logWrapper(logger)),
 	)
+
 	if err := service.Client().Init(client.RequestTimeout(cfg.ClientTimeOut * time.Second)); err != nil {
 		logger.Error("micro client init error", zap.Error(err))
 	}
@@ -113,16 +114,16 @@ func RunHTTPServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{
 	}
 }
 
-func logWrapper(log *zap.Logger) server.HandlerWrapper {
-	return func(hf server.HandlerFunc) server.HandlerFunc {
-		return func(ctx context.Context, req server.Request, rsp interface{}) error {
-			log.Info("receive request",
-				zap.String("method", req.Method()),
-				zap.String("Service", req.Service()),
-				zap.Reflect("request param:", req.Body()),
-			)
-			err := hf(ctx, req, rsp)
-			return err
-		}
-	}
-}
+// func logWrapper(log *zap.Logger) server.HandlerWrapper {
+// 	return func(hf server.HandlerFunc) server.HandlerFunc {
+// 		return func(ctx context.Context, req server.Request, rsp interface{}) error {
+// 			log.Info("receive request",
+// 				zap.String("method", req.Method()),
+// 				zap.String("Service", req.Service()),
+// 				zap.Reflect("request param:", req.Body()),
+// 			)
+// 			err := hf(ctx, req, rsp)
+// 			return err
+// 		}
+// 	}
+// }

@@ -11,12 +11,12 @@ import (
 	"github.com/cralack/ChaosMetrics/server/model/response"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
 	"github.com/cralack/ChaosMetrics/server/proto/publisher"
-	grpccli "github.com/go-micro/plugins/v4/client/grpc"
-	"github.com/go-micro/plugins/v4/registry/etcd"
 	"github.com/redis/go-redis/v9"
-	"go-micro.dev/v4"
-	"go-micro.dev/v4/client"
-	"go-micro.dev/v4/registry"
+	"go-micro.dev/v5"
+	"go-micro.dev/v5/client"
+	grpccli "go-micro.dev/v5/client/grpc"
+	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/registry/etcd"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -35,7 +35,7 @@ func NewSumnService(params ...interface{}) *SumonerService {
 		global.ChaLogger.Debug("param", zap.Int("len", len(params)))
 	}
 	conf := global.ChaConf.Micro
-	reg := etcd.NewRegistry(registry.Addrs(conf.RegistryAddress))
+	reg := etcd.NewEtcdRegistry(registry.Addrs(conf.RegistryAddress))
 	name := "gin.grpc.client"
 
 	server := micro.NewService(
