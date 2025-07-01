@@ -444,8 +444,8 @@ github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1/go.mod h1:Ohn+xnUBi
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-go-micro.dev/v5 v5.8.0 h1:VNWQhv/3VG5b7+p91biVnaNcUacp4MApCt9mg78fKDg=
-go-micro.dev/v5 v5.8.0/go.mod h1:x+xHtsnA7Mn7kkfIwcHahUWZTCKTZCKSFvJK4ksSPNU=
+go-micro.dev/v5 v5.9.0 h1:I4d3vD9oxsu4O8u9J0abZKMUiqdyWQzunftzmtnNYvQ=
+go-micro.dev/v5 v5.9.0/go.mod h1:juL9YyX5gr7TlJ5ySE7e12BqiJxPhYKEHMJCoVTEz4g=
 go.etcd.io/bbolt v1.4.0 h1:TU77id3TnN/zKr7CO/uk+fBCwF2jGcMuw2B/FMAzYIk=
 go.etcd.io/bbolt v1.4.0/go.mod h1:AsD+OCi/qPN1giOX1aiLAha3o1U8rAz65bvN4j0sRuk=
 go.etcd.io/etcd/api/v3 v3.6.1 h1:yJ9WlDih9HT457QPuHt/TH/XtsdN2tubyxyQHSHPsEo=
@@ -616,8 +616,8 @@ google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 h1:
 google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822/go.mod h1:qQ0YXyHHx3XkvlzUtpXDkS29lDSafHMZBAZDc03LQ3A=
 google.golang.org/grpc v1.73.0 h1:VIWSmpI2MegBtTuFt5/JWy2oXxtjJ/e89Z70ImfD2ok=
 google.golang.org/grpc v1.73.0/go.mod h1:50sbHOUqWoCQGI8V2HQLJM0B+LMlIUjNSZmow7EVBQc=
-google.golang.org/grpc/examples v0.0.0-20250514161145-5c0d55244474 h1:7B8e8jJRSI3lfKIzwRDNU6f0yzNFhiPXFGbOuNETfIw=
-google.golang.org/grpc/examples v0.0.0-20250514161145-5c0d55244474/go.mod h1:WPWnet+nYurNGpV0rVYHI1YuOJwVHeM3t8f76m410XM=
+google.golang.org/grpc/examples v0.0.0-20250515150734-f2d3e11f3057 h1:lPv+iqlAyiKMjbL3ivJlAASixPknLv806R6zaoE4PUM=
+google.golang.org/grpc/examples v0.0.0-20250515150734-f2d3e11f3057/go.mod h1:WPWnet+nYurNGpV0rVYHI1YuOJwVHeM3t8f76m410XM=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
 google.golang.org/protobuf v0.0.0-20200228230310-ab0ca4ff8a60/go.mod h1:cfTl7dwQJ+fmap5saPgwCLgHXTUD7jkjRqWcaiX5VyM=
