@@ -13,7 +13,7 @@
     "@vueuse/core": "^13.5.0",
     "@vueuse/integrations": "^13.5.0",
     "axios": "^1.9.0",
-    "element-plus": "^2.10.3",
+    "element-plus": "^2.10.4",
     "eslint": "8",
     "nprogress": "^0.2.0",
     "pinia": "^3.0.3",
