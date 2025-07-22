@@ -7,7 +7,7 @@ toolchain go1.24.4
 require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/casbin/casbin/v2 v2.109.0
-	github.com/casbin/gorm-adapter/v3 v3.33.0
+	github.com/casbin/gorm-adapter/v3 v3.34.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
