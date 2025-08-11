@@ -6,8 +6,8 @@ toolchain go1.24.4
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/casbin/casbin/v2 v2.109.0
-	github.com/casbin/gorm-adapter/v3 v3.34.0
+	github.com/casbin/casbin/v2 v2.115.0
+	github.com/casbin/gorm-adapter/v3 v3.36.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
@@ -22,18 +22,18 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
-	github.com/swaggo/swag v1.16.4
+	github.com/swaggo/swag v1.16.6
 	go-micro.dev/v5 v5.9.0
-	go.etcd.io/etcd/client/v3 v3.6.2
+	go.etcd.io/etcd/client/v3 v3.6.4
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.40.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822
-	google.golang.org/grpc v1.73.0
+	google.golang.org/grpc v1.74.2
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.6.0
-	gorm.io/gorm v1.30.0
+	gorm.io/gorm v1.30.1
 )
 
 require (
@@ -132,8 +132,8 @@ require (
 	github.com/urfave/cli/v2 v2.27.6 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	go.etcd.io/bbolt v1.4.0 // indirect
-	go.etcd.io/etcd/api/v3 v3.6.2 // indirect
-	go.etcd.io/etcd/client/pkg/v3 v3.6.2 // indirect
+	go.etcd.io/etcd/api/v3 v3.6.4 // indirect
+	go.etcd.io/etcd/client/pkg/v3 v3.6.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
