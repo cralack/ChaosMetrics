@@ -33,8 +33,8 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3(vue@3.5.18)
       sass:
-        specifier: ^1.90.0
-        version: 1.90.0
+        specifier: ^1.91.0
+        version: 1.91.0
       universal-cookie:
         specifier: ^8
         version: 8.0.1
@@ -50,19 +50,19 @@ importers:
         version: 7.28.0(@babel/core@7.27.4)(eslint@8.57.1)
       '@vitejs/plugin-legacy':
         specifier: ^6.1.1
-        version: 6.1.1(terser@5.31.1)(vite@6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1))
+        version: 6.1.1(terser@5.31.1)(vite@6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1))
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
-        version: 6.0.1(vite@6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1))(vue@3.5.18)
+        version: 6.0.1(vite@6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1))(vue@3.5.18)
       eslint-plugin-vue:
         specifier: ^10.3.0
         version: 10.4.0(eslint@8.57.1)(vue-eslint-parser@9.4.3(eslint@8.57.1))
       vite:
         specifier: 6.3.5
-        version: 6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1)
+        version: 6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1)
       vite-plugin-windicss:
         specifier: ^1.9.4
-        version: 1.9.4(vite@6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1))
+        version: 1.9.4(vite@6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1))
       windicss:
         specifier: ^3.5.6
         version: 3.5.6
@@ -1931,8 +1931,8 @@ packages:
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
 
-  sass@1.90.0:
-    resolution: {integrity: sha512-9GUyuksjw70uNpb1MTYWsH9MQHOHY6kwfnkafC24+7aOMZn9+rVMBxRbLvw756mrBFbIsFg6Xw9IkR2Fnn3k+Q==}
+  sass@1.91.0:
+    resolution: {integrity: sha512-aFOZHGf+ur+bp1bCHZ+u8otKGh77ZtmFyXDo4tlYvT7PWql41Kwd8wdkPqhhT+h2879IVblcHFglIMofsFd1EA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -3158,7 +3158,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitejs/plugin-legacy@6.1.1(terser@5.31.1)(vite@6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1))':
+  '@vitejs/plugin-legacy@6.1.1(terser@5.31.1)(vite@6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1))':
     dependencies:
       '@babel/core': 7.27.4
       '@babel/preset-env': 7.27.2(@babel/core@7.27.4)
@@ -3169,14 +3169,14 @@ snapshots:
       regenerator-runtime: 0.14.1
       systemjs: 6.15.1
       terser: 5.31.1
-      vite: 6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1)
+      vite: 6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-vue@6.0.1(vite@6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1))(vue@3.5.18)':
+  '@vitejs/plugin-vue@6.0.1(vite@6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1))(vue@3.5.18)':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.29
-      vite: 6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1)
+      vite: 6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1)
       vue: 3.5.18
 
   '@vue/compiler-core@3.5.18':
@@ -4076,7 +4076,7 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
-  sass@1.90.0:
+  sass@1.91.0:
     dependencies:
       chokidar: 4.0.3
       immutable: 5.1.3
@@ -4174,17 +4174,17 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  vite-plugin-windicss@1.9.4(vite@6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1)):
+  vite-plugin-windicss@1.9.4(vite@6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1)):
     dependencies:
       '@windicss/plugin-utils': 1.9.4
       debug: 4.4.0
       kolorist: 1.8.0
-      vite: 6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1)
+      vite: 6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1)
       windicss: 3.5.6
     transitivePeerDependencies:
       - supports-color
 
-  vite@6.3.5(jiti@1.21.6)(sass@1.90.0)(terser@5.31.1):
+  vite@6.3.5(jiti@1.21.6)(sass@1.91.0)(terser@5.31.1):
     dependencies:
       esbuild: 0.25.5
       fdir: 6.4.5(picomatch@4.0.2)
@@ -4195,7 +4195,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
       jiti: 1.21.6
-      sass: 1.90.0
+      sass: 1.91.0
       terser: 5.31.1
 
   vue-demi@0.14.10(vue@3.5.18):
