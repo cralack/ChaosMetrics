@@ -124,7 +124,6 @@ func (p *Pumper) createSummonerURL(loCode riotmodel.LOCATION) {
 		Loc:  loc,
 		Data: nil,
 	})
-	return
 }
 
 func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO) {
@@ -168,7 +167,6 @@ func (p *Pumper) handleSummoner(loc string, summoners ...*riotmodel.SummonerDTO)
 			}
 		}
 	}
-	return
 }
 
 func (p *Pumper) cacheSummoners(summoners []*riotmodel.SummonerDTO, loc string) {

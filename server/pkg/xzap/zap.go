@@ -67,7 +67,7 @@ func Zap(env global.Env) (*zap.Logger, error) {
 	zap.ReplaceGlobals(log)
 
 	defer func(log *zap.Logger) {
-		_ = log.Sync()
+		err = log.Sync()
 	}(log)
 
 	if err != nil {

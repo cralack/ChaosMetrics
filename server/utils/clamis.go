@@ -49,28 +49,34 @@ func GetClaims(ctx *gin.Context) (*request.CustomClaims, error) {
 
 // GetUserUuid 从Gin的Context中获取从jwt解析出来的用户UUID
 func GetUserUuid(ctx *gin.Context) uuid.UUID {
-	if claims, exists := ctx.Get("claims"); !exists {
-		if cl, err := GetClaims(ctx); err != nil {
-			return uuid.UUID{}
-		} else {
-			return cl.UUID
+	if claims, exists := ctx.Get("claims"); exists {
+		if waitUse, ok := claims.(*request.CustomClaims); ok {
+			return waitUse.UUID
 		}
-	} else {
-		waitUse := claims.(*request.CustomClaims)
-		return waitUse.UUID
+		// 类型断言失败时处理
+		return uuid.UUID{}
 	}
+
+	cl, err := GetClaims(ctx)
+	if err != nil || cl == nil {
+		return uuid.UUID{}
+	}
+	return cl.UUID
 }
 
 // GetUserID 从Gin的Context中获取从jwt解析出来的用户ID
 func GetUserID(ctx *gin.Context) uint {
-	if claims, exists := ctx.Get("claims"); !exists {
-		if cl, err := GetClaims(ctx); err != nil {
-			return 0
-		} else {
-			return cl.PrivateClaims.ID
+	if claims, exists := ctx.Get("claims"); exists {
+		if waitUse, ok := claims.(*request.CustomClaims); ok {
+			return waitUse.PrivateClaims.ID
 		}
-	} else {
-		waitUse := claims.(*request.CustomClaims)
-		return waitUse.PrivateClaims.ID
+		// 类型断言失败时处理
+		return 0
 	}
+
+	cl, err := GetClaims(ctx)
+	if err != nil || cl == nil {
+		return 0
+	}
+	return cl.PrivateClaims.ID
 }

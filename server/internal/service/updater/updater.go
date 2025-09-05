@@ -163,6 +163,7 @@ func (u *Updater) UpdateChampions(version string) {
 		sort.Strings(cList)
 	} else {
 		err = json.Unmarshal([]byte(buffer), &cList)
+		u.logger.Error("rdb data wrong", zap.Error(err))
 	}
 
 	// store champion list
@@ -218,7 +219,6 @@ func (u *Updater) UpdateChampions(version string) {
 			u.logger.Info(fmt.Sprintf("%d@%s's champion(%d/%d) store done", vIdx, lang, cnt, len(cList)))
 		}
 	}
-	return
 }
 
 func (u *Updater) UpdateItems(version string) {
@@ -232,10 +232,11 @@ func (u *Updater) UpdateItems(version string) {
 		itemList *riotmodel.ItemList
 		items    map[string][]*riotmodel.ItemDTO // [ver-mode-lang]
 	)
-	if version == "" {
+
+	vIdx, err = utils.ConvertVersionToIdx(version)
+	if version == "" || err != nil {
 		u.logger.Error("wrong version")
 	}
-	vIdx, err = utils.ConvertVersionToIdx(version)
 	items = make(map[string][]*riotmodel.ItemDTO)
 	key := "/items"
 
@@ -295,7 +296,6 @@ func (u *Updater) UpdateItems(version string) {
 	if !flag {
 		u.logger.Info("all " + version + "'s items fetch done")
 	}
-	return
 }
 
 func (u *Updater) UpdatePerks(version string) {
@@ -307,10 +307,11 @@ func (u *Updater) UpdatePerks(version string) {
 		vIdx  uint
 		perks []*riotmodel.Perk
 	)
-	if version == "" {
+
+	vIdx, err = utils.ConvertVersionToIdx(version)
+	if version == "" || err != nil {
 		u.logger.Error("wrong version")
 	}
-	vIdx, err = utils.ConvertVersionToIdx(version)
 	ctx := context.Background()
 	for _, langCode := range u.stgy.Lang {
 		lang := utils.ConvertLangToLangStr(langCode)
@@ -368,14 +369,15 @@ func (u *Updater) UpdateSpell(version string) {
 		vIdx      uint
 		spellList *riotmodel.SpellList
 	)
-	if version == "" {
+
+	vIdx, err = utils.ConvertVersionToIdx(version)
+	if version == "" || err != nil {
 		u.logger.Error("wrong version")
 	}
-	vIdx, err = utils.ConvertVersionToIdx(version)
 	ctx := context.Background()
 	for _, langCode := range u.stgy.Lang {
 		lang := utils.ConvertLangToLangStr(langCode)
-		key = fmt.Sprintf("/spells/")
+		key = "/spells/"
 		u.rdb.Expire(ctx, key, u.stgy.LifeTime)
 		url = fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/%s/data/%s/summoner.json",
 			version, lang)

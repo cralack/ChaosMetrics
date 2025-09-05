@@ -198,7 +198,6 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 			Data:  chunk,
 		}
 	}
-	return
 }
 
 func (p *Pumper) cacheEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {

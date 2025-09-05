@@ -69,7 +69,7 @@ func ConvertEndmark(str string) (err error) {
 	str = strings.ToUpper(str)
 	rankStr := str[len(str)-1]
 	rank_ = uint(rankStr - '0')
-	if 4 < rank_ || rank_ < 0 {
+	if 4 < rank_ {
 		return errors.New("wrong rank")
 	}
 

@@ -36,12 +36,11 @@ func (m *Master) Campaign() {
 
 	// check leader
 	leaderChange := e.Observe(context.Background())
-	select {
-	case resp := <-leaderChange:
-		m.leaderID = string(resp.Kvs[0].Value)
-		m.logger.Info("leader change",
-			zap.String("leader:", string(resp.Kvs[0].Value)))
-	}
+	resp := <-leaderChange
+	m.leaderID = string(resp.Kvs[0].Value)
+	m.logger.Info("leader change",
+		zap.String("leader:", string(resp.Kvs[0].Value)))
+
 	workerNodeChange := m.WatchWorker()
 
 	for {

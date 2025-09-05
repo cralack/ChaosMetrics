@@ -51,7 +51,8 @@ func (j *JWT) ParseToken(tokenStr string) (*request.CustomClaims, error) {
 		return j.SigningKey, nil
 	})
 	if err != nil {
-		if ve, ok := err.(*jwt.ValidationError); ok {
+		var ve *jwt.ValidationError
+		if errors.As(err, &ve) {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 				return nil, TokenMalformed
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
@@ -63,6 +64,8 @@ func (j *JWT) ParseToken(tokenStr string) (*request.CustomClaims, error) {
 				return nil, TokenInvalid
 			}
 		}
+		// 如果不是ValidationError，直接返回TokenInvalid
+		return nil, TokenInvalid
 	}
 	if token != nil {
 		if claims, ok := token.Claims.(*request.CustomClaims); ok && token.Valid {

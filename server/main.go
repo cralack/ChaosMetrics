@@ -38,7 +38,7 @@ func main() {
 			global.ChaLogger.Fatal("run app failed:", zap.Error(err))
 		}
 	}()
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit // 阻塞等待接收 channel 数据
 	global.ChaLogger.Info("exiting...")

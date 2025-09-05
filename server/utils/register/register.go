@@ -114,16 +114,16 @@ func RunHTTPServer(logger *zap.Logger, cfg *config.MicroServ, opts ...interface{
 	}
 }
 
-// func logWrapper(log *zap.Logger) server.HandlerWrapper {
-// 	return func(hf server.HandlerFunc) server.HandlerFunc {
-// 		return func(ctx context.Context, req server.Request, rsp interface{}) error {
-// 			log.Info("receive request",
-// 				zap.String("method", req.Method()),
-// 				zap.String("Service", req.Service()),
-// 				zap.Reflect("request param:", req.Body()),
-// 			)
-// 			err := hf(ctx, req, rsp)
-// 			return err
-// 		}
-// 	}
-// }
+/*func logWrapper(log *zap.Logger) server.HandlerWrapper {
+	return func(hf server.HandlerFunc) server.HandlerFunc {
+		return func(ctx context.Context, req server.Request, rsp interface{}) error {
+			log.Info("receive request",
+				zap.String("method", req.Method()),
+				zap.String("Service", req.Service()),
+				zap.Reflect("request param:", req.Body()),
+			)
+			err := hf(ctx, req, rsp)
+			return err
+		}
+	}
+}*/

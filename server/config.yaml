@@ -40,7 +40,7 @@ fetcher:
 
 redis:
   host: localhost                        # IP地址
-  port: 32101                             # 端口
+  port: 6379                             # 端口
   db: 0                                  # 数据库编号
   username: testman                      # 用户名
   password: ""                           # 密码

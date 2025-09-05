@@ -80,7 +80,6 @@ func (p *Pumper) loadMatch(location riotmodel.LOCATION) {
 		p.logger.Error("sync match form db to cache failed", zap.Error(err))
 	}
 	matches = nil
-	return
 }
 
 func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
@@ -131,7 +130,6 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 		Loc:  loc,
 		Data: nil,
 	})
-	return
 }
 
 func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res *riotmodel.MatchDB) {
@@ -203,7 +201,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 
 	// update summoner's name when revisionDate > 1day
 	sumn := req.Data.(*matchTask).sumn
-	if sumn.RiotName == "" || time.Now().Sub(sumn.RevisionDate) >= time.Hour*24*3 {
+	if sumn.RiotName == "" || time.Since(sumn.RevisionDate) >= time.Hour*24*3 {
 		for _, par := range res.Participants {
 			if par.MetaSummonerId == sumn.MetaSummonerID && par.RiotName != sumn.RiotName {
 				sumn.FormerName = sumn.RiotName
@@ -274,7 +272,6 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sID string) {
 			Data:  chunk,
 		}
 	}
-	return
 }
 
 func (p *Pumper) FetchMatchBySumnID(sumnID string, loc riotmodel.LOCATION) {

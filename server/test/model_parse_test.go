@@ -350,7 +350,7 @@ func Test_parse_version(t *testing.T) {
 		t.Fatal(err)
 	}
 	curVersion := res[0]
-	t.Logf(curVersion)
+	t.Log(curVersion)
 }
 
 func Test_parse_item_list(t *testing.T) {
@@ -368,7 +368,7 @@ func Test_parse_item_list(t *testing.T) {
 }
 
 func Test_parse_spell_list(t *testing.T) {
-	url := fmt.Sprintf("https://ddragon.leagueoflegends.com/cdn/14.1.1/data/zh_CN/summoner.json")
+	url := "https://ddragon.leagueoflegends.com/cdn/14.1.1/data/zh_CN/summoner.json"
 	buff, err := f.Get(url)
 	if err != nil {
 		t.Fatal(err)
