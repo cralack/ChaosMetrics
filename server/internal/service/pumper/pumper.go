@@ -32,8 +32,8 @@ const (
 	SummonerTypeKey    = "sum"
 	MatchTypeKey       = "match"
 	finishTypeKey      = "finish"
-	entryBySumnID      = "entryBySummoner"
-	matchBySumnID      = "matchBySummoner"
+	entryByPuuid       = "entryByPuuid"
+	matchByPuuid       = "matchByPuuid"
 )
 
 type Pumper struct {
@@ -46,8 +46,8 @@ type Pumper struct {
 	fetcher     fetcher.Fetcher
 	scheduler   scheduler.Scheduler
 	consumer    xamqp.MessageQueue
-	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][SummonerID]
-	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][SummonerID]
+	entryMap    map[string]map[string]*riotmodel.LeagueEntryDTO // entryMap[Loc][Puuid]
+	sumnMap     map[string]map[string]*riotmodel.SummonerDTO    // sumnMap[Loc][Puuid]
 	matchMap    map[string]map[string]bool                      // matchMap[Loc][matchID]
 	Exit        chan struct{}
 	out         chan *DBResult
@@ -350,7 +350,7 @@ func (p *Pumper) fetch() {
 			// get old & cur match list
 			if buff, err = p.fetcher.Get(req.URL); err != nil || buff == nil {
 				p.logger.Error(fmt.Sprintf("fetch summoner %s's match list failed",
-					data.sumn.MetaSummonerID), zap.Error(err))
+					data.sumn.PUUID), zap.Error(err))
 				if req.Retry < p.stgy.Retry {
 					req.Retry++
 					p.scheduler.Push(req)
@@ -389,19 +389,23 @@ func (p *Pumper) fetch() {
 					}
 				}
 			}
+			if summoner.RiotName == "" {
+				acc := p.FetchAccountByPuuid(summoner.PUUID, summoner.Loc)
+				summoner.RiotName = acc.GameName
+				summoner.RiotTagline = acc.Tagline
+			}
 			p.handleSummoner(req.Loc, summoner)
+			if len(matches) == 0 {
+				continue
+			}
 
 			p.logger.Debug(fmt.Sprintf("updating %s#%s's match list @ %d,store %d matches",
 				summoner.RiotName, summoner.RiotTagline, cnt, len(matches)))
 			if cnt == int(p.summonerIdx[loc]) {
 				p.rdb.HSet(context.Background(), "lastupdate", "pumper", time.Now().Unix())
 			}
-			if len(matches) == 0 {
-				continue
-			}
-			p.handleMatches(matches, summoner.MetaSummonerID)
 
-			// case entryBySumnID:
+			p.handleMatches(matches, summoner.PUUID)
 		}
 	}
 }

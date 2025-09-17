@@ -61,7 +61,7 @@ func (p *Pumper) loadEntrie(location riotmodel.LOCATION) {
 	}
 	if len(entries) != 0 {
 		for _, e := range entries {
-			k := fmt.Sprintf("%s@%s", e.SummonerID, e.QueType)
+			k := fmt.Sprintf("%s@%s", e.Puuid, e.QueType)
 			// assign to localmap
 			if _, has := p.entryMap[loc][k]; !has {
 				p.entryMap[loc][k] = e
@@ -159,7 +159,7 @@ func (p *Pumper) handleEntries(entries []*riotmodel.LeagueEntryDTO, loc string) 
 
 	for _, entry := range entries {
 		// entry doenst exist:create new data
-		k := fmt.Sprintf("%s@%s", entry.SummonerID, entry.QueType)
+		k := fmt.Sprintf("%s@%s", entry.Puuid, entry.QueType)
 		if e, has := p.entryMap[loc][k]; !has {
 			p.entryMap[loc][k] = entry
 			entry.ID = p.entrieIdx[loCode]
@@ -207,7 +207,7 @@ func (p *Pumper) cacheEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {
 	pipe.Expire(ctx, key, p.stgy.LifeTime)
 	cmds := make([]*redis.IntCmd, 0, len(entries))
 	for _, e := range entries {
-		field := fmt.Sprintf("%s@%s", e.SummonerID, e.QueType)
+		field := fmt.Sprintf("%s@%s", e.Puuid, e.QueType)
 		cmds = append(cmds, pipe.HSet(ctx, key, field, e))
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
@@ -215,7 +215,7 @@ func (p *Pumper) cacheEntries(entries []*riotmodel.LeagueEntryDTO, loc string) {
 	}
 }
 
-func (p *Pumper) FetchEntryBySumnID(sumnID string, loc riotmodel.LOCATION) {
+func (p *Pumper) FetchEntryBySumnID(Puuid string, loc riotmodel.LOCATION) {
 	var (
 		url    string
 		locStr string
@@ -223,7 +223,7 @@ func (p *Pumper) FetchEntryBySumnID(sumnID string, loc riotmodel.LOCATION) {
 	)
 	locStr, host = utils.ConvertLocationToLoHoSTR(loc)
 
-	url = fmt.Sprintf("%s/lol/league/v4/entries/by-summoner/%s", host, sumnID)
+	url = fmt.Sprintf("%s/lol/league/v4/entries/by-puuid/%s", host, Puuid)
 	p.scheduler.Push(&scheduler.Task{
 		Type:     mortalEntryTypeKey,
 		Priority: true,

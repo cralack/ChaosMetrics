@@ -36,16 +36,16 @@ func (s *SumonerService) HandleSummoner(src *riotmodel.SummonerDTO) (des *respon
 	// load entry from redis
 	{
 		key = fmt.Sprintf("/entry/%s", src.Loc)
-		field = fmt.Sprintf("%s@RANKED_SOLO_5x5", src.MetaSummonerID)
+		field = fmt.Sprintf("%s@RANKED_SOLO_5x5", src.PUUID)
 		buff = s.rdb.HGet(ctx, key, field).Val()
 		entry := &riotmodel.LeagueEntryDTO{}
-		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.SummonerID == src.MetaSummonerID {
+		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.Puuid == src.PUUID {
 			des.SoloEntry = ConvertEntry(entry)
 		}
-		field = fmt.Sprintf("%s@RANKED_FLEX_SR", src.MetaSummonerID)
+		field = fmt.Sprintf("%s@RANKED_FLEX_SR", src.PUUID)
 		buff = s.rdb.HGet(ctx, key, field).Val()
 		entry = &riotmodel.LeagueEntryDTO{}
-		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.SummonerID == src.MetaSummonerID {
+		if err = json.Unmarshal([]byte(buff), &entry); err == nil && entry.Puuid == src.PUUID {
 			des.FlexEntry = ConvertEntry(entry)
 		}
 	}

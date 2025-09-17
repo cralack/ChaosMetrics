@@ -10,6 +10,7 @@ import (
 
 	"github.com/cralack/ChaosMetrics/server/internal/global"
 	"github.com/cralack/ChaosMetrics/server/model/riotmodel"
+	"github.com/redis/go-redis/v9"
 )
 
 func ConvertLocationToLoHoSTR(loc riotmodel.LOCATION) (loCode, hostURL string) {
@@ -200,8 +201,8 @@ func _(que string) riotmodel.QUECODE {
 
 func GetCurMajorVersions() []string {
 	res := global.ChaRDB.HGet(context.Background(), "/version", "versions")
-	if res.Err() != nil {
-		global.ChaLogger.Error(res.Err().Error())
+	if errors.Is(res.Err(), redis.Nil) {
+		global.ChaLogger.Info("Key '/version' or field 'versions' does not exist in Redis")
 		return []string{}
 	}
 	versions := make([]string, 0)

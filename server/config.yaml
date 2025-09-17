@@ -1,5 +1,5 @@
 ---
-env: test  # 环境(test|dev|product)
+env: dev  # 环境(test|dev|product)
 
 database:
   driver: mysql                         # 连接驱动

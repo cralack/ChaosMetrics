@@ -20,10 +20,10 @@ func (p *Pumper) TaskHandlers(body []byte) error {
 	}
 
 	switch task.Type {
-	case entryBySumnID:
-		p.FetchEntryBySumnID(sumn.MetaSummonerID, taskLoc)
-	case matchBySumnID:
-		p.FetchMatchBySumnID(sumn.MetaSummonerID, taskLoc)
+	case entryByPuuid:
+		p.FetchEntryBySumnID(sumn.PUUID, taskLoc)
+	case matchByPuuid:
+		p.FetchMatchBySumnID(sumn.PUUID, taskLoc)
 	}
 	p.logger.Debug(fmt.Sprintf("task info: %v,%v", task.Loc, task.ID))
 	return nil

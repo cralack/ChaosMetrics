@@ -85,7 +85,7 @@ func (p *Pumper) loadMatch(location riotmodel.LOCATION) {
 func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 	var (
 		url      string
-		sid      string
+		puuid    string
 		summoner *riotmodel.SummonerDTO
 		has      bool
 		count    int
@@ -99,13 +99,13 @@ func (p *Pumper) createMatchListURL(loCode riotmodel.LOCATION) {
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",
 		startTime, endTime, p.stgy.MaxMatchCount)
 
-	for sid, summoner = range p.sumnMap[loc] {
+	for puuid, summoner = range p.sumnMap[loc] {
 		matchList := utils.ConvertStrToSlice(summoner.Matches)
 		// ranker || len(match)<require
 		needsUpdate := false
-		if _, has = p.entryMap[loc][sid]; has {
+		if _, has = p.entryMap[loc][puuid]; has {
 			needsUpdate = true
-		} else if len(matchList) < p.stgy.MaxMatchCount {
+		} else if len(matchList) <= p.stgy.MaxMatchCount {
 			needsUpdate = true
 		}
 
@@ -141,12 +141,12 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		matchTL *riotmodel.MatchTimelineDTO
 	)
 
-	sumID := req.Data.(*matchTask).sumn.MetaSummonerID
+	sumPuuid := req.Data.(*matchTask).sumn.PUUID
 	// 1.fetch match
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s", host, matchID)
 	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match %s failed",
-			sumID, matchID), zap.Error(err))
+			sumPuuid, matchID), zap.Error(err))
 		if req.Retry < p.stgy.Retry {
 			req.Retry++
 			p.scheduler.Push(req)
@@ -155,7 +155,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	}
 	if err = json.Unmarshal(buff, &match); err != nil {
 		p.logger.Error(fmt.Sprintf("unmarshal %s's match %s json failed",
-			sumID, matchID), zap.Error(err))
+			sumPuuid, matchID), zap.Error(err))
 		return
 	}
 	// remake || bot game
@@ -169,7 +169,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	url = fmt.Sprintf("%s/lol/match/v5/matches/%s/timeline", host, matchID)
 	if buff, err = p.fetcher.Get(url); err != nil || len(buff) < 1000 {
 		p.logger.Error(fmt.Sprintf("fetch %s's match timeline %s failed",
-			sumID, matchID), zap.Error(err))
+			sumPuuid, matchID), zap.Error(err))
 		if req.Retry < p.stgy.Retry {
 			req.Retry++
 			p.scheduler.Push(req)
@@ -178,7 +178,7 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 	}
 	if err = json.Unmarshal(buff, &matchTL); err != nil {
 		p.logger.Error(fmt.Sprintf("unmarshal %s's match %s json failed",
-			sumID, matchID), zap.Error(err))
+			sumPuuid, matchID), zap.Error(err))
 		return
 	}
 
@@ -199,13 +199,18 @@ func (p *Pumper) FetchMatchByID(req *scheduler.Task, host, matchID string) (res 
 		return nil
 	}
 
-	// update summoner's name when revisionDate > 1day
+	// update summoner's name
 	sumn := req.Data.(*matchTask).sumn
 	if sumn.RiotName == "" || time.Since(sumn.RevisionDate) >= time.Hour*24*3 {
 		for _, par := range res.Participants {
-			if par.MetaSummonerId == sumn.MetaSummonerID && par.RiotName != sumn.RiotName {
-				sumn.FormerName = sumn.RiotName
-				sumn.FormerTagline = sumn.RiotTagline
+			if par.RiotName == "" {
+				fmt.Println("here")
+			}
+			if par.Puuid == sumn.PUUID {
+				if par.RiotName != sumn.RiotName {
+					sumn.FormerName = sumn.RiotName
+					sumn.FormerTagline = sumn.RiotTagline
+				}
 				sumn.RiotName = par.RiotName
 				sumn.RiotTagline = par.RiotTagline
 				return
@@ -274,9 +279,9 @@ func (p *Pumper) handleMatches(matches []*riotmodel.MatchDB, sID string) {
 	}
 }
 
-func (p *Pumper) FetchMatchBySumnID(sumnID string, loc riotmodel.LOCATION) {
+func (p *Pumper) FetchMatchBySumnID(puuid string, loc riotmodel.LOCATION) {
 	var (
-		puuid  string
+		// puuid  string
 		region string
 		url    string
 		locStr string
@@ -285,11 +290,11 @@ func (p *Pumper) FetchMatchBySumnID(sumnID string, loc riotmodel.LOCATION) {
 	)
 	locStr, _ = utils.ConvertLocationToLoHoSTR(loc)
 	region = utils.ConvertLocationToRegionHost(loc)
-	if sumn, has = p.sumnMap[locStr][sumnID]; !has {
+	if sumn, has = p.sumnMap[locStr][puuid]; !has {
 		p.logger.Error("no such summoner")
 		return
 	}
-	puuid = sumn.PUUID
+	// puuid = sumn.PUUID
 	startTime := time.Now().AddDate(0, -2, 0).Unix() // one year ago unix
 	endTime := time.Now().Unix()                     // cur time unix
 	queryParams := fmt.Sprintf("startTime=%d&endTime=%d&start=0&count=%d",

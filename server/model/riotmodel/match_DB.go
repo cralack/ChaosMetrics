@@ -57,9 +57,9 @@ type ParticipantDB struct {
 	RiotName                  string `json:"riotName" gorm:"column:riot_name;type:varchar(100)"`
 	RiotTagline               string `json:"riotTagline" gorm:"column:riot_tagline;type:varchar(100)"`
 	// SummonerName              string  `json:"summonerName" gorm:"column:summoner_name;type:varchar(100)"`            // 召唤师名称
-	Summoner1Id        int     `json:"summoner1Id" gorm:"column:summoner1_id;type:smallint"` // 召唤师技能1ID
-	Summoner2Id        int     `json:"summoner2Id" gorm:"column:summoner2_id;type:smallint"` // 召唤师技能2ID
-	MetaSummonerId     string  `json:"metaSummonerId" gorm:"column:meta_summoner_id"`
+	Summoner1Id int `json:"summoner1Id" gorm:"column:summoner1_id;type:smallint"` // 召唤师技能1ID
+	Summoner2Id int `json:"summoner2Id" gorm:"column:summoner2_id;type:smallint"` // 召唤师技能2ID
+	// MetaSummonerId     string  `json:"metaSummonerId" gorm:"column:meta_summoner_id"`
 	JudgeScore         float32 `json:"judgeScore" gorm:"column:judge_score"`                                 // 评分
 	KDA                float32 `json:"kda" gorm:"column:kda"`                                                // KDA
 	KP                 float32 `json:"kp" gorm:"column:kp"`                                                  // 击杀参与率
@@ -139,16 +139,16 @@ func (m *MatchDB) ParseClassicAndARAM(match *MatchDTO, matchTL *MatchTimelineDTO
 			RiotTagline:               p.RiotIdTagline,
 			Summoner1Id:               p.Summoner1Id,
 			Summoner2Id:               p.Summoner2Id,
-			MetaSummonerId:            p.SummonerId,
-			KDA:                       p.Challenges.KDA,
-			KP:                        p.Challenges.KillParticipation,
-			TeamId:                    p.TeamId,
-			DamageDealt:               p.TotalDamageDealtToChampions,
-			DamageToken:               p.TotalDamageTaken,
-			VisionScore:               p.VisionScore,
-			TimeCCingOthers:           p.TimeCCingOthers,
-			TotalTimeSpentDead:        p.TotalTimeSpentDead,
-			TotalMinionsKilled:        p.TotalMinionsKilled,
+			// MetaSummonerId:            p.SummonerId,
+			KDA:                p.Challenges.KDA,
+			KP:                 p.Challenges.KillParticipation,
+			TeamId:             p.TeamId,
+			DamageDealt:        p.TotalDamageDealtToChampions,
+			DamageToken:        p.TotalDamageTaken,
+			VisionScore:        p.VisionScore,
+			TimeCCingOthers:    p.TimeCCingOthers,
+			TotalTimeSpentDead: p.TotalTimeSpentDead,
+			TotalMinionsKilled: p.TotalMinionsKilled,
 			Build: &Build{
 				Perk: p.PerksSTR,
 			},
@@ -166,6 +166,9 @@ func (m *MatchDB) ParseClassicAndARAM(match *MatchDTO, matchTL *MatchTimelineDTO
 	for _, frame := range matchTL.Info.Frames {
 		for _, event := range frame.Events {
 			parId := event.ParticipantId - 1
+			if parId == -1 { // why parID=0 exist?
+				continue
+			}
 			switch event.Type {
 			case "SKILL_LEVEL_UP":
 				skillSlot[parId] =

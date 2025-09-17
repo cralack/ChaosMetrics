@@ -36,7 +36,7 @@ func Test_parse_summoners(t *testing.T) {
 	// 打印解析结果
 	for _, summoner := range summoners {
 		fmt.Println("ID:", summoner.ID)
-		fmt.Println("AccountID:", summoner.AccountID)
+		// fmt.Println("AccountID:", summoner.AccountID)
 		fmt.Println("PUUID:", summoner.PUUID)
 		fmt.Println("ProfileIconID:", summoner.ProfileIconID)
 		fmt.Println("RevisionDate:", summoner.RevisionDate)
@@ -60,9 +60,9 @@ func Test_parse_summoners(t *testing.T) {
 	key := "/summoner/tw2"
 	cmds := make([]*redis.IntCmd, 0, len(summoners))
 	for _, s := range summoners {
-		cmds = append(cmds, pipe.HSet(ctx, key, s.MetaSummonerID))
+		cmds = append(cmds, pipe.HSet(ctx, key, s.PUUID))
 	}
-	if err = rdb.HSet(ctx, key, summoners[0].MetaSummonerID, summoners[0]).Err(); err != nil {
+	if err = rdb.HSet(ctx, key, summoners[0].PUUID, summoners[0]).Err(); err != nil {
 		logger.Debug("")
 	}
 	if _, err = pipe.Exec(ctx); err != nil {
@@ -283,7 +283,7 @@ func Test_parse_league(t *testing.T) {
 	})
 	n := 10
 	for i := 0; i < n; i++ {
-		fmt.Printf("summoner %s's LP is %d\n", entries[i].SummonerID, entries[i].LeaguePoints)
+		fmt.Printf("summoner %s's LP is %d\n", entries[i].Puuid, entries[i].LeaguePoints)
 	}
 }
 

@@ -130,7 +130,7 @@ func Test_summoner_entry_store(t *testing.T) {
 	}
 	var entry *riotmodel.LeagueEntryDTO
 	for _, e := range league.Entries {
-		if e.SummonerID == "CA6s2lmln5pY47sa0BcpyV39Vq7vDVSTMUVtJ17h7J3UURCTcDFwFS4lrg" {
+		if e.Puuid == "CA6s2lmln5pY47sa0BcpyV39Vq7vDVSTMUVtJ17h7J3UURCTcDFwFS4lrg" {
 			entry = e
 		}
 	}
@@ -148,7 +148,7 @@ func Test_summoner_entry_store(t *testing.T) {
 
 	var tar *riotmodel.LeagueEntryDTO
 	db.Preload(clause.Associations).First(&tar)
-	t.Log(tar.SummonerID)
+	t.Log(tar.Puuid)
 }
 
 func Test_isExist(t *testing.T) {
@@ -177,7 +177,7 @@ func Test_isExist(t *testing.T) {
 		t.Log(err)
 	}
 	for _, e := range existintEntry {
-		entryExistMap[e.SummonerID] = true
+		entryExistMap[e.Puuid] = true
 	}
 	for _, k := range keys {
 		if _, has := entryExistMap[k]; !has {

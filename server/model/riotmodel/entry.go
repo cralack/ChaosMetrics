@@ -29,7 +29,7 @@ type LeagueEntryDTO struct {
 	Rank         string         `json:"rank" gorm:"column:rank;type:varchar(100)"`                        // 段位
 	LeaguePoints int            `json:"leaguePoints" gorm:"column:league_points;type:smallint"`           // 段位积分
 	Losses       int            `json:"losses" gorm:"column:losses;type:smallint"`                        // 负场次数（召唤师峡谷）
-	SummonerID   string         `json:"summonerId" gorm:"column:summoner_id;type:varchar(100)"`           // 玩家的加密召唤师ID
+	Puuid        string         `json:"puuid" gorm:"column:puuid;type:varchar(100)"`                      // 玩家的加密召唤师ID
 	// riot update on jul 20,23
 	LeagueID string `json:"leagueId" gorm:"column:league_id;type:varchar(100)"`   // 联赛ID
 	QueType  string `json:"queueType" gorm:"column:queue_type;type:varchar(100)"` // 排位类型
