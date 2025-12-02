@@ -23,7 +23,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
-	go-micro.dev/v5 v5.11.0
+	go-micro.dev/v5 v5.12.0
 	go.etcd.io/etcd/client/v3 v3.6.6
 	go.uber.org/zap v1.27.1
 	golang.org/x/crypto v0.45.0
