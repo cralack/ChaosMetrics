@@ -8,7 +8,7 @@ services:
     build:
       context: ../../server
       dockerfile: ./Dockerfile
-    image: server:latest
+    image: server:0.9
     networks:
       - container-net
     depends_on:
@@ -87,7 +87,7 @@ services:
     build:
       context: ../../web
       dockerfile: ./Dockerfile
-    image: web:latest
+    image: web:0.9
     restart: always
     ports:
       - "8888:80"
@@ -143,7 +143,7 @@ services:
     build:
       context: ../docker
       dockerfile: ./rabbitmq.Dockerfile
-    image: custom-rabbitmq
+    image: custom-rabbitmq:3.13.0
     restart: always
     environment:
       RABBITMQ_DEFAULT_USER: "guest"
@@ -207,5 +207,3 @@ volumes:
   redis_data:
   rabbitmq_data:
   web_data:
-
-
