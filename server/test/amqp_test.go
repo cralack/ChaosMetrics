@@ -133,17 +133,17 @@ func Test_RabbitMQ_Producer(t *testing.T) {
 	err = producer.Start()
 	assert.NoError(t, err)
 
-	// should be 4,5,1,2,3
+	// should be 0,1,2,3,4...
 	delayedTime := []int64{9, 1, 6, 4, 3, 8, 2, 5, 7, 10, 0}
 	for _, tim := range delayedTime {
 		massage := fmt.Sprintf("%d test message", tim)
-		err = producer.Publish([]byte(massage), xamqp.Exchange, xamqp.RoutingKey, tim*500)
+		err = producer.Publish([]byte(massage), xamqp.Exchange, xamqp.RoutingKey, tim*1000)
 		assert.NoError(t, err)
 		if err == nil {
 			logger.Debug("sent message " + massage)
 		}
 	}
-	timer := time.NewTimer(time.Second * 5)
+	timer := time.NewTimer(time.Second * 15)
 	<-timer.C
 }
 
