@@ -1,0 +1,43 @@
+# ===================== 根目录通用忽略规则 =====================
+# 全局忽略.idea目录
+.idea/
+
+# ===================== /web 目录专属忽略规则 =====================
+# Logs相关
+/web/logs
+/web/*.log
+/web/npm-debug.log*
+/web/yarn-debug.log*
+/web/yarn-error.log*
+/web/pnpm-debug.log*
+/web/lerna-debug.log*
+
+# 前端依赖/构建产物
+/web/node_modules
+/web/dist
+/web/dist-ssr
+/web/*.local
+
+# 临时文件/目录
+/web/src/assets/datadragon
+/web/log/
+/web/*.tmp
+
+# 编辑器相关文件/目录
+/web/.vscode/*
+!/web/.vscode/extensions.json
+/web/.DS_Store
+/web/*.suo
+/web/*.ntvs*
+/web/*.njsproj
+/web/*.sln
+/web/*.sw?
+
+# ===================== /server 目录专属忽略规则 =====================
+# 临时目录/文件
+/server/log/
+/server/*.tmp
+
+# 敏感配置文件
+/server/api_key
+/server/email_key
